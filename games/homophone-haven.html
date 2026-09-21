@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Homophone Haven - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #061a12; --card: #0d2b1f; --accent: #22c55e; --accent-dim: #15803d;
+      --text: #f8fafc; --muted: #86efac;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .sentence-box { font-size: 1.25rem; font-weight: 600; line-height: 1.6; text-align: center; margin: 1.5rem 0; min-height: 4rem; }
+    .blank { color: var(--accent); border-bottom: 2px dashed var(--accent); padding: 0 0.3rem; }
+    .choices-col { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; }
+    .choice-btn { background: #143d2c; color: var(--text); border: 2px solid var(--accent-dim); border-radius: 0.6rem; padding: 1rem; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+    .choice-btn:active { background: var(--accent-dim); }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span id="level-lbl">Sentence: 1 / 4</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.9rem;">Choose the correct spelling for the sentence:</p>
+    <div class="sentence-box" id="sentence-prompt"></div>
+    <div class="choices-col" id="options-col"></div>
+  </div>
+  <script>
+    let audioCtx = null;
+    function chime(f, t) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.frequency.value = f; g.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + t);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + t);
+    }
+    const QUESTS = [
+      { text: "The toucan rested <span class='blank'>___</span> nest in the hollow branch.", correct: "their", opts: ["there", "their", "they're"] },
+      { text: "We spotted a <span class='blank'>___</span> running through the dense leaves.", correct: "hare", opts: ["hair", "hare"] },
+      { text: "The sunlight came <span class='blank'>___</span> the tall tree crowns.", correct: "through", opts: ["threw", "through"] },
+      { text: "The jungle river current was too <span class='blank'>___</span> to cross.", correct: "strong", opts: ["weak", "week"] }
+    ];
+    let qIdx = 0;
+    function renderQuest() {
+      if (qIdx >= QUESTS.length) {
+        document.getElementById('sentence-prompt').innerHTML = "HAVEN MASTERED!";
+        document.getElementById('options-col').innerHTML = "<p style='text-align:center; color:var(--muted); font-weight:bold;'>+20 Sunlight Stored</p>";
+        let sun = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
+        localStorage.setItem('jacksjungle_sunlight', sun + 20);
+        localStorage.setItem('jacksjungle_completed_homophone_haven', 'true');
+        chime(600, 0.2); return;
+      }
+      const q = QUESTS[qIdx];
+      document.getElementById('level-lbl').textContent = `Sentence: ${qIdx + 1} / ${QUESTS.length}`;
+      document.getElementById('sentence-prompt').innerHTML = q.text;
+      const col = document.getElementById('options-col');
+      col.innerHTML = "";
+      q.opts.forEach(opt => {
+        const b = document.createElement('button');
+        b.className = 'choice-btn';
+        b.textContent = opt;
+        b.onclick = () => {
+          if (opt === q.correct) {
+            chime(480, 0.12);
+            qIdx++;
+            renderQuest();
+          } else {
+            chime(180, 0.2);
+            alert("Check the meaning and try again!");
+          }
+        };
+        col.appendChild(b);
+      });
+    }
+    renderQuest();
+  </script>
+</body>
+</html>
