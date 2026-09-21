@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Grammar Grove - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #061a12; --card: #0d2b1f; --accent: #22c55e; --accent-dim: #15803d;
+      --text: #f8fafc; --muted: #86efac;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .leaf-word { font-size: 2.4rem; font-weight: 800; color: #fff; margin: 1.5rem 0; letter-spacing: 0.05rem; }
+    .bins-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; }
+    .bin-btn { background: #143d2c; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.15rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; }
+    .bin-btn:active { background: var(--accent-dim); }
+    .feedback { height: 1.5rem; margin-top: 1rem; font-size: 0.95rem; font-weight: 600; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span id="streak-lbl">Leaf: 1 / 5</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.9rem;">Sort the leaf into the right grammar log:</p>
+    <div class="leaf-word" id="leaf-word">SLOTH</div>
+    <div class="bins-grid">
+      <button class="bin-btn" onclick="sortWord('NOUN')">Noun</button>
+      <button class="bin-btn" onclick="sortWord('VERB')">Verb</button>
+      <button class="bin-btn" onclick="sortWord('ADJECTIVE')">Adjective</button>
+      <button class="bin-btn" onclick="sortWord('ADVERB')">Adverb</button>
+    </div>
+    <div class="feedback" id="feedback-msg"></div>
+  </div>
+  <script>
+    const WORDS = [
+      { word: "SLOTH", pos: "NOUN" },
+      { word: "CLIMB", pos: "VERB" },
+      { word: "ANCIENT", pos: "ADJECTIVE" },
+      { word: "QUICKLY", pos: "ADVERB" },
+      { word: "WATERFALL", pos: "NOUN" }
+    ];
+    let curr = 0;
+    function renderLeaf() {
+      if (curr >= WORDS.length) {
+        document.getElementById('leaf-word').textContent = "GROVE CLEARED!";
+        document.querySelector('.bins-grid').innerHTML = "";
+        document.getElementById('feedback-msg').textContent = "+20 Sunlight Earned!";
+        let sun = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
+        localStorage.setItem('jacksjungle_sunlight', sun + 20);
+        localStorage.setItem('jacksjungle_completed_grammar_grove', 'true');
+        return;
+      }
+      document.getElementById('streak-lbl').textContent = `Leaf: ${curr + 1} / ${WORDS.length}`;
+      document.getElementById('leaf-word').textContent = WORDS[curr].word;
+    }
+    function sortWord(selectedPos) {
+      if (selectedPos === WORDS[curr].pos) {
+        curr++;
+        renderLeaf();
+      } else {
+        document.getElementById('feedback-msg').textContent = "Incorrect part of speech!";
+        setTimeout(() => { document.getElementById('feedback-msg').textContent = ""; }, 1000);
+      }
+    }
+    renderLeaf();
+  </script>
+</body>
+</html>
