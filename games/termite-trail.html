@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Termite Trail - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #1a1208; --card: #2a1c0d; --accent: #f59e0b; --accent-dim: #b45309;
+      --text: #fef3c7; --muted: #fde68a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .eq-row { font-size: 2.2rem; font-weight: 800; margin: 2rem 0; color: #fff; }
+    .op-slot { color: var(--accent); border-bottom: 3px dashed var(--accent); padding: 0 0.5rem; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; width: 100%; }
+    .op-btn { background: #3d2913; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.6rem; font-weight: bold; border-radius: 0.5rem; cursor: pointer; }
+    .op-btn:active { background: var(--accent-dim); }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span id="step-lbl">Equation: 1 / 4</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.9rem;">Pick the missing mathematical operator:</p>
+    <div class="eq-row" id="eq-display"></div>
+    <div class="grid">
+      <button class="op-btn" onclick="checkOp('+')">+</button>
+      <button class="op-btn" onclick="checkOp('-')">&minus;</button>
+      <button class="op-btn" onclick="checkOp('*')">&times;</button>
+      <button class="op-btn" onclick="checkOp('/')">&divide;</button>
+    </div>
+  </div>
+  <script>
+    const EQS = [
+      { a: 12, b: 4, res: 16, op: '+' },
+      { a: 18, b: 3, res: 6, op: '/' },
+      { a: 7, b: 6, res: 42, op: '*' },
+      { a: 25, b: 9, res: 16, op: '-' }
+    ];
+    let idx = 0;
+    function renderEq() {
+      if (idx >= EQS.length) {
+        document.getElementById('eq-display').textContent = "TRAIL BALANCED!";
+        document.querySelector('.grid').innerHTML = "<p style='grid-column: span 4; text-align:center; font-weight:bold; color:var(--muted);'>+20 Sunlight Stored</p>";
+        let s = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
+        localStorage.setItem('jacksjungle_sunlight', s + 20);
+        localStorage.setItem('jacksjungle_completed_termite_trail', 'true');
+        return;
+      }
+      const e = EQS[idx];
+      document.getElementById('step-lbl').textContent = `Equation: ${idx + 1} / ${EQS.length}`;
+      document.getElementById('eq-display').innerHTML = `${e.a} <span class="op-slot">?</span> ${e.b} = ${e.res}`;
+    }
+    function checkOp(op) {
+      if (op === EQS[idx].op) {
+        idx++; renderEq();
+      } else {
+        alert("The branch tilts! Re-evaluate the equation.");
+      }
+    }
+    renderEq();
+  </script>
+</body>
+</html>
