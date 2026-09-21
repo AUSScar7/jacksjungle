@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Syllable Chop - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #061a12; --card: #0d2b1f; --accent: #22c55e; --accent-dim: #15803d;
+      --text: #f8fafc; --muted: #86efac; --danger: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .word-display { font-size: 2.2rem; font-weight: 800; letter-spacing: 0.15rem; color: #fff; margin: 2rem 0; text-align: center; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; width: 100%; }
+    .num-btn { background: #143d2c; color: var(--text); border: 2px solid var(--accent-dim); border-radius: 0.6rem; padding: 1rem; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
+    .num-btn:active { background: var(--accent-dim); }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span id="round-indicator">Word: 1 / 5</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.95rem;">Count the syllables in the word:</p>
+    <div class="word-display" id="word-target">CATERPILLAR</div>
+    <div class="grid">
+      <button class="num-btn" onclick="checkSyllables(1)">1</button>
+      <button class="num-btn" onclick="checkSyllables(2)">2</button>
+      <button class="num-btn" onclick="checkSyllables(3)">3</button>
+      <button class="num-btn" onclick="checkSyllables(4)">4</button>
+    </div>
+    <div class="status-msg" id="status-label"></div>
+  </div>
+  <script>
+    let audioCtx = null;
+    function beep(f, t) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.frequency.value = f; g.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + t);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + t);
+    }
+    const WORDS = [
+      { word: "CATERPILLAR", count: 4 },
+      { word: "JUNGLE", count: 2 },
+      { word: "VINE", count: 1 },
+      { word: "CANOPY", count: 3 },
+      { word: "CROCODILE", count: 3 }
+    ];
+    let idx = 0;
+    function renderWord() {
+      if (idx >= WORDS.length) {
+        document.getElementById('word-target').textContent = "ALL CHOPPED!";
+        document.querySelector('.grid').innerHTML = "";
+        document.getElementById('status-label').textContent = "+20 Sunlight Earned!";
+        let sun = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
+        localStorage.setItem('jacksjungle_sunlight', sun + 20);
+        localStorage.setItem('jacksjungle_completed_syllable_chop', 'true');
+        beep(520, 0.2); return;
+      }
+      document.getElementById('round-indicator').textContent = `Word: ${idx + 1} / ${WORDS.length}`;
+      document.getElementById('word-target').textContent = WORDS[idx].word;
+    }
+    function checkSyllables(n) {
+      if (n === WORDS[idx].count) {
+        beep(440, 0.15);
+        idx++;
+        renderWord();
+      } else {
+        beep(160, 0.25);
+        document.getElementById('status-label').textContent = "Incorrect count. Listen closely!";
+        setTimeout(() => { document.getElementById('status-label').textContent = ""; }, 1000);
+      }
+    }
+    renderWord();
+  </script>
+</body>
+</html>
