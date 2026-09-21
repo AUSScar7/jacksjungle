@@ -58,6 +58,35 @@
     header {
       text-align: center;
       margin-bottom: 2rem;
+      position: relative;
+    }
+
+    /* Sound Control Bar */
+    .top-controls {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 0.5rem;
+    }
+
+    .sound-toggle-btn {
+      background: rgba(13, 43, 31, 0.8);
+      border: 1px solid var(--border-card);
+      color: var(--text-muted);
+      padding: 0.45rem 0.9rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .sound-toggle-btn.active {
+      border-color: var(--accent);
+      color: #fff;
+      background: rgba(34, 197, 94, 0.2);
     }
 
     header h1 {
@@ -89,7 +118,7 @@
       letter-spacing: 0.05rem;
     }
 
-    /* AI Attribution Note placed cleanly under the badge */
+    /* Relocated AI Note */
     .ai-top-attribution {
       font-size: 0.78rem;
       color: #94a3b8;
@@ -280,8 +309,9 @@
       opacity: 0.9;
     }
 
+    /* Replaced 'Rooted' label with 'Completed' */
     .completed-badge {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       color: var(--accent);
       font-weight: 700;
       display: inline-flex;
@@ -355,15 +385,20 @@
 
   <div class="content-wrapper">
     <header>
+      <div class="top-controls">
+        <button class="sound-toggle-btn" id="sound-btn" onclick="toggleAmbientSound()">
+          <span id="sound-icon">🔇</span>
+          <span id="sound-text">Sound: Off</span>
+        </button>
+      </div>
+
       <h1>Jack's Jungle</h1>
       <p>Interactive web-based educational games designed for curious minds.</p>
       
-      <!-- Rating (Focus removed) -->
       <div>
         <span class="badge">Rated: G &amp; PG-13</span>
       </div>
 
-      <!-- Relocated AI Note -->
       <div class="ai-top-attribution">
         Please note this webpage was created with the assistance of AI.
       </div>
@@ -376,7 +411,7 @@
       </a>
     </div>
 
-    <!-- Biome Stage & Leaf Bank (Starts at 0% / 0 Leaves) -->
+    <!-- Biome Stage & Leaf Bank -->
     <div class="card">
       <h2>
         <span>Biome Establishment Stage</span>
@@ -626,7 +661,7 @@
   </div>
 
   <script>
-    // --- Ambient Canopy Floating Leaves / Spores Canvas ---
+    // --- Ambient Canopy Floating Leaves Canvas ---
     const canvas = document.getElementById('ambient-canvas');
     const ctx = canvas.getContext('2d');
     let width, height;
@@ -645,7 +680,7 @@
         this.y = Math.random() * height;
         this.size = Math.random() * 3 + 2;
         this.speedX = (Math.random() - 0.5) * 0.5;
-        this.speedY = Math.random() * 0.4 + 0.2; // Gently drifting downwards like leaves
+        this.speedY = Math.random() * 0.4 + 0.2;
         this.alpha = Math.random() * 0.4 + 0.2;
         this.rotation = Math.random() * Math.PI * 2;
         this.rotSpeed = (Math.random() - 0.5) * 0.02;
@@ -664,7 +699,6 @@
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rotation);
         ctx.beginPath();
-        // Leaf oval shape
         ctx.ellipse(0, 0, this.size * 1.5, this.size * 0.8, 0, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(74, 222, 128, ${this.alpha})`;
         ctx.shadowBlur = 6;
@@ -690,6 +724,106 @@
     initParticles();
     animate();
 
+    // --- Procedural Ambient Jungle Sound Synthesizer ---
+    let audioCtx = null;
+    let isSoundOn = false;
+    let ambientNoiseNode = null;
+    let ambientGainNode = null;
+    let chimeInterval = null;
+
+    function initAmbientSoundEngine() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      // Gentle filtered pink noise simulating a soft canopy breeze
+      const bufferSize = audioCtx.sampleRate * 2;
+      const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      let b0 = 0, b1 = 0, b2 = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99 * b0 + white * 0.05;
+        b1 = 0.96 * b1 + white * 0.11;
+        b2 = 0.86 * b2 + white * 0.25;
+        output[i] = (b0 + b1 + b2) * 0.08;
+      }
+
+      ambientNoiseNode = audioCtx.createBufferSource();
+      ambientNoiseNode.buffer = noiseBuffer;
+      ambientNoiseNode.loop = true;
+
+      // Filter to keep only warm, low-frequency rustling
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 340;
+
+      ambientGainNode = audioCtx.createGain();
+      ambientGainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      ambientGainNode.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 2.5);
+
+      ambientNoiseNode.connect(filter);
+      filter.connect(ambientGainNode);
+      ambientGainNode.connect(audioCtx.destination);
+      ambientNoiseNode.start();
+
+      // Occasional peaceful pentatonic chime
+      const pentatonic = [392.00, 440.00, 523.25, 659.25, 783.99]; // G4, A4, C5, E5, G5
+      chimeInterval = setInterval(() => {
+        if (!isSoundOn || !audioCtx) return;
+        if (Math.random() > 0.4) {
+          playCanopyChime(pentatonic[Math.floor(Math.random() * pentatonic.length)]);
+        }
+      }, 4500);
+    }
+
+    function playCanopyChime(freq) {
+      if (!audioCtx || audioCtx.state === 'suspended') return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+      gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.04, audioCtx.currentTime + 0.3);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 3.0);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 3.1);
+    }
+
+    function toggleAmbientSound() {
+      const btn = document.getElementById('sound-btn');
+      const icon = document.getElementById('sound-icon');
+      const txt = document.getElementById('sound-text');
+
+      if (!isSoundOn) {
+        initAmbientSoundEngine();
+        isSoundOn = true;
+        btn.classList.add('active');
+        icon.textContent = '🔊';
+        txt.textContent = 'Sound: On';
+      } else {
+        if (ambientGainNode && audioCtx) {
+          ambientGainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+          setTimeout(() => {
+            if (ambientNoiseNode) ambientNoiseNode.stop();
+            if (chimeInterval) clearInterval(chimeInterval);
+            if (audioCtx) audioCtx.suspend();
+          }, 500);
+        }
+        isSoundOn = false;
+        btn.classList.remove('active');
+        icon.textContent = '🔇';
+        txt.textContent = 'Sound: Off';
+      }
+    }
+
     // --- SVG Root Network Vector ---
     const rootSvgTemplate = `
       <svg class="root-overlay" viewBox="0 0 200 32" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
@@ -700,9 +834,8 @@
       </svg>
     `;
 
-    // --- Progression Engine (Leaves & Root Mapping) ---
+    // --- Progression Engine (Leaves & Completed Mapping) ---
     function updateProgress() {
-      // Read leaves (support legacy sunlight key if previously tested)
       let leaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
       if (isNaN(leaves)) {
         const legacySun = parseInt(localStorage.getItem('jacksjungle_sunlight'), 10);
@@ -711,14 +844,13 @@
 
       document.getElementById('leaf-readout').textContent = `🍃 ${leaves} Leaves`;
 
-      // Progress bar percentage (Scaled to 200 leaves for full canopy maturity)
       const percent = Math.min(100, Math.round((leaves / 200) * 100));
       document.getElementById('leaf-progress-bar').style.width = `${percent}%`;
       document.getElementById('progress-percent-label').textContent = `Canopy Density: ${percent}%`;
 
       let hasCompletedAnyGame = leaves > 0;
 
-      // Scan games and attach root indicators
+      // Scan games and attach completed roots + labels
       const allGameNodes = document.querySelectorAll('.game-node[data-game-id]');
       allGameNodes.forEach(node => {
         const gameId = node.getAttribute('data-game-id');
@@ -732,7 +864,7 @@
             if (footerRow && !footerRow.querySelector('.completed-badge')) {
               const badge = document.createElement('span');
               badge.className = 'completed-badge';
-              badge.innerHTML = '🌱 Rooted';
+              badge.innerHTML = '🌿 Completed';
               footerRow.appendChild(badge);
             }
           }
@@ -790,7 +922,6 @@
     function resetProgress() {
       const confirmReset = window.confirm("Are you sure you want to reset all canopy progress and collected leaves? This cannot be undone.");
       if (confirmReset) {
-        // Clear all jacksjungle keys from localStorage
         const keysToRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
@@ -800,11 +931,9 @@
         }
         keysToRemove.forEach(k => localStorage.removeItem(k));
         
-        // Ensure keys start fresh at 0
         localStorage.setItem('jacksjungle_leaves', '0');
         localStorage.setItem('jacksjungle_sunlight', '0');
 
-        // Reload the page to restore initial locked state
         window.location.reload();
       }
     }
