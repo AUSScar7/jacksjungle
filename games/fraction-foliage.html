@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Fraction Foliage - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #061a12; --card: #0d2b1f; --accent: #10b981; --accent-dim: #047857;
+      --text: #ecfdf5; --muted: #a7f3d0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .fraction-hero { font-size: 3rem; font-weight: 800; color: #fff; margin: 1.5rem 0; }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; }
+    .leaf-btn { background: #134e4a; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.25rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; }
+    .leaf-btn:active { background: var(--accent-dim); }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span id="tier-lbl">Foliage: 1 / 4</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.9rem;">Match the fraction with its decimal equivalent:</p>
+    <div class="fraction-hero" id="fraction-text">1 / 2</div>
+    <div class="grid" id="decimal-options"></div>
+  </div>
+  <script>
+    const PAIRS = [
+      { frac: "1 / 2", dec: "0.5", distractors: ["0.2", "0.25", "0.05"] },
+      { frac: "3 / 4", dec: "0.75", distractors: ["0.34", "0.50", "0.80"] },
+      { frac: "1 / 4", dec: "0.25", distractors: ["0.40", "0.14", "0.04"] },
+      { frac: "1 / 5", dec: "0.20", distractors: ["0.15", "0.50", "0.02"] }
+    ];
+    let fIdx = 0;
+    function renderFraction() {
+      if (fIdx >= PAIRS.length) {
+        document.getElementById('fraction-text').textContent = "FOLIAGE MATCHED!";
+        document.getElementById('decimal-options').innerHTML = "<p style='grid-column: span 2; text-align:center; font-weight:bold; color:var(--muted);'>+20 Sunlight Stored</p>";
+        let s = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
+        localStorage.setItem('jacksjungle_sunlight', s + 20);
+        localStorage.setItem('jacksjungle_completed_fraction_foliage', 'true');
+        return;
+      }
+      const p = PAIRS[fIdx];
+      document.getElementById('tier-lbl').textContent = `Foliage: ${fIdx + 1} / ${PAIRS.length}`;
+      document.getElementById('fraction-text').textContent = p.frac;
+      let opts = [p.dec, ...p.distractors].sort(() => Math.random() - 0.5);
+      const grid = document.getElementById('decimal-options');
+      grid.innerHTML = "";
+      opts.forEach(o => {
+        const b = document.createElement('button');
+        b.className = 'leaf-btn'; b.textContent = o;
+        b.onclick = () => {
+          if (o === p.dec) {
+            fIdx++; renderFraction();
+          } else {
+            alert("Check decimal places!");
+          }
+        };
+        grid.appendChild(b);
+      });
+    }
+    renderFraction();
+  </script>
+</body>
+</html>
