@@ -3,516 +3,190 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jack's Jungle | Something Wild is Growing</title>
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            display: ['Cinzel', 'serif'],
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-          },
-          colors: {
-            jungle: {
-              950: '#040d07',
-              900: '#09180e',
-              850: '#0d2215',
-              800: '#143120',
-              700: '#1e4830',
-              500: '#2e7d51',
-              400: '#46a36c',
-              300: '#7ad19f',
-              accent: '#d1a84f', // Warm amber / sunlight through foliage
-              gold: '#ecc765',
-            }
-          },
-          animation: {
-            'glow-pulse': 'glow 6s ease-in-out infinite',
-            'float-subtle': 'float 7s ease-in-out infinite',
-          },
-          keyframes: {
-            glow: {
-              '0%, 100%': { opacity: '0.45', transform: 'scale(1)' },
-              '50%': { opacity: '0.8', transform: 'scale(1.05)' },
-            },
-            float: {
-              '0%, 100%': { transform: 'translateY(0px)' },
-              '50%': { transform: 'translateY(-8px)' },
-            }
-          }
-        }
-      }
-    }
-  </script>
-
+  <title>Jack's Jungle - Interactive Educational Games</title>
   <style>
-    /* Base style enhancements */
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #22c55e;
+      --accent-hover: #16a34a;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
     body {
-      background-color: #040d07;
-      color: #e5ede7;
-      overflow-x: hidden;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1rem;
     }
 
-    /* Ambient mist and canopy background layers */
-    .forest-bg {
-      background: radial-gradient(circle at 50% 15%, #143520 0%, #081a10 45%, #030a05 100%);
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
     }
 
-    .vignette {
-      box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.85);
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
     }
 
-    /* Subtle ray of light filter */
-    .god-rays {
-      background: conic-gradient(
-        from 180deg at 50% 0%,
-        transparent 0deg,
-        rgba(209, 168, 79, 0.04) 20deg,
-        transparent 35deg,
-        rgba(122, 209, 159, 0.05) 55deg,
-        transparent 75deg
-      );
+    header h1 {
+      font-size: 2.5rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
     }
 
-    /* Smooth glass styling */
-    .glass-card {
-      background: rgba(13, 34, 21, 0.55);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(122, 209, 159, 0.16);
-      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
     }
 
-    .glass-card:hover {
-      background: rgba(17, 43, 27, 0.72);
-      border-color: rgba(209, 168, 79, 0.45);
-      transform: translateY(-4px);
-      box-shadow: 0 16px 36px -12px rgba(4, 13, 7, 0.8), 0 0 20px -4px rgba(70, 163, 108, 0.2);
+    .badge {
+      display: inline-block;
+      background: var(--border);
+      color: var(--text);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.75rem;
     }
 
-    /* Canvas background pinning */
-    #foliage-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1.3rem;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    .progress-track {
+      background: var(--border);
+      height: 16px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 1rem 0 0.5rem;
+    }
+
+    .progress-bar {
+      background: var(--accent);
       height: 100%;
-      pointer-events: none;
-      z-index: 2;
+      width: 15%; /* Decreased Biome Establishment Stage */
+      border-radius: 8px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .game-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      text-align: center;
+    }
+
+    .game-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+
+    .game-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
     }
   </style>
 </head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Jack's Jungle</h1>
+      <p>Playful, child-friendly online educational games.</p>
+      <span class="badge">Rated: G &amp; PG-13 Focus</span>
+    </header>
 
-<body class="relative min-h-screen flex flex-col justify-between selection:bg-jungle-400 selection:text-jungle-950">
-
-  <!-- Ambient canvas animation (Leaves, Fireflies, Spores) -->
-  <canvas id="foliage-canvas"></canvas>
-
-  <!-- Atmospheric Background Gradients -->
-  <div class="fixed inset-0 forest-bg pointer-events-none z-0"></div>
-  <div class="fixed inset-0 god-rays pointer-events-none z-[1]"></div>
-  <div class="fixed inset-0 vignette pointer-events-none z-[3]"></div>
-
-  <!-- Ambient Light Pulse at the top -->
-  <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[700px] h-[360px] bg-jungle-400/10 rounded-full blur-[120px] pointer-events-none z-[1] animate-glow-pulse"></div>
-
-  <!-- Navigation / Top status bar -->
-  <header class="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-    <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-xl glass-card flex items-center justify-center text-jungle-accent shadow-inner">
-        <!-- Botanical Monstera / Jungle Leaf SVG -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
-          <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
-        </svg>
+    <!-- Biome Establishment Progress -->
+    <div class="card">
+      <h2>Biome Establishment Stage</h2>
+      <p style="font-size: 0.95rem; color: var(--text-muted);">
+        Deploying core game systems and digital interactive modules across the site.
+      </p>
+      <div class="progress-track">
+        <div class="progress-bar"></div>
       </div>
-      <div>
-        <span class="font-display font-bold tracking-widest text-sm text-jungle-300">JACK'S JUNGLE</span>
-        <span class="block text-[10px] tracking-wider text-emerald-400/60 uppercase">Domain Live & Verified</span>
+      <div class="progress-label">
+        <span>Current Phase: Alpha Sandbox</span>
+        <span>15%</span>
       </div>
     </div>
 
-    <!-- Web Audio Ambient Soundscape Button -->
-    <div class="flex items-center space-x-3">
-      <button id="soundscape-toggle" class="glass-card px-4 py-2.5 rounded-full flex items-center space-x-2 text-xs font-semibold tracking-wide text-emerald-100 hover:text-white transition group focus:outline-none">
-        <span class="relative flex h-2.5 w-2.5">
-          <span id="audio-indicator-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-jungle-accent opacity-0"></span>
-          <span id="audio-indicator-dot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-700"></span>
-        </span>
-        <span id="soundscape-label">Ambient Soundscape: Off</span>
-        <svg id="speaker-icon" class="w-4 h-4 text-jungle-400 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
-        </svg>
-      </button>
-    </div>
-  </header>
-
-  <!-- Main Hero Section -->
-  <main class="relative z-10 w-full max-w-5xl mx-auto px-6 pt-10 pb-16 flex flex-col items-center text-center">
-    
-    <!-- Habitat Status Pill -->
-    <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full glass-card border border-emerald-500/20 text-xs font-medium text-emerald-300 mb-8 animate-float-subtle">
-      <span class="w-2 h-2 rounded-full bg-jungle-accent animate-pulse"></span>
-      <span>Expedition Basecamp Establishing • 2026</span>
+    <!-- About the Site -->
+    <div class="card">
+      <h2>What is Jack's Jungle?</h2>
+      <p>
+        Jack's Jungle is an online gaming portal offering small, accessible, and bite-sized learning activities. Designed for curious minds, every game provides practical problem-solving, science concepts, and logic puzzles in a low-friction, browser-ready environment.
+      </p>
     </div>
 
-    <!-- Main Title -->
-    <h1 class="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-[#f3f8f4] via-[#c6e6d1] to-[#609d78] drop-shadow-sm mb-6 leading-tight">
-      Jack's Jungle
-    </h1>
-
-    <!-- Subtitle / Narrative -->
-    <p class="max-w-2xl text-base sm:text-lg md:text-xl text-emerald-100/80 font-light leading-relaxed mb-10">
-      Deep in the foliage, something wild is taking root. A curated haven for botanical wonder, living rainforest habitats, and uncharted canopy adventures is currently growing.
-    </p>
-
-    <!-- Interactive Launch Pulse / Progress Indicator -->
-    <div class="w-full max-w-md glass-card p-6 rounded-2xl mb-14 text-left border border-emerald-500/20">
-      <div class="flex justify-between items-center mb-3">
-        <span class="text-xs uppercase tracking-wider font-semibold text-emerald-300 flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5 text-jungle-accent" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.316.492-.53 1.05-.724 1.623-.374 1.106-.69 2.274-1.077 3.32-.244.66-.498 1.258-.77 1.76-.275.508-.574.887-.935 1.137a1 1 0 00.565 1.83c.697 0 1.298-.445 1.77-1.026.471-.582.87-1.334 1.233-2.146.362-.81.677-1.687.973-2.518.297-.83.567-1.603.847-2.215.14-.306.286-.566.442-.76a2.02 2.02 0 01.328-.315 1 1 0 00-.38-.26z" clip-rule="evenodd" />
-            <path d="M4 11a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z" />
-          </svg>
-          Biome Establishment Phase
-        </span>
-        <span class="text-xs font-mono font-bold text-jungle-gold">78% Cultivated</span>
-      </div>
-      
-      <!-- Progress Bar Track -->
-      <div class="w-full bg-jungle-950/80 rounded-full h-2.5 overflow-hidden p-0.5 border border-emerald-900/50">
-        <div class="bg-gradient-to-r from-jungle-500 via-jungle-300 to-jungle-gold h-full rounded-full w-[78%] transition-all duration-1000"></div>
-      </div>
-
-      <div class="flex justify-between items-center mt-3 text-[11px] text-emerald-400/60 font-mono">
-        <span>Soil & Substrata Prepared</span>
-        <span>Canopy Unveiling Soon</span>
-      </div>
-    </div>
-
-    <!-- Teaser Expedition Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-left">
-      
-      <!-- Card 1: Flora -->
-      <div class="glass-card p-6 rounded-2xl group cursor-pointer" onclick="illuminateCard(this)">
-        <div class="w-12 h-12 rounded-xl bg-jungle-900/90 border border-emerald-500/20 flex items-center justify-center text-jungle-300 mb-4 group-hover:scale-110 group-hover:border-jungle-accent transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-          </svg>
+    <!-- Incoming Content -->
+    <div class="card">
+      <h2>Upcoming Modules</h2>
+      <div class="game-grid">
+        <div class="game-card">
+          <h3>Habitat Match</h3>
+          <p>Learn animal ecosystems and food chains through rapid sorting puzzles.</p>
         </div>
-        <h3 class="font-display font-bold text-lg text-emerald-100 mb-1 group-hover:text-jungle-gold transition">Exotic Flora</h3>
-        <p class="text-xs text-emerald-200/60 leading-relaxed">
-          Rare aroids, ancient ferns, and vibrant epiphytic specimens collected under careful cultivation.
-        </p>
-        <div class="mt-4 flex items-center text-[11px] font-semibold text-jungle-accent group-hover:translate-x-1 transition">
-          <span>Catalog Preview</span>
-          <svg class="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <div class="game-card">
+          <h3>Logic Circuit</h3>
+          <p>Entry-level logic gate challenges and procedural problem solving.</p>
+        </div>
+        <div class="game-card">
+          <h3>Math Tracker</h3>
+          <p>Fast-paced arithmetic drills wrapped in arcade mechanics.</p>
         </div>
       </div>
-
-      <!-- Card 2: Fauna & Terraria -->
-      <div class="glass-card p-6 rounded-2xl group cursor-pointer" onclick="illuminateCard(this)">
-        <div class="w-12 h-12 rounded-xl bg-jungle-900/90 border border-emerald-500/20 flex items-center justify-center text-jungle-300 mb-4 group-hover:scale-110 group-hover:border-jungle-accent transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"/>
-          </svg>
-        </div>
-        <h3 class="font-display font-bold text-lg text-emerald-100 mb-1 group-hover:text-jungle-gold transition">Living Vivariums</h3>
-        <p class="text-xs text-emerald-200/60 leading-relaxed">
-          Self-sustaining bio-active terrariums, humidity balancing, and micro-climatic glass ecosystems.
-        </p>
-        <div class="mt-4 flex items-center text-[11px] font-semibold text-jungle-accent group-hover:translate-x-1 transition">
-          <span>Habitat Blueprint</span>
-          <svg class="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        </div>
-      </div>
-
-      <!-- Card 3: Expeditions -->
-      <div class="glass-card p-6 rounded-2xl group cursor-pointer" onclick="illuminateCard(this)">
-        <div class="w-12 h-12 rounded-xl bg-jungle-900/90 border border-emerald-500/20 flex items-center justify-center text-jungle-300 mb-4 group-hover:scale-110 group-hover:border-jungle-accent transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-          </svg>
-        </div>
-        <h3 class="font-display font-bold text-lg text-emerald-100 mb-1 group-hover:text-jungle-gold transition">Field Chronicles</h3>
-        <p class="text-xs text-emerald-200/60 leading-relaxed">
-          Propagation logs, humidity tutorials, plant hunting dispatches, and botanical workshops.
-        </p>
-        <div class="mt-4 flex items-center text-[11px] font-semibold text-jungle-accent group-hover:translate-x-1 transition">
-          <span>Expedition Notes</span>
-          <svg class="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        </div>
-      </div>
-
     </div>
 
-    <!-- Notification dispatch modal / message trigger -->
-    <div id="notice-toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 glass-card px-5 py-3 rounded-full border border-jungle-accent/40 text-xs text-emerald-100 shadow-2xl transition-all duration-300 opacity-0 pointer-events-none translate-y-4 flex items-center space-x-2 z-50">
-      <svg class="w-4 h-4 text-jungle-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-      <span id="toast-text">Specimen logged. Expedition reports will arrive on launch.</span>
-    </div>
-
-  </main>
-
-  <!-- Footer -->
-  <footer class="relative z-10 w-full max-w-7xl mx-auto px-6 py-8 border-t border-emerald-950/80 flex flex-col sm:flex-row items-center justify-between text-xs text-emerald-400/50 space-y-4 sm:space-y-0">
-    <div class="flex items-center space-x-2">
-      <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-      <span class="font-mono text-emerald-300/80">jacksjungle.com</span>
-      <span>• All rights reserved</span>
-    </div>
-    <div class="flex items-center space-x-6">
-      <a href="#about" onclick="triggerToast('Jack\'s Jungle is currently in private preview.')" class="hover:text-jungle-300 transition">About the Reserve</a>
-      <a href="#contact" onclick="triggerToast('Enquiries: hello@jacksjungle.com')" class="hover:text-jungle-300 transition">Contact</a>
-    </div>
-  </footer>
-
-  <script>
-    /**
-     * Canvas Atmospheric Simulation
-     * Floating leaves, spores, and firefly particles
-     */
-    const canvas = document.getElementById('foliage-canvas');
-    const ctx = canvas.getContext('2d');
-    let width = 0;
-    let height = 0;
-    let particles = [];
-
-    function resizeCanvas() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    class CanopyParticle {
-      constructor() {
-        this.reset(true);
-      }
-
-      reset(init = false) {
-        this.x = Math.random() * width;
-        this.y = init ? Math.random() * height : -30;
-        this.size = Math.random() * 8 + 3;
-        this.speedY = Math.random() * 0.45 + 0.2;
-        this.speedX = Math.random() * 0.3 - 0.15;
-        this.angle = Math.random() * 360;
-        this.spin = (Math.random() - 0.5) * 0.02;
-        this.type = Math.random() > 0.4 ? 'leaf' : 'spore';
-        this.alpha = Math.random() * 0.4 + 0.15;
-        this.glow = Math.random() * 10;
-      }
-
-      update() {
-        this.y += this.speedY;
-        this.x += Math.sin(this.angle) * 0.4 + this.speedX;
-        this.angle += this.spin;
-
-        if (this.y > height + 40 || this.x < -40 || this.x > width + 40) {
-          this.reset();
-        }
-      }
-
-      draw() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle);
-
-        if (this.type === 'leaf') {
-          // Leaf shape
-          ctx.beginPath();
-          ctx.moveTo(0, -this.size);
-          ctx.quadraticCurveTo(this.size * 0.9, 0, 0, this.size);
-          ctx.quadraticCurveTo(-this.size * 0.9, 0, 0, -this.size);
-          ctx.fillStyle = `rgba(86, 178, 122, ${this.alpha * 0.7})`;
-          ctx.fill();
-        } else {
-          // Bioluminescent spore / firefly
-          ctx.beginPath();
-          ctx.arc(0, 0, this.size * 0.35, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(236, 199, 101, ${this.alpha})`;
-          ctx.shadowColor = 'rgba(236, 199, 101, 0.8)';
-          ctx.shadowBlur = 8;
-          ctx.fill();
-        }
-
-        ctx.restore();
-      }
-    }
-
-    // Spawn particle army
-    const particleCount = Math.min(Math.floor(window.innerWidth / 20), 45);
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new CanopyParticle());
-    }
-
-    function animateLoop() {
-      ctx.clearRect(0, 0, width, height);
-      for (let i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw();
-      }
-      requestAnimationFrame(animateLoop);
-    }
-    window.onload = function() {
-      animateLoop();
-    };
-
-    /**
-     * Web Audio API Synthesizer
-     * Generates pure procedural forest soundscape:
-     * - Filtered noise wind / canopy rustle
-     * - Subtle periodic bird chirp frequency sweeps
-     * No external media files needed!
-     */
-    let audioCtx = null;
-    let isPlaying = false;
-    let masterGain = null;
-    let birdInterval = null;
-
-    function initAudio() {
-      if (audioCtx) return;
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      audioCtx = new AudioContext();
-
-      masterGain = audioCtx.createGain();
-      masterGain.gain.setValueAtTime(0.01, audioCtx.currentTime);
-      masterGain.connect(audioCtx.destination);
-    }
-
-    // Procedural Wind / Canopy Rustle generator
-    function startWind() {
-      const bufferSize = audioCtx.sampleRate * 2;
-      const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      const output = noiseBuffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
-      }
-
-      const whiteNoise = audioCtx.createBufferSource();
-      whiteNoise.buffer = noiseBuffer;
-      whiteNoise.loop = true;
-
-      // Bandpass filter to simulate wind whistling through leaves
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(320, audioCtx.currentTime);
-      filter.Q.setValueAtTime(1.8, audioCtx.currentTime);
-
-      // Low LFO for undulating breeze
-      const lfo = audioCtx.createOscillator();
-      const lfoGain = audioCtx.createGain();
-      lfo.frequency.setValueAtTime(0.12, audioCtx.currentTime);
-      lfoGain.gain.setValueAtTime(180, audioCtx.currentTime);
-      lfo.connect(lfoGain);
-      lfoGain.connect(filter.frequency);
-
-      const windGain = audioCtx.createGain();
-      windGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-
-      whiteNoise.connect(filter);
-      filter.connect(windGain);
-      windGain.connect(masterGain);
-
-      whiteNoise.start();
-      lfo.start();
-    }
-
-    // Procedural tropical bird chirp synthesizer
-    function playChirp() {
-      if (!isPlaying || !audioCtx) return;
-
-      const osc = audioCtx.createOscillator();
-      const chirpGain = audioCtx.createGain();
-      const now = audioCtx.currentTime;
-
-      // Randomised bird frequency sweep
-      const baseFreq = 2200 + Math.random() * 1200;
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(baseFreq, now);
-      osc.frequency.exponentialRampToValueAtTime(baseFreq + 600, now + 0.08);
-      osc.frequency.exponentialRampToValueAtTime(baseFreq - 400, now + 0.18);
-
-      chirpGain.gain.setValueAtTime(0.001, now);
-      chirpGain.gain.linearRampToValueAtTime(0.04, now + 0.04);
-      chirpGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
-
-      osc.connect(chirpGain);
-      chirpGain.connect(masterGain);
-
-      osc.start(now);
-      osc.stop(now + 0.23);
-    }
-
-    const soundBtn = document.getElementById('soundscape-toggle');
-    const soundLabel = document.getElementById('soundscape-label');
-    const pingIndicator = document.getElementById('audio-indicator-ping');
-    const dotIndicator = document.getElementById('audio-indicator-dot');
-
-    soundBtn.addEventListener('click', () => {
-      initAudio();
-
-      if (!isPlaying) {
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
-        masterGain.gain.setTargetAtTime(0.18, audioCtx.currentTime, 1);
-        startWind();
-        birdInterval = setInterval(() => {
-          if (Math.random() > 0.35) {
-            playChirp();
-            setTimeout(playChirp, 160 + Math.random() * 140);
-          }
-        }, 3200);
-
-        isPlaying = true;
-        soundLabel.textContent = 'Ambient Soundscape: On';
-        pingIndicator.classList.remove('opacity-0');
-        dotIndicator.classList.remove('bg-emerald-700');
-        dotIndicator.classList.add('bg-jungle-gold');
-        triggerToast('Canopy soundscape activated.');
-      } else {
-        masterGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.4);
-        clearInterval(birdInterval);
-        isPlaying = false;
-        soundLabel.textContent = 'Ambient Soundscape: Off';
-        pingIndicator.classList.add('opacity-0');
-        dotIndicator.classList.remove('bg-jungle-gold');
-        dotIndicator.classList.add('bg-emerald-700');
-        triggerToast('Soundscape muted.');
-      }
-    });
-
-    function triggerToast(message) {
-      const toast = document.getElementById('notice-toast');
-      const text = document.getElementById('toast-text');
-      text.textContent = message;
-      toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-      toast.classList.add('opacity-100', 'translate-y-0');
-
-      clearTimeout(window.toastTimer);
-      window.toastTimer = setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-        toast.classList.remove('opacity-100', 'translate-y-0');
-      }, 3000);
-    }
-
-    function illuminateCard(card) {
-      card.classList.add('ring-2', 'ring-jungle-accent/60');
-      setTimeout(() => {
-        card.classList.remove('ring-2', 'ring-jungle-accent/60');
-      }, 600);
-      triggerToast('Habitat records documented in the field guide.');
-    }
-  </script>
+    <footer>
+      <p>&copy; jacksjungle.com — Web-only educational games.</p>
+    </footer>
+  </div>
 </body>
 </html>
