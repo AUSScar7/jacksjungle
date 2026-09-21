@@ -239,6 +239,19 @@
       letter-spacing: 0.05rem;
     }
 
+    /* AI Attribution Note */
+    .ai-attribution-note {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 0.4rem;
+      padding: 0.4rem 0.6rem;
+      margin-top: 0.6rem;
+      line-height: 1.3;
+      font-style: italic;
+    }
+
     /* Fog of War / Locked State */
     .game-node.locked {
       background: var(--locked-bg);
@@ -323,13 +336,22 @@
         <div class="layer-req" style="color: var(--accent);">Unlocked</div>
       </div>
       <div class="game-grid">
+        
+        <!-- Game 1 with AI Assistance Disclosure -->
         <a href="games/vine-climber.html" class="game-node">
           <div>
             <h3>Vine Climber</h3>
             <p>Grow jungle vines upward by picking the missing letters and completing vocabulary terms.</p>
           </div>
-          <span class="game-tag">Spelling &bull; Game 1</span>
+          <div>
+            <span class="game-tag">Spelling &bull; Game 1</span>
+            <div class="ai-attribution-note">
+              Please note this Webpage was created with the assistance of AI.
+            </div>
+          </div>
         </a>
+
+        <!-- Game 2 -->
         <a href="games/phonics-swamp.html" class="game-node">
           <div>
             <h3>Phonics Swamp</h3>
@@ -337,6 +359,8 @@
           </div>
           <span class="game-tag">Phonics &bull; Game 2</span>
         </a>
+
+        <!-- Game 3 -->
         <a href="games/canopy-crosswords.html" class="game-node">
           <div>
             <h3>Canopy Crosswords</h3>
@@ -344,6 +368,8 @@
           </div>
           <span class="game-tag">Vocabulary &bull; Game 3</span>
         </a>
+
+        <!-- Game 4 -->
         <a href="games/root-word-expedition.html" class="game-node">
           <div>
             <h3>Root Word Expedition</h3>
@@ -351,6 +377,8 @@
           </div>
           <span class="game-tag">Morphemes &bull; Game 4</span>
         </a>
+
+        <!-- Game 5 -->
         <a href="games/anagram-antics.html" class="game-node">
           <div>
             <h3>Anagram Antics</h3>
