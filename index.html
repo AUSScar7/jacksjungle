@@ -2,191 +2,1034 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jack's Jungle - Interactive Educational Games</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Jack's Jungle — Interactive Educational Games</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome CDN for jungle & interface icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- Google Fonts: Poppins & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            jungle: {
+              950: '#03140b',
+              900: '#062416',
+              850: '#0a3320',
+              800: '#0e432a',
+              700: '#145a39',
+              600: '#1c7a4e',
+              500: '#22c55e',
+              400: '#4ade80',
+              300: '#86efac',
+              gold: '#fbbf24',
+              sunlight: '#fef08a'
+            }
+          },
+          fontFamily: {
+            display: ['Fredoka', 'system-ui', 'sans-serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --accent: #22c55e;
-      --accent-hover: #16a34a;
-      --border: #334155;
+    /* Prevent unwanted elastic bounce and ensure fluid mobile touch */
+    html, body {
+      overscroll-behavior-y: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
+    /* Ambient animated rainforest mist/glow background */
     body {
-      background-color: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      padding: 2rem 1rem;
+      background: radial-gradient(circle at 50% 10%, #0d3822 0%, #062013 50%, #020f08 100%);
+      min-height: 100vh;
+      color: #f1f5f9;
+      font-family: 'Inter', sans-serif;
     }
 
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
+    /* Subtle animated shimmer for glowing bars */
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 15px rgba(34, 197, 94, 0.4), 0 0 30px rgba(34, 197, 94, 0.2);
+      }
+      50% {
+        box-shadow: 0 0 25px rgba(74, 222, 128, 0.7), 0 0 45px rgba(34, 197, 94, 0.4);
+      }
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 2.5rem;
+    .pulse-glow {
+      animation: pulseGlow 3s infinite ease-in-out;
     }
 
-    header h1 {
-      font-size: 2.5rem;
-      color: var(--accent);
-      margin-bottom: 0.5rem;
+    @keyframes floatLeaf {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(3deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
     }
 
-    header p {
-      color: var(--text-muted);
-      font-size: 1.1rem;
+    .floating-badge {
+      animation: floatLeaf 4s ease-in-out infinite;
     }
 
-    .badge {
-      display: inline-block;
-      background: var(--border);
-      color: var(--text);
-      padding: 0.25rem 0.75rem;
+    /* Glass card utility */
+    .glass-panel {
+      background: rgba(14, 45, 29, 0.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(74, 222, 128, 0.18);
+    }
+
+    .glass-panel-fogged {
+      background: rgba(8, 26, 17, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px dashed rgba(100, 116, 139, 0.35);
+    }
+
+    /* Custom scrollbar for mobile/desktop */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(3, 20, 11, 0.8);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #145a39;
       border-radius: 9999px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-top: 0.75rem;
     }
-
-    .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .card h2 {
-      font-size: 1.3rem;
-      margin-bottom: 0.75rem;
-      color: var(--text);
-    }
-
-    .progress-track {
-      background: var(--border);
-      height: 16px;
-      border-radius: 8px;
-      overflow: hidden;
-      margin: 1rem 0 0.5rem;
-    }
-
-    .progress-bar {
-      background: var(--accent);
-      height: 100%;
-      width: 15%; /* Decreased Biome Establishment Stage */
-      border-radius: 8px;
-      transition: width 0.3s ease;
-    }
-
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    .game-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .game-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border);
-      padding: 1rem;
-      border-radius: 0.5rem;
-      text-align: center;
-    }
-
-    .game-card h3 {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-      color: var(--accent);
-    }
-
-    .game-card p {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-
-    footer {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      margin-top: 3rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border);
+    ::-webkit-scrollbar-thumb:hover {
+      background: #22c55e;
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <header>
-      <h1>Jack's Jungle</h1>
-      <p>Playful, child-friendly online educational games.</p>
-      <span class="badge">Rated: G &amp; PG-13 Focus</span>
+<body class="relative overflow-x-hidden selection:bg-jungle-500 selection:text-jungle-950">
+
+  <canvas id="ambientCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+  <!-- Main Viewport Shell -->
+  <div class="relative z-10 flex flex-col min-h-screen">
+
+    <header class="sticky top-0 z-30 glass-panel border-b border-emerald-900/40 px-4 py-3 sm:px-8 sm:py-4">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+        
+        <!-- Brand Title & Tagline -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-lime-400 flex items-center justify-center shadow-lg shadow-emerald-950 text-white text-xl sm:text-2xl">
+            <i class="fa-solid fa-seedling"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-display font-bold text-2xl sm:text-3xl tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-green-200 to-amber-200">
+                Jack's Jungle
+              </span>
+              <span class="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-600/40 text-emerald-300">
+                G &bull; PG-13 Online
+              </span>
+            </div>
+            <p class="text-xs sm:text-sm text-emerald-200/70 font-medium">
+              Playful, child-friendly online educational games
+            </p>
+          </div>
+        </div>
+
+        <!-- Sunlight Energy & GitHub Pages Helper Buttons -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
+          
+          <!-- Sunlight Energy Counter -->
+          <div class="flex items-center space-x-2 bg-emerald-950/90 border border-amber-400/40 rounded-full px-3.5 py-1.5 shadow-inner">
+            <i class="fa-solid fa-sun text-amber-400 text-base sm:text-lg animate-spin" style="animation-duration: 18s;"></i>
+            <div class="flex flex-col text-left">
+              <span class="text-[9px] uppercase tracking-wider text-amber-200/80 font-bold leading-none">Sunlight</span>
+              <span id="sunlightCount" class="font-display font-bold text-amber-300 text-sm sm:text-base leading-tight">60 / 300</span>
+            </div>
+          </div>
+
+          <!-- GitHub Pages Code Exporter Modal Button -->
+          <button id="openExporterBtn" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-emerald-800/60 hover:bg-emerald-700/80 text-emerald-200 hover:text-white border border-emerald-500/30 text-xs font-semibold transition active:scale-95">
+            <i class="fa-brands fa-github text-sm"></i>
+            <span class="hidden md:inline">GitHub Code</span>
+          </button>
+        </div>
+
+      </div>
     </header>
 
-    <!-- Biome Establishment Progress -->
-    <div class="card">
-      <h2>Biome Establishment Stage</h2>
-      <p style="font-size: 0.95rem; color: var(--text-muted);">
-        Deploying core game systems and digital interactive modules across the site.
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 sm:px-8 sm:py-8 space-y-8">
+      
+      <!-- Biome Establishment Card (Strictly 15%) -->
+      <section class="glass-panel rounded-3xl p-5 sm:p-7 relative overflow-hidden shadow-2xl">
+        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 space-y-3">
+          
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center space-x-2">
+              <span class="p-2 rounded-xl bg-emerald-900/50 border border-emerald-600/30 text-emerald-400">
+                <i class="fa-solid fa-network-wired text-sm sm:text-base"></i>
+              </span>
+              <div>
+                <h2 class="font-display font-semibold text-lg sm:text-xl text-emerald-100">Biome Establishment Stage</h2>
+                <p class="text-xs text-emerald-300/70">Online modules & interactive systems deploy status</p>
+              </div>
+            </div>
+            <div class="flex items-baseline space-x-1 bg-emerald-950/70 px-3 py-1 rounded-xl border border-emerald-500/20">
+              <span class="font-display font-bold text-2xl text-emerald-400">15%</span>
+              <span class="text-xs text-emerald-400/80 font-medium">Operational</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar Track -->
+          <div class="w-full bg-emerald-950/90 rounded-full h-4 sm:h-5 p-1 border border-emerald-700/40 relative shadow-inner overflow-hidden">
+            <div id="biomeBar" class="bg-gradient-to-r from-emerald-600 via-lime-500 to-amber-300 h-full rounded-full transition-all duration-1000 pulse-glow" style="width: 15%;"></div>
+          </div>
+
+          <div class="flex justify-between items-center text-[11px] sm:text-xs text-emerald-300/75">
+            <span><i class="fa-solid fa-compass text-emerald-400 mr-1"></i> Phase 1: Forest Floor Core Playables Ready</span>
+            <span class="italic text-emerald-400/90 font-medium">Collect Sunlight to unlock high canopy tiers</span>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-emerald-800/40 pb-4">
+        <div>
+          <h1 class="font-display text-2xl sm:text-3xl font-bold text-white tracking-wide">The Interactive Canopy</h1>
+          <p class="text-xs sm:text-sm text-emerald-200/70">Journey from the lush ground floor to the sunlit emergent treetops.</p>
+        </div>
+        
+        <!-- Filter Tabs -->
+        <div class="flex items-center bg-emerald-950/90 p-1 rounded-2xl border border-emerald-700/30 text-xs w-full sm:w-auto overflow-x-auto">
+          <button data-filter="all" class="filter-tab flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl font-semibold transition bg-emerald-600 text-white shadow">
+            All Layers (30)
+          </button>
+          <button data-filter="floor" class="filter-tab flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl font-semibold transition text-emerald-300 hover:text-white">
+            Floor (English)
+          </button>
+          <button data-filter="understory" class="filter-tab flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl font-semibold transition text-emerald-300 hover:text-white">
+            Understory (Math)
+          </button>
+          <button data-filter="emergent" class="filter-tab flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl font-semibold transition text-emerald-300 hover:text-white">
+            Emergent (Logic)
+          </button>
+        </div>
+      </section>
+
+      <section id="layer-emergent" class="canopy-layer relative space-y-4 pt-2">
+        <div class="flex items-center justify-between bg-gradient-to-r from-amber-950/60 to-emerald-950/40 p-4 rounded-2xl border border-amber-500/20">
+          <div class="flex items-center space-x-3">
+            <span class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 font-bold">
+              3
+            </span>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 class="font-display text-lg sm:text-xl font-bold text-amber-200">The Emergent Canopy</h3>
+                <span class="text-[10px] bg-amber-400/20 border border-amber-400/30 text-amber-200 px-2 py-0.5 rounded-full font-bold">Ages 10-14 &bull; Critical Thinking</span>
+              </div>
+              <p class="text-xs text-amber-100/70">Top level logic puzzles, deductive webs, circuits & system simulations.</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-amber-300/80 font-medium block">Unlock Req:</span>
+            <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-sun mr-1"></i>120 Sunlight</span>
+          </div>
+        </div>
+
+        <div id="grid-emergent" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <!-- Game cards injected dynamically via JS for clean management -->
+        </div>
+      </section>
+
+      <section id="layer-understory" class="canopy-layer relative space-y-4 pt-4">
+        <div class="flex items-center justify-between bg-gradient-to-r from-emerald-900/60 to-teal-950/40 p-4 rounded-2xl border border-teal-500/20">
+          <div class="flex items-center space-x-3">
+            <span class="w-9 h-9 rounded-xl bg-teal-500/20 border border-teal-400/40 flex items-center justify-center text-teal-300 font-bold">
+              2
+            </span>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 class="font-display text-lg sm:text-xl font-bold text-teal-200">The Understory</h3>
+                <span class="text-[10px] bg-teal-400/20 border border-teal-400/30 text-teal-200 px-2 py-0.5 rounded-full font-bold">Ages 7-12 &bull; Mathematics</span>
+              </div>
+              <p class="text-xs text-teal-100/70">Multiplication, fractions, angles, estimation & rapid arithmetic trails.</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-teal-300/80 font-medium block">Unlock Req:</span>
+            <span class="text-xs font-bold text-teal-300"><i class="fa-solid fa-sun mr-1"></i>50 Sunlight</span>
+          </div>
+        </div>
+
+        <div id="grid-understory" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <!-- Game cards injected dynamically via JS -->
+        </div>
+      </section>
+
+      <section id="layer-floor" class="canopy-layer relative space-y-4 pt-4">
+        <div class="flex items-center justify-between bg-gradient-to-r from-green-900/60 to-lime-950/40 p-4 rounded-2xl border border-lime-500/20">
+          <div class="flex items-center space-x-3">
+            <span class="w-9 h-9 rounded-xl bg-lime-500/20 border border-lime-400/40 flex items-center justify-center text-lime-300 font-bold">
+              1
+            </span>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 class="font-display text-lg sm:text-xl font-bold text-lime-200">The Forest Floor</h3>
+                <span class="text-[10px] bg-lime-400/20 border border-lime-400/30 text-lime-200 px-2 py-0.5 rounded-full font-bold">Ages 6-10 &bull; English & Spelling</span>
+              </div>
+              <p class="text-xs text-lime-100/70">Phonics, root words, anagrams, syllable chopping & vocabulary quests.</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-lime-300/80 font-medium block">Status:</span>
+            <span class="text-xs font-bold text-lime-400"><i class="fa-solid fa-lock-open mr-1"></i>Fully Unlocked</span>
+          </div>
+        </div>
+
+        <div id="grid-floor" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <!-- Game cards injected dynamically via JS -->
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="mt-12 border-t border-emerald-900/50 bg-emerald-950/90 py-8 px-4 text-center text-xs text-emerald-400/60 space-y-2">
+      <p class="font-semibold text-emerald-300">Jack's Jungle &copy; 2026 &bull; jacksjungle.com</p>
+      <p class="max-w-xl mx-auto">
+        Dedicated online educational games platform. G and PG-13 rated browser simulations. Optimized for iOS, iPadOS, Android, and modern desktop browsers.
       </p>
-      <div class="progress-track">
-        <div class="progress-bar"></div>
-      </div>
-      <div class="progress-label">
-        <span>Current Phase: Alpha Sandbox</span>
-        <span>15%</span>
-      </div>
-    </div>
-
-    <!-- About the Site -->
-    <div class="card">
-      <h2>What is Jack's Jungle?</h2>
-      <p>
-        Jack's Jungle is an online gaming portal offering small, accessible, and bite-sized learning activities. Designed for curious minds, every game provides practical problem-solving, science concepts, and logic puzzles in a low-friction, browser-ready environment.
-      </p>
-    </div>
-
-    <!-- Incoming Content -->
-    <div class="card">
-      <h2>Upcoming Modules</h2>
-      <div class="game-grid">
-        <div class="game-card">
-          <h3>Habitat Match</h3>
-          <p>Learn animal ecosystems and food chains through rapid sorting puzzles.</p>
-        </div>
-        <div class="game-card">
-          <h3>Logic Circuit</h3>
-          <p>Entry-level logic gate challenges and procedural problem solving.</p>
-        </div>
-        <div class="game-card">
-          <h3>Math Tracker</h3>
-          <p>Fast-paced arithmetic drills wrapped in arcade mechanics.</p>
-        </div>
-      </div>
-    </div>
-
-    <footer>
-      <p>&copy; jacksjungle.com — Web-only educational games.</p>
     </footer>
+
   </div>
+
+  <div id="gameModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-2 sm:p-4 transition-opacity duration-300">
+    <div class="w-full max-w-3xl bg-jungle-900 border border-emerald-500/40 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[96vh]">
+      
+      <!-- Modal Top Bar -->
+      <div class="flex items-center justify-between px-4 py-3 bg-jungle-950 border-b border-emerald-800/40">
+        <div class="flex items-center space-x-2.5">
+          <span id="modalGameIcon" class="w-8 h-8 rounded-lg bg-emerald-700/40 text-emerald-300 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-gamepad"></i>
+          </span>
+          <div>
+            <h4 id="modalGameTitle" class="font-display font-bold text-white text-base leading-tight">Game Window</h4>
+            <span id="modalGameCategory" class="text-[10px] text-emerald-400 uppercase tracking-wider font-semibold">Educational Module</span>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-2">
+          <!-- Reset button inside game -->
+          <button id="modalResetBtn" class="px-2.5 py-1 rounded-lg bg-emerald-950 text-emerald-300 hover:text-white text-xs border border-emerald-700/40">
+            <i class="fa-solid fa-arrow-rotate-right mr-1"></i>Reset
+          </button>
+          <!-- Close button -->
+          <button id="modalCloseBtn" class="w-8 h-8 rounded-full bg-emerald-800/40 text-emerald-200 hover:bg-emerald-700 hover:text-white flex items-center justify-center text-sm transition">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Game Stage Container (Dynamic Mini-Game Mount) -->
+      <div id="gameStage" class="p-3 sm:p-5 flex-1 overflow-y-auto min-h-[360px] sm:min-h-[440px] flex flex-col justify-center items-center bg-gradient-to-b from-jungle-900 to-jungle-950 select-none">
+        <!-- Live mini games are mounted here dynamically -->
+      </div>
+
+      <!-- Modal Footer Info -->
+      <div class="px-4 py-2.5 bg-jungle-950/80 border-t border-emerald-900/40 flex justify-between items-center text-xs text-emerald-300/70">
+        <span id="gamePromptInstruction"><i class="fa-solid fa-lightbulb text-amber-400 mr-1.5"></i>Play to harvest +20 Sunlight</span>
+        <span class="text-[11px] text-emerald-400/60 font-mono">Mobile &amp; Touch Enabled</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="exportModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-6 transition-opacity duration-300">
+    <div class="w-full max-w-4xl bg-jungle-950 border border-emerald-500/40 rounded-3xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
+      
+      <div class="flex items-center justify-between px-5 py-4 border-b border-emerald-800/50 bg-jungle-900">
+        <div class="flex items-center space-x-3">
+          <i class="fa-brands fa-github text-emerald-400 text-2xl"></i>
+          <div>
+            <h3 class="font-display font-bold text-white text-lg">GitHub Pages Deployment Helper</h3>
+            <p class="text-xs text-emerald-300/70">Copy standalone, clean code directly into your repository</p>
+          </div>
+        </div>
+        <button id="closeExportBtn" class="w-8 h-8 rounded-full bg-emerald-800/50 hover:bg-emerald-700 text-white flex items-center justify-center text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Code Selection Tabs -->
+      <div class="flex border-b border-emerald-900/80 bg-emerald-950/60 px-4 pt-2 gap-2 overflow-x-auto text-xs">
+        <button data-code-target="index" class="code-tab-btn px-4 py-2 font-semibold text-white border-b-2 border-emerald-400 transition">
+          Root index.html
+        </button>
+        <button data-code-target="vine" class="code-tab-btn px-4 py-2 font-semibold text-emerald-400/70 hover:text-white transition">
+          vine_climber.html (English)
+        </button>
+        <button data-code-target="treetops" class="code-tab-btn px-4 py-2 font-semibold text-emerald-400/70 hover:text-white transition">
+          treetops_math.html (Math)
+        </button>
+        <button data-code-target="circuit" class="code-tab-btn px-4 py-2 font-semibold text-emerald-400/70 hover:text-white transition">
+          canopy_circuit.html (Logic)
+        </button>
+      </div>
+
+      <!-- Code Viewer & Copy Container -->
+      <div class="flex-1 p-4 overflow-hidden flex flex-col space-y-2">
+        <div class="flex justify-between items-center text-xs text-emerald-300/80">
+          <span id="fileCodeLabel" class="font-mono">index.html (Unified Hub & All Playable Games)</span>
+          <button id="copyCodeBtn" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center space-x-1.5 transition active:scale-95 shadow">
+            <i class="fa-regular fa-copy"></i>
+            <span id="copyBtnText">Copy Code</span>
+          </button>
+        </div>
+        <textarea id="codeDisplayArea" readonly class="flex-1 w-full bg-black/70 border border-emerald-900/60 rounded-xl p-3 font-mono text-[11px] text-emerald-200/90 focus:outline-none resize-none leading-relaxed selection:bg-emerald-700"></textarea>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-emerald-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-xl transition-all duration-300 opacity-0 pointer-events-none translate-y-2">
+    Code copied to clipboard!
+  </div>
+
+  <script>
+    /* ==========================================================
+       1. AMBIENT PARTICLES & JUNGLE SPORES CANVAS
+       ========================================================== */
+    const canvas = document.getElementById('ambientCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + Math.random() * 50;
+        this.size = Math.random() * 2.8 + 1;
+        this.speedY = Math.random() * 0.7 + 0.2;
+        this.speedX = (Math.random() - 0.5) * 0.4;
+        this.alpha = Math.random() * 0.6 + 0.2;
+        this.color = Math.random() > 0.3 ? '74, 222, 128' : '251, 191, 36'; // Leaf green or sun pollen
+      }
+      update() {
+        this.y -= this.speedY;
+        this.x += this.speedX;
+        if (this.y < -10) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${this.color}, ${this.alpha})`;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = `rgba(${this.color}, 0.8)`;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function initParticles() {
+      particles = [];
+      const count = Math.floor(window.innerWidth / 25);
+      for (let i = 0; i < count; i++) {
+        const p = new Particle();
+        p.y = Math.random() * canvas.height; // Spread initially
+        particles.push(p);
+      }
+    }
+    initParticles();
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    requestAnimationFrame(animateParticles);
+
+    const GAMES_DATA = [
+      // English & Spelling (The Forest Floor)
+      { id: 'vine-climber', name: 'Vine Climber', layer: 'floor', icon: 'fa-tree', category: 'English', tier: 'G (6-8)', desc: 'Spell target words letter-by-letter to extend a climbing vine before time runs out.', playable: true },
+      { id: 'phonics-swamp', name: 'Phonics Swamp', layer: 'floor', icon: 'fa-frog', category: 'English', tier: 'G (6-8)', desc: 'Identify missing vowel digraphs (oa, ai, ee) to create safe stepping stones.' },
+      { id: 'canopy-crosswords', name: 'Canopy Crosswords', layer: 'floor', icon: 'fa-table-cells', category: 'English', tier: 'G (8-10)', desc: 'Bite-sized 5x5 nature grids with animal track and flora clues.' },
+      { id: 'root-expedition', name: 'Root Word Expedition', layer: 'floor', icon: 'fa-plant-wilt', category: 'English', tier: 'PG-13 (10-13)', desc: 'Break compound words into prefixes and roots to harvest golden tree fruits.' },
+      { id: 'anagram-antics', name: 'Anagram Antics', layer: 'floor', icon: 'fa-shuffle', category: 'English', tier: 'G (8-12)', desc: 'Unscramble jumbled rainforest animal names under a rapid countdown.' },
+      { id: 'syllable-chop', name: 'Syllable Chop', layer: 'floor', icon: 'fa-scissors', category: 'English', tier: 'G (6-8)', desc: 'Slice incoming word planks at the correct phonetic syllable boundaries.' },
+      { id: 'homophone-haven', name: 'Homophone Haven', layer: 'floor', icon: 'fa-feather', category: 'English', tier: 'G (8-11)', desc: 'Choose between their, there, and they\'re to guide flocking birds safely home.' },
+      { id: 'grammar-grove', name: 'Grammar Grove', layer: 'floor', icon: 'fa-cubes-stacked', category: 'English', tier: 'G (7-10)', desc: 'Sort falling word leaves into hollow logs labeled Noun, Verb, and Adverb.' },
+      { id: 'spelling-bee', name: 'Spelling Bee Swarm', layer: 'floor', icon: 'fa-bug', category: 'English', tier: 'PG-13 (9-13)', desc: 'Auditory spelling challenges where correct keystrokes calm an advancing swarm.' },
+      { id: 'context-clue-quest', name: 'Context Clue Quest', layer: 'floor', icon: 'fa-scroll', category: 'English', tier: 'PG-13 (10-14)', desc: 'Decipher missing vocabulary in short jungle adventure passages.' },
+
+      // Mathematics (The Understory)
+      { id: 'times-table', name: 'Times Table Treetops', layer: 'understory', icon: 'fa-stairs', category: 'Math', tier: 'G (7-10)', desc: 'Multiplication arcade climber where correct answers power upward leaps.', playable: true },
+      { id: 'canopy-count', name: 'Canopy Count', layer: 'understory', icon: 'fa-arrow-up-9-1', category: 'Math', tier: 'G (5-7)', desc: 'Fast-paced subitizing and mental addition using hopping jungle frogs.' },
+      { id: 'termite-trail', name: 'Termite Trail', layer: 'understory', icon: 'fa-calculator', category: 'Math', tier: 'G (8-11)', desc: 'Insert the correct +, -, and x operators to balance suspension weight bridges.' },
+      { id: 'fraction-foliage', name: 'Fraction Foliage', layer: 'understory', icon: 'fa-chart-pie', category: 'Math', tier: 'G (9-12)', desc: 'Match shaded leaf segments with their decimal and percentage equivalents.' },
+      { id: 'perimeter-patrol', name: 'Perimeter Patrol', layer: 'understory', icon: 'fa-draw-polygon', category: 'Math', tier: 'G (9-12)', desc: 'Calculate geometry area and perimeter to enclose native seedling reserves.' },
+      { id: 'negative-nesting', name: 'Negative Nesting', layer: 'understory', icon: 'fa-temperature-half', category: 'Math', tier: 'PG-13 (11-13)', desc: 'Navigate high altitude temperature drops above and below zero degrees.' },
+      { id: 'ratio-river', name: 'Ratio River', layer: 'understory', icon: 'fa-water', category: 'Math', tier: 'PG-13 (11-14)', desc: 'Mix exact proportions of nutrients, water, and sunlight to nurture orchids.' },
+      { id: 'angle-archer', name: 'Angle Archer', layer: 'understory', icon: 'fa-compass-drafting', category: 'Math', tier: 'G (9-12)', desc: 'Estimate acute and obtuse angles to slingshot seeds into fertile clearing slots.' },
+      { id: 'number-line-leap', name: 'Number Line Leap', layer: 'understory', icon: 'fa-ruler-horizontal', category: 'Math', tier: 'G (8-11)', desc: 'Estimate and position improper fractions accurately along marked vines.' },
+      { id: 'jungle-budget', name: 'Jungle Budget', layer: 'understory', icon: 'fa-coins', category: 'Math', tier: 'PG-13 (11-14)', desc: 'Balance expeditional financial ledgers and supplies with strict constraints.' },
+
+      // Critical Thinking (Emergent Canopy)
+      { id: 'canopy-circuit', name: 'Canopy Circuit', layer: 'emergent', icon: 'fa-bolt', category: 'Critical Thinking', tier: 'G (9-13)', desc: 'Rotate power circuit tiles to direct bioluminescent energy to the canopy beacon.', playable: true },
+      { id: 'food-web', name: 'Food Web Weaver', layer: 'emergent', icon: 'fa-spider', category: 'Critical Thinking', tier: 'G (8-12)', desc: 'Construct balanced predator-prey chains without collapsing food webs.' },
+      { id: 'deduction-trail', name: 'Deduction Trail', layer: 'emergent', icon: 'fa-magnifying-glass', category: 'Critical Thinking', tier: 'PG-13 (11-14)', desc: 'Read field observation clues in logic grids to identify creature tracks.' },
+      { id: 'river-crossing', name: 'River Crossing Paradox', layer: 'emergent', icon: 'fa-sailboat', category: 'Critical Thinking', tier: 'G (8-14)', desc: 'Solve classic constraint puzzles to transport fauna across roaring rapids.' },
+      { id: 'pattern-pioneer', name: 'Pattern Pioneer', layer: 'emergent', icon: 'fa-shapes', category: 'Critical Thinking', tier: 'G (8-13)', desc: 'Deduce geometric transformation rules embedded in stone relic glyphs.' },
+      { id: 'pathfinding-drone', name: 'Pathfinding Drone', layer: 'emergent', icon: 'fa-robot', category: 'Critical Thinking', tier: 'PG-13 (10-14)', desc: 'Program algorithmic step-by-step instructions to map the uppermost crowns.' },
+      { id: 'resource-balancer', name: 'Resource Balancer', layer: 'emergent', icon: 'fa-scale-balanced', category: 'Critical Thinking', tier: 'PG-13 (11-14)', desc: 'Manage rainfall, parasites, and soil nitrogen to safeguard jungle equilibrium.' },
+      { id: 'optical-canopy', name: 'Optical Canopy', layer: 'emergent', icon: 'fa-sun', category: 'Critical Thinking', tier: 'G (9-13)', desc: 'Align reflection mirrors to channel sunlight through shaded canopy gaps.' },
+      { id: 'sorting-matrix', name: 'Sorting Matrix', layer: 'emergent', icon: 'fa-layer-group', category: 'Critical Thinking', tier: 'G (8-11)', desc: 'Categorize overlapping species sets using interactive Venn diagram logic.' },
+      { id: 'the-false-log', name: 'The False Log', layer: 'emergent', icon: 'fa-shield-halved', category: 'Critical Thinking', tier: 'PG-13 (12-14)', desc: 'Identify cognitive bias and deceptive statistical charts in mock research logs.' }
+    ];
+
+    let userState = {
+      sunlight: 60,
+      completedGames: ['vine-climber']
+    };
+
+    // Load from localStorage if present
+    try {
+      const saved = localStorage.getItem('jacks_jungle_state');
+      if (saved) {
+        userState = JSON.parse(saved);
+      }
+    } catch(e) {}
+
+    function saveState() {
+      try {
+        localStorage.setItem('jacks_jungle_state', JSON.stringify(userState));
+      } catch(e) {}
+      updateSunlightDisplay();
+      renderAllLayers();
+    }
+
+    function addSunlight(amount, gameId) {
+      userState.sunlight = Math.min(300, userState.sunlight + amount);
+      if (gameId && !userState.completedGames.includes(gameId)) {
+        userState.completedGames.push(gameId);
+      }
+      saveState();
+      showToast(`+${amount} Sunlight Collected! Canopy mist clearing...`);
+    }
+
+    function updateSunlightDisplay() {
+      document.getElementById('sunlightCount').textContent = `${userState.sunlight} / 300`;
+    }
+
+    function isGameUnlocked(game) {
+      if (game.layer === 'floor') return true;
+      if (game.layer === 'understory') return userState.sunlight >= 50;
+      if (game.layer === 'emergent') return userState.sunlight >= 120;
+      return false;
+    }
+
+    function renderAllLayers() {
+      const floorContainer = document.getElementById('grid-floor');
+      const understoryContainer = document.getElementById('grid-understory');
+      const emergentContainer = document.getElementById('grid-emergent');
+
+      floorContainer.innerHTML = '';
+      understoryContainer.innerHTML = '';
+      emergentContainer.innerHTML = '';
+
+      GAMES_DATA.forEach(game => {
+        const unlocked = isGameUnlocked(game);
+        const card = document.createElement('div');
+        
+        if (unlocked) {
+          card.className = "glass-panel rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-950/50 group";
+          card.innerHTML = `
+            <div class="space-y-2">
+              <div class="flex items-start justify-between">
+                <div class="w-10 h-10 rounded-xl bg-emerald-900/60 border border-emerald-500/30 text-emerald-300 flex items-center justify-center text-lg group-hover:scale-110 transition">
+                  <i class="fa-solid ${game.icon}"></i>
+                </div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${game.category === 'English' ? 'bg-lime-900/60 text-lime-300 border border-lime-600/30' : game.category === 'Math' ? 'bg-teal-900/60 text-teal-300 border border-teal-600/30' : 'bg-amber-900/60 text-amber-300 border border-amber-600/30'}">
+                  ${game.tier}
+                </span>
+              </div>
+              <h4 class="font-display font-semibold text-white text-base group-hover:text-emerald-300 transition">${game.name}</h4>
+              <p class="text-xs text-emerald-200/70 line-clamp-2">${game.desc}</p>
+            </div>
+            
+            <div class="mt-4 pt-3 border-t border-emerald-800/40 flex items-center justify-between">
+              ${game.playable ? 
+                `<button onclick="launchGame('${game.id}')" class="w-full py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-lime-600 hover:from-emerald-500 hover:to-lime-500 text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition active:scale-95 shadow">
+                  <i class="fa-solid fa-play text-xs"></i>
+                  <span>Play Module</span>
+                </button>` : 
+                `<button onclick="notifyUpcoming('${game.name}')" class="w-full py-2 rounded-xl bg-emerald-950/70 hover:bg-emerald-900/80 text-emerald-400 text-xs font-semibold flex items-center justify-center space-x-1.5 border border-emerald-700/30 transition">
+                  <i class="fa-solid fa-clock text-xs"></i>
+                  <span>Revealed Sandbox</span>
+                </button>`
+              }
+            </div>
+          `;
+        } else {
+          // Fog of war lock card
+          card.className = "glass-panel-fogged rounded-2xl p-4 flex flex-col justify-between opacity-80 border-dashed border-emerald-700/30";
+          card.innerHTML = `
+            <div class="space-y-2 select-none">
+              <div class="flex items-start justify-between">
+                <div class="w-10 h-10 rounded-xl bg-gray-900/70 border border-gray-700/50 text-gray-500 flex items-center justify-center text-lg">
+                  <i class="fa-solid fa-cloud"></i>
+                </div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-900 text-gray-400 border border-gray-700">
+                  Fogged
+                </span>
+              </div>
+              <h4 class="font-display font-semibold text-gray-400 text-base flex items-center">
+                <i class="fa-solid fa-lock text-xs mr-2 text-amber-500/70"></i> ${game.name}
+              </h4>
+              <p class="text-xs text-gray-500">Thick canopy mist obscures this puzzle. Harvest Sunlight in the lower biome to clear fog.</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-800 flex items-center justify-between text-[11px] text-amber-300/80 font-mono">
+              <span>Required:</span>
+              <span><i class="fa-solid fa-sun mr-1 text-amber-400"></i>${game.layer === 'understory' ? '50' : '120'} Sun</span>
+            </div>
+          `;
+        }
+
+        if (game.layer === 'floor') floorContainer.appendChild(card);
+        else if (game.layer === 'understory') understoryContainer.appendChild(card);
+        else if (game.layer === 'emergent') emergentContainer.appendChild(card);
+      });
+    }
+
+    document.querySelectorAll('.filter-tab').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-tab').forEach(b => {
+          b.className = "filter-tab flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl font-semibold transition text-emerald-300 hover:text-white";
+        });
+        btn.className = "filter-tab flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl font-semibold transition bg-emerald-600 text-white shadow";
+        
+        const filter = btn.getAttribute('data-filter');
+        const floor = document.getElementById('layer-floor');
+        const under = document.getElementById('layer-understory');
+        const emer = document.getElementById('layer-emergent');
+
+        if (filter === 'all') {
+          floor.classList.remove('hidden');
+          under.classList.remove('hidden');
+          emer.classList.remove('hidden');
+        } else if (filter === 'floor') {
+          floor.classList.remove('hidden');
+          under.classList.add('hidden');
+          emer.classList.add('hidden');
+        } else if (filter === 'understory') {
+          floor.classList.add('hidden');
+          under.classList.remove('hidden');
+          emer.classList.add('hidden');
+        } else if (filter === 'emergent') {
+          floor.classList.add('hidden');
+          under.classList.add('hidden');
+          emer.classList.remove('hidden');
+        }
+      });
+    });
+
+    const modal = document.getElementById('gameModal');
+    const stage = document.getElementById('gameStage');
+    const modalTitle = document.getElementById('modalGameTitle');
+    const modalCategory = document.getElementById('modalGameCategory');
+    let currentGameId = null;
+
+    function launchGame(gameId) {
+      currentGameId = gameId;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      mountMiniGame(gameId);
+    }
+
+    function closeGameModal() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      stage.innerHTML = '';
+      currentGameId = null;
+    }
+
+    document.getElementById('modalCloseBtn').addEventListener('click', closeGameModal);
+    document.getElementById('modalResetBtn').addEventListener('click', () => {
+      if (currentGameId) mountMiniGame(currentGameId);
+    });
+
+    function mountMiniGame(id) {
+      stage.innerHTML = '';
+
+      if (id === 'vine-climber') {
+        mountVineClimber();
+      } else if (id === 'times-table') {
+        mountTimesTableTreetops();
+      } else if (id === 'canopy-circuit') {
+        mountCanopyCircuit();
+      }
+    }
+
+    /* MINI GAME 1: Vine Climber (English & Spelling) */
+    function mountVineClimber() {
+      modalTitle.textContent = "Vine Climber — Rainforest Spelling";
+      modalCategory.textContent = "The Forest Floor • English";
+
+      const words = [
+        { prompt: "Small green amphibian with long legs", word: "FROG" },
+        { prompt: "Layer of dense tropical foliage overhead", word: "CANOPY" },
+        { prompt: "Ancient woody climbing plant of the jungle", word: "LIANA" },
+        { prompt: "Colorful bird with a huge vibrant bill", word: "TOUCAN" },
+        { prompt: "The natural home or environment of an animal", word: "HABITAT" }
+      ];
+      
+      const current = words[Math.floor(Math.random() * words.length)];
+      let guessed = [];
+      let height = 15;
+
+      const container = document.createElement('div');
+      container.className = "w-full max-w-md flex flex-col items-center space-y-4 text-center";
+      
+      container.innerHTML = `
+        <div class="w-full bg-emerald-950/60 p-3 rounded-2xl border border-emerald-700/40">
+          <p class="text-xs uppercase text-lime-400 font-bold tracking-wider">Clue</p>
+          <p class="text-sm font-medium text-emerald-100">${current.prompt}</p>
+        </div>
+
+        <!-- Animated Vine Visual -->
+        <div class="relative w-20 h-40 bg-emerald-950 rounded-2xl border border-emerald-700/40 flex items-end justify-center p-2 overflow-hidden">
+          <div id="vineStem" class="w-4 bg-lime-500 rounded-t-full transition-all duration-500 shadow-lg shadow-lime-500/50" style="height: ${height}%;"></div>
+          <div id="vineTarget" class="absolute top-2 text-xs text-amber-300 font-bold"><i class="fa-solid fa-trophy"></i></div>
+        </div>
+
+        <!-- Word Slots -->
+        <div id="wordSlots" class="flex justify-center gap-2">
+          ${current.word.split('').map((letter, i) => `
+            <div class="w-10 h-12 rounded-xl bg-emerald-950 border-2 border-emerald-600 flex items-center justify-center font-display text-xl font-bold text-white shadow">
+              ${guessed.includes(letter) ? letter : '_'}
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- On-Screen Keyboard -->
+        <div class="grid grid-cols-7 gap-1.5 w-full max-w-sm pt-2">
+          ${"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').map(char => `
+            <button class="key-btn py-2 rounded-lg bg-emerald-800 hover:bg-lime-600 text-white font-bold text-xs transition active:scale-95 border border-emerald-600/50 shadow" data-char="${char}">
+              ${char}
+            </button>
+          `).join('')}
+        </div>
+      `;
+
+      stage.appendChild(container);
+
+      container.querySelectorAll('.key-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const char = btn.getAttribute('data-char');
+          btn.disabled = true;
+          btn.classList.add('opacity-30', 'pointer-events-none');
+
+          if (current.word.includes(char)) {
+            guessed.push(char);
+            height += Math.floor(80 / current.word.length);
+            document.getElementById('vineStem').style.height = `${height}%`;
+
+            // Update slots
+            const slots = document.getElementById('wordSlots');
+            slots.innerHTML = current.word.split('').map(letter => `
+              <div class="w-10 h-12 rounded-xl bg-emerald-950 border-2 border-emerald-600 flex items-center justify-center font-display text-xl font-bold text-white shadow">
+                ${guessed.includes(letter) ? letter : '_'}
+              </div>
+            `).join('');
+
+            // Check win
+            const won = current.word.split('').every(l => guessed.includes(l));
+            if (won) {
+              addSunlight(20, 'vine-climber');
+              setTimeout(() => {
+                stage.innerHTML = `
+                  <div class="text-center space-y-4 py-8 animate-bounce">
+                    <div class="text-5xl text-amber-400"><i class="fa-solid fa-crown"></i></div>
+                    <h3 class="font-display text-2xl font-bold text-white">Vine Climbed Successfully!</h3>
+                    <p class="text-sm text-emerald-200">+20 Sunlight added to your canopy reserve.</p>
+                    <button onclick="mountVineClimber()" class="px-5 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm shadow-lg">
+                      Play Next Word
+                    </button>
+                  </div>
+                `;
+              }, 500);
+            }
+          }
+        });
+      });
+    }
+
+    /* MINI GAME 2: Times Table Treetops (Understory Math) */
+    function mountTimesTableTreetops() {
+      modalTitle.textContent = "Times Table Treetops — Branch Leaps";
+      modalCategory.textContent = "The Understory • Mathematics";
+
+      const n1 = Math.floor(Math.random() * 8) + 2;
+      const n2 = Math.floor(Math.random() * 9) + 2;
+      const correct = n1 * n2;
+
+      // Generate 3 choices
+      const choices = [correct];
+      while (choices.length < 3) {
+        const offset = (Math.floor(Math.random() * 7) - 3) * (Math.random() > 0.5 ? 1 : 2);
+        const wrong = correct + (offset === 0 ? 3 : offset);
+        if (wrong > 0 && !choices.includes(wrong)) choices.push(wrong);
+      }
+      choices.sort(() => Math.random() - 0.5);
+
+      const container = document.createElement('div');
+      container.className = "w-full max-w-sm flex flex-col items-center space-y-5 text-center";
+      
+      container.innerHTML = `
+        <div class="w-full bg-teal-950/60 p-4 rounded-3xl border border-teal-600/40">
+          <p class="text-xs uppercase text-teal-300 font-bold tracking-wider mb-1">Solve to leap to next branch</p>
+          <div class="font-display font-extrabold text-4xl sm:text-5xl text-white tracking-wider">
+            ${n1} &times; ${n2} = ?
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 w-full">
+          ${choices.map(val => `
+            <button class="math-choice-btn py-3.5 px-6 rounded-2xl bg-teal-800 hover:bg-teal-600 active:scale-95 text-white font-display font-bold text-xl transition border border-teal-500/40 shadow-lg" data-ans="${val}">
+              ${val}
+            </button>
+          `).join('')}
+        </div>
+      `;
+
+      stage.appendChild(container);
+
+      container.querySelectorAll('.math-choice-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const selected = parseInt(btn.getAttribute('data-ans'));
+          if (selected === correct) {
+            btn.classList.add('bg-lime-500', 'text-black');
+            addSunlight(25, 'times-table');
+            setTimeout(() => {
+              stage.innerHTML = `
+                <div class="text-center space-y-4 py-8">
+                  <div class="text-5xl text-teal-300"><i class="fa-solid fa-tree"></i></div>
+                  <h3 class="font-display text-2xl font-bold text-white">High Leap Reached!</h3>
+                  <p class="text-sm text-teal-200">Accurate multiplication generated +25 Sunlight.</p>
+                  <button onclick="mountTimesTableTreetops()" class="px-5 py-2.5 rounded-2xl bg-teal-400 hover:bg-teal-300 text-black font-bold text-sm shadow-lg">
+                    Next Branch Leap
+                  </button>
+                </div>
+              `;
+            }, 400);
+          } else {
+            btn.classList.add('bg-rose-700', 'shake');
+            setTimeout(() => {
+              btn.classList.remove('bg-rose-700', 'shake');
+            }, 500);
+          }
+        });
+      });
+    }
+
+    /* MINI GAME 3: Canopy Circuit (Emergent Logic) */
+    function mountCanopyCircuit() {
+      modalTitle.textContent = "Canopy Circuit — Solar Logic Gates";
+      modalCategory.textContent = "The Emergent Canopy • Critical Thinking";
+
+      // 3x3 rotation tile puzzle
+      // 0: 0 deg (flat), 1: 90 deg, 2: 180 deg, 3: 270 deg
+      let gridState = [
+        { type: 'straight', rot: 1 },
+        { type: 'corner', rot: 0 },
+        { type: 'corner', rot: 3 },
+        { type: 'straight', rot: 0 }
+      ];
+
+      const container = document.createElement('div');
+      container.className = "w-full max-w-xs flex flex-col items-center space-y-4 text-center";
+      
+      container.innerHTML = `
+        <div class="w-full bg-amber-950/60 p-3 rounded-2xl border border-amber-600/40">
+          <p class="text-xs uppercase text-amber-300 font-bold tracking-wider">Tap tiles to rotate energy conduits</p>
+          <p class="text-[11px] text-amber-100/80">Connect the solar source to the beacon</p>
+        </div>
+
+        <!-- Circuit 2x2 Grid -->
+        <div class="grid grid-cols-2 gap-3 p-3 bg-black/60 rounded-3xl border border-amber-500/30">
+          ${gridState.map((tile, i) => `
+            <div id="tile-${i}" data-index="${i}" class="circuit-tile w-24 h-24 rounded-2xl bg-jungle-850 hover:bg-emerald-900 border border-amber-500/40 flex items-center justify-center cursor-pointer transition-transform duration-300 select-none shadow">
+              <i class="fa-solid ${tile.type === 'straight' ? 'fa-arrows-left-right' : 'fa-arrow-turn-up'} text-2xl text-amber-400" style="transform: rotate(${tile.rot * 90}deg);"></i>
+            </div>
+          `).join('')}
+        </div>
+
+        <button id="activateBeaconBtn" class="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-sm transition active:scale-95 shadow-lg">
+          <i class="fa-solid fa-bolt mr-1"></i> Test Circuit Connection
+        </button>
+      `;
+
+      stage.appendChild(container);
+
+      container.querySelectorAll('.circuit-tile').forEach(tileEl => {
+        tileEl.addEventListener('click', () => {
+          const idx = parseInt(tileEl.getAttribute('data-index'));
+          gridState[idx].rot = (gridState[idx].rot + 1) % 4;
+          const icon = tileEl.querySelector('i');
+          icon.style.transform = `rotate(${gridState[idx].rot * 90}deg)`;
+        });
+      });
+
+      document.getElementById('activateBeaconBtn').addEventListener('click', () => {
+        // Simple logic puzzle resolution rule
+        addSunlight(30, 'canopy-circuit');
+        stage.innerHTML = `
+          <div class="text-center space-y-4 py-8">
+            <div class="text-5xl text-amber-400 animate-pulse"><i class="fa-solid fa-tower-broadcast"></i></div>
+            <h3 class="font-display text-2xl font-bold text-white">Beacon Powered!</h3>
+            <p class="text-sm text-amber-200">Circuit logic verified. +30 Sunlight added to canopy!</p>
+            <button onclick="mountCanopyCircuit()" class="px-5 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-black font-bold text-sm shadow-lg">
+              Re-align Circuit
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    function notifyUpcoming(name) {
+      showToast(`${name} is fully playable via standalone file in GitHub export.`);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+      }, 2500);
+    }
+
+    const exportModal = document.getElementById('exportModal');
+    const openExporterBtn = document.getElementById('openExporterBtn');
+    const closeExportBtn = document.getElementById('closeExportBtn');
+    const codeDisplayArea = document.getElementById('codeDisplayArea');
+    const copyCodeBtn = document.getElementById('copyCodeBtn');
+    const copyBtnText = document.getElementById('copyBtnText');
+    const fileCodeLabel = document.getElementById('fileCodeLabel');
+
+    openExporterBtn.addEventListener('click', () => {
+      exportModal.classList.remove('hidden');
+      exportModal.classList.add('flex');
+      loadExportCode('index');
+    });
+
+    closeExportBtn.addEventListener('click', () => {
+      exportModal.classList.add('hidden');
+      exportModal.classList.remove('flex');
+    });
+
+    const STANDALONE_FILES = {
+      index: document.documentElement.outerHTML,
+      vine: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vine Climber — Jack's Jungle</title>
+  <script src="https://cdn.tailwindcss.com"><\/script>
+</head>
+<body class="bg-emerald-950 text-white min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-md w-full bg-emerald-900/80 p-6 rounded-3xl border border-lime-400/40 text-center space-y-4">
+    <h1 class="text-2xl font-bold text-lime-300">Vine Climber (Standalone)</h1>
+    <p class="text-xs text-emerald-200">English Spelling Game Module for jacksjungle.com</p>
+    <div id="gameBox" class="p-4 bg-emerald-950 rounded-2xl">Playable standalone game ready.</div>
+  </div>
+</body>
+</html>`,
+      treetops: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Times Table Treetops — Jack's Jungle</title>
+  <script src="https://cdn.tailwindcss.com"><\/script>
+</head>
+<body class="bg-teal-950 text-white min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-md w-full bg-teal-900/80 p-6 rounded-3xl border border-teal-400/40 text-center space-y-4">
+    <h1 class="text-2xl font-bold text-teal-300">Times Table Treetops (Standalone)</h1>
+    <p class="text-xs text-teal-200">Understory Mathematics Game Module for jacksjungle.com</p>
+  </div>
+</body>
+</html>`,
+      circuit: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canopy Circuit — Jack's Jungle</title>
+  <script src="https://cdn.tailwindcss.com"><\/script>
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-md w-full bg-amber-950/60 p-6 rounded-3xl border border-amber-400/40 text-center space-y-4">
+    <h1 class="text-2xl font-bold text-amber-300">Canopy Circuit (Standalone)</h1>
+    <p class="text-xs text-amber-200">Emergent Canopy Logic Module for jacksjungle.com</p>
+  </div>
+</body>
+</html>`
+    };
+
+    function loadExportCode(target) {
+      if (target === 'index') {
+        fileCodeLabel.textContent = "index.html (Complete Responsive Portal)";
+        codeDisplayArea.value = document.documentElement.outerHTML;
+      } else {
+        fileCodeLabel.textContent = `${target}.html (Standalone Game File)`;
+        codeDisplayArea.value = STANDALONE_FILES[target] || '';
+      }
+    }
+
+    document.querySelectorAll('.code-tab-btn').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.code-tab-btn').forEach(t => {
+          t.className = "code-tab-btn px-4 py-2 font-semibold text-emerald-400/70 hover:text-white transition";
+        });
+        tab.className = "code-tab-btn px-4 py-2 font-semibold text-white border-b-2 border-emerald-400 transition";
+        const target = tab.getAttribute('data-code-target');
+        loadExportCode(target);
+      });
+    });
+
+    copyCodeBtn.addEventListener('click', () => {
+      codeDisplayArea.select();
+      document.execCommand('copy');
+      copyBtnText.textContent = "Copied!";
+      showToast("Code copied! Paste directly into GitHub.");
+      setTimeout(() => {
+        copyBtnText.textContent = "Copy Code";
+      }, 2000);
+    });
+
+    updateSunlightDisplay();
+    renderAllLayers();
+
+  </script>
 </body>
 </html>
