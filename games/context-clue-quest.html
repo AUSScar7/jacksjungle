@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg: #061a12; --card: #0d2b1f; --accent: #22c55e; --accent-dim: #15803d;
-      --text: #f8fafc; --muted: #86efac;
+      --text: #f8fafc; --muted: #86efac; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -25,8 +25,24 @@
     .passage { background: rgba(0,0,0,0.35); border-left: 3px solid var(--accent); padding: 1rem; border-radius: 0.4rem; font-size: 1.05rem; line-height: 1.5; margin: 1rem 0; color: #fff; }
     .highlight { color: var(--accent); font-weight: bold; text-decoration: underline; }
     .grid { display: flex; flex-direction: column; gap: 0.6rem; width: 100%; }
-    .opt-btn { background: #143d2c; border: 2px solid var(--accent-dim); color: #fff; padding: 0.85rem; border-radius: 0.5rem; font-size: 1rem; cursor: pointer; font-weight: 600; text-align: left; }
+    .opt-btn {
+      background: #143d2c; border: 2px solid var(--accent-dim); color: #fff; padding: 0.85rem;
+      border-radius: 0.5rem; font-size: 1rem; cursor: pointer; font-weight: 600; text-align: left;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .opt-btn:active { background: var(--accent-dim); }
+    .opt-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.4rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 0.75rem; }
   </style>
 </head>
 <body>
@@ -38,8 +54,33 @@
     <div class="passage" id="passage-body"></div>
     <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;" id="query-lbl">What does the highlighted word mean?</p>
     <div class="grid" id="choices-box"></div>
+    <div class="status-msg" id="status-out"></div>
   </div>
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const PASSAGES = [
       {
         html: "The canopy fog was so <span class='highlight'>dense</span> that explorers could barely see the vines three feet ahead.",
@@ -58,13 +99,18 @@
       }
     ];
     let pIdx = 0;
+
     function renderPassage() {
+      const status = document.getElementById('status-out');
+      status.textContent = "";
+
       if (pIdx >= PASSAGES.length) {
         document.getElementById('passage-body').textContent = "QUEST COMPLETE! Forest Floor Cleared.";
-        document.getElementById('choices-box').innerHTML = "<p style='text-align:center; color:var(--muted); font-weight:bold;'>+20 Sunlight Added</p>";
-        let sun = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
-        localStorage.setItem('jacksjungle_sunlight', sun + 20);
-        localStorage.setItem('jacksjungle_completed_context_clue_quest', 'true');
+        document.getElementById('choices-box').innerHTML = "";
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('context_clue_quest');
+        playTone(520, 'sine', 0.2);
         return;
       }
       const p = PASSAGES[pIdx];
@@ -72,14 +118,20 @@
       document.getElementById('passage-body').innerHTML = p.html;
       const cb = document.getElementById('choices-box');
       cb.innerHTML = "";
+
       p.opts.forEach(opt => {
         const b = document.createElement('button');
         b.className = 'opt-btn'; b.textContent = opt;
         b.onclick = () => {
           if (opt === p.correct) {
-            pIdx++; renderPassage();
+            playTone(480, 'triangle', 0.15);
+            pIdx++;
+            renderPassage();
           } else {
-            alert("Reread the context and try again!");
+            playTone(160, 'sawtooth', 0.25, true);
+            b.classList.add('wrong');
+            status.textContent = "Re-read the narrative context and try again!";
+            setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
         cb.appendChild(b);
