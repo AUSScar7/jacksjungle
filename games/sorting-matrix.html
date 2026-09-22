@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FPNZR7VVNC', {
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Sorting Matrix - Jack's Jungle</title>
   <style>
     :root {
       --bg: #111a24; --card: #1b2938; --accent: #60a5fa; --accent-dim: #2563eb;
-      --text: #f0f9ff; --muted: #93c5fd;
+      --text: #f0f9ff; --muted: #93c5fd; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -24,8 +35,24 @@
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
     .creature-card { font-size: 2.2rem; font-weight: 800; color: #fff; margin: 1.5rem 0; letter-spacing: 0.05rem; }
     .grid { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; }
-    .zone-btn { background: #23374d; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.05rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; text-align: left; }
+    .zone-btn {
+      background: #23374d; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
+      font-size: 1.05rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; text-align: left;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .zone-btn:active { background: var(--accent-dim); }
+    .zone-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -34,42 +61,77 @@
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
       <span id="tier-indicator">Species: 1 / 4</span>
     </div>
-    <p style="color: var(--muted); font-size: 0.9rem;">Sort the species by Set Properties:</p>
+    <p style="color: var(--muted); font-size: 0.9rem;">Sort the species into the correct Venn set category:</p>
     <div class="creature-card" id="creature-display">PLATYPUS</div>
-    <div class="grid">
-      <button class="zone-btn" onclick="checkSort('MAMMAL_ONLY')">A: Mammal Only (Does not lay eggs)</button>
-      <button class="zone-btn" onclick="checkSort('BOTH')">A ∩ B: Both (Mammal AND Egg-Laying)</button>
-      <button class="zone-btn" onclick="checkSort('EGG_ONLY')">B: Egg-Laying Only (Not a Mammal)</button>
+    <div class="grid" id="zones-box">
+      <button class="zone-btn" onclick="checkSort('MAMMAL_ONLY', this)">A: Mammal Only (Does not lay eggs)</button>
+      <button class="zone-btn" onclick="checkSort('BOTH', this)">A &cap; B: Both (Mammal AND Egg-Laying)</button>
+      <button class="zone-btn" onclick="checkSort('EGG_ONLY', this)">B: Egg-Laying Only (Not a Mammal)</button>
     </div>
+    <div class="status-msg" id="status-label"></div>
   </div>
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const SET_QUESTIONS = [
-      { name: "PLATYPUS", correct: "BOTH" },
-      { name: "KANGAROO", correct: "MAMMAL_ONLY" },
-      { name: "TREE FROG", correct: "EGG_ONLY" },
-      { name: "ECHIDNA", correct: "BOTH" }
+      { name: "PLATYPUS", correct: "BOTH", clue: "Platypuses are monotremes—egg-laying mammals!" },
+      { name: "KANGAROO", correct: "MAMMAL_ONLY", clue: "Kangaroos give birth to live joeys (marsupials)." },
+      { name: "TREE FROG", correct: "EGG_ONLY", clue: "Tree frogs are amphibians that lay clutches of eggs." },
+      { name: "ECHIDNA", correct: "BOTH", clue: "Echidnas are monotremes that lay leathery eggs!" }
     ];
     let qIdx = 0;
+
     function renderQuestion() {
+      const status = document.getElementById('status-label');
+      status.textContent = "";
+
       if (qIdx >= SET_QUESTIONS.length) {
         document.getElementById('creature-display').textContent = "MATRIX SORTED!";
-        document.querySelector('.grid').innerHTML = "<p style='text-align:center; font-weight:bold; color:var(--muted);'>+20 Leaves Added</p>";
-        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
-        localStorage.setItem('jacksjungle_leaves', l + 20);
-        localStorage.setItem('jacksjungle_sunlight', l + 20);
-        localStorage.setItem('jacksjungle_completed_sorting_matrix', 'true');
+        document.getElementById('zones-box').innerHTML = "";
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('sorting_matrix');
+        playTone(520, 'sine', 0.2);
         return;
       }
       document.getElementById('tier-indicator').textContent = `Species: ${qIdx + 1} / ${SET_QUESTIONS.length}`;
       document.getElementById('creature-display').textContent = SET_QUESTIONS[qIdx].name;
     }
-    function checkSort(zone) {
+
+    function checkSort(zone, btn) {
       if (zone === SET_QUESTIONS[qIdx].correct) {
+        playTone(480, 'triangle', 0.15);
         qIdx++; renderQuestion();
       } else {
-        alert("Consider monotremes and taxonomic classifications carefully!");
+        playTone(160, 'sawtooth', 0.25, true);
+        btn.classList.add('wrong');
+        document.getElementById('status-label').textContent = SET_QUESTIONS[qIdx].clue;
+        setTimeout(() => btn.classList.remove('wrong'), 700);
       }
     }
+
     renderQuestion();
   </script>
 </body>
