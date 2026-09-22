@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Canopy Circuit - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #091317; --card: #11222b; --accent: #38bdf8; --accent-dim: #0284c7;
+      --text: #f0f9ff; --muted: #7dd3fc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 440px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .grid { display: grid; grid-template-columns: repeat(3, 72px); grid-template-rows: repeat(3, 72px); gap: 8px; margin: 1.5rem 0; }
+    .tile {
+      background: #183341; border: 2px solid #295369; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .tile.powered { border-color: var(--accent); color: var(--accent); }
+    .status-msg { height: 1.5rem; font-weight: 600; font-size: 0.95rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span>Tap Tiles to Rotate Conduit</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.88rem; text-align: center;">Align all pipes horizontally across the middle row:</p>
+    <div class="grid" id="circuit-grid"></div>
+    <div class="status-msg" id="status-label"></div>
+  </div>
+  <script>
+    // Rotations: 0 = horizontal (―), 1 = vertical (|)
+    let rotations = [1, 1, 1];
+    function renderGrid() {
+      const g = document.getElementById('circuit-grid');
+      g.innerHTML = "";
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          const d = document.createElement('div');
+          d.className = 'tile';
+          if (r === 1) {
+            d.textContent = rotations[c] === 0 ? "━" : "┃";
+            if (rotations[c] === 0) d.classList.add('powered');
+            d.onclick = () => {
+              rotations[c] = (rotations[c] + 1) % 2;
+              renderGrid();
+              checkWin();
+            };
+          } else {
+            d.style.opacity = "0.3";
+            d.textContent = "•";
+          }
+          g.appendChild(d);
+        }
+      }
+    }
+    function checkWin() {
+      if (rotations.every(r => r === 0)) {
+        document.getElementById('status-label').textContent = "POWER CONNECTED! +20 Leaves Claimed.";
+        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
+        localStorage.setItem('jacksjungle_leaves', l + 20);
+        localStorage.setItem('jacksjungle_sunlight', l + 20);
+        localStorage.setItem('jacksjungle_completed_canopy_circuit', 'true');
+      }
+    }
+    renderGrid();
+  </script>
+</body>
+</html>
