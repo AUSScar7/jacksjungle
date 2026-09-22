@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Number Line Leap - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #141b17; --card: #202d26; --accent: #34d399; --accent-dim: #059669;
+      --text: #ecfdf5; --muted: #a7f3d0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .target-val { font-size: 2.8rem; font-weight: 800; color: #fff; margin: 1.5rem 0; }
+    .line-container { width: 100%; position: relative; margin: 1.5rem 0; padding: 0 10px; }
+    .vine-bar { width: 100%; height: 8px; background: var(--accent-dim); border-radius: 4px; position: relative; }
+    .labels-row { display: flex; justify-content: space-between; margin-top: 8px; font-weight: bold; color: var(--muted); }
+    .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; width: 100%; margin-top: 1rem; }
+    .slot-btn { background: #134e3b; border: 2px solid var(--accent-dim); color: #fff; padding: 0.85rem; border-radius: 0.5rem; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+    .slot-btn:active { background: var(--accent-dim); }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span id="leap-count">Leap: 1 / 4</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.95rem;">Which vine segment contains this value?</p>
+    <div class="target-val" id="target-number">1.75</div>
+    <div class="line-container">
+      <div class="vine-bar"></div>
+      <div class="labels-row">
+        <span>0</span>
+        <span>1</span>
+        <span>2</span>
+        <span>3</span>
+      </div>
+    </div>
+    <div class="btn-grid" id="zones-box"></div>
+  </div>
+  <script>
+    const LEAPS = [
+      { val: "1.75", range: "Between 1 and 2", opts: ["Between 0 and 1", "Between 1 and 2", "Between 2 and 3"] },
+      { val: "2 ½", range: "Between 2 and 3", opts: ["Between 0 and 1", "Between 1 and 2", "Between 2 and 3"] },
+      { val: "0.4", range: "Between 0 and 1", opts: ["Between 0 and 1", "Between 1 and 2", "Between 2 and 3"] },
+      { val: "2.85", range: "Between 2 and 3", opts: ["Between 0 and 1", "Between 1 and 2", "Between 2 and 3"] }
+    ];
+    let lIdx = 0;
+    function renderLeap() {
+      if (lIdx >= LEAPS.length) {
+        document.getElementById('target-number').textContent = "VINE CROSSED!";
+        document.getElementById('zones-box').innerHTML = "<p style='grid-column:span 3; text-align:center; font-weight:bold; color:var(--muted);'>+20 Leaves Stored</p>";
+        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
+        localStorage.setItem('jacksjungle_leaves', l + 20);
+        localStorage.setItem('jacksjungle_sunlight', l + 20);
+        localStorage.setItem('jacksjungle_completed_number_line_leap', 'true');
+        return;
+      }
+      const item = LEAPS[lIdx];
+      document.getElementById('leap-count').textContent = `Leap: ${lIdx + 1} / ${LEAPS.length}`;
+      document.getElementById('target-number').textContent = item.val;
+
+      const zBox = document.getElementById('zones-box');
+      zBox.innerHTML = "";
+      item.opts.forEach(opt => {
+        const b = document.createElement('button');
+        b.className = 'slot-btn';
+        b.textContent = opt.replace("Between ", "");
+        b.onclick = () => {
+          if (opt === item.range) {
+            lIdx++; renderLeap();
+          } else {
+            alert("Evaluate whole number boundaries!");
+          }
+        };
+        zBox.appendChild(b);
+      });
+    }
+    renderLeap();
+  </script>
+</body>
+</html>
