@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FPNZR7VVNC');
+</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Angle Archer - Jack's Jungle</title>
   <style>
     :root {
       --bg: #151a08; --card: #252e0e; --accent: #84cc16; --accent-dim: #65a30d;
-      --text: #f7fee7; --muted: #d9f99d;
+      --text: #f7fee7; --muted: #d9f99d; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -24,8 +33,24 @@
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
     canvas { background: #131707; border: 1px solid var(--accent-dim); border-radius: 0.5rem; width: 240px; height: 160px; margin: 1rem 0; }
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; width: 100%; }
-    .angle-btn { background: #354215; border: 2px solid var(--accent-dim); color: #fff; padding: 0.85rem 0; font-size: 1.1rem; font-weight: bold; border-radius: 0.5rem; cursor: pointer; }
+    .angle-btn {
+      background: #354215; border: 2px solid var(--accent-dim); color: #fff; padding: 0.85rem 0;
+      font-size: 1.05rem; font-weight: bold; border-radius: 0.5rem; cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .angle-btn:active { background: var(--accent-dim); }
+    .angle-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -37,8 +62,33 @@
     <p style="color: var(--muted); font-size: 0.9rem;">Estimate the angle between the vines:</p>
     <canvas id="angle-canvas" width="240" height="160"></canvas>
     <div class="grid" id="opts-container"></div>
+    <div class="status-msg" id="status-label"></div>
   </div>
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const ANGLES = [
       { deg: 45, type: "Acute (45°)", distractors: ["90°", "135°"] },
       { deg: 90, type: "Right Angle (90°)", distractors: ["60°", "120°"] },
@@ -55,20 +105,17 @@
       ctx.lineWidth = 3;
       ctx.strokeStyle = "#84cc16";
 
-      // Base arm
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(cx + r, cy);
       ctx.stroke();
 
-      // Angled arm
       const rad = -(deg * Math.PI / 180);
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(cx + r * Math.cos(rad), cy + r * Math.sin(rad));
       ctx.stroke();
 
-      // Arc
       ctx.beginPath();
       ctx.arc(cx, cy, 25, 0, rad, true);
       ctx.strokeStyle = "#a3e635";
@@ -77,13 +124,16 @@
     }
 
     function renderQuestion() {
+      const status = document.getElementById('status-label');
+      status.textContent = "";
+
       if (aIdx >= ANGLES.length) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        document.getElementById('opts-container').innerHTML = "<p style='grid-column:span 3; text-align:center; font-weight:bold; color:var(--muted);'>+20 Leaves Added</p>";
-        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
-        localStorage.setItem('jacksjungle_leaves', l + 20);
-        localStorage.setItem('jacksjungle_sunlight', l + 20);
-        localStorage.setItem('jacksjungle_completed_angle_archer', 'true');
+        document.getElementById('opts-container').innerHTML = "";
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('angle_archer');
+        playTone(520, 'sine', 0.2);
         return;
       }
       const item = ANGLES[aIdx];
@@ -99,9 +149,13 @@
         b.textContent = ch;
         b.onclick = () => {
           if (ch === item.type) {
+            playTone(480, 'triangle', 0.15);
             aIdx++; renderQuestion();
           } else {
-            alert("Review angle categories: Acute (<90°), Right (90°), Obtuse (>90°)");
+            playTone(160, 'sawtooth', 0.25, true);
+            b.classList.add('wrong');
+            status.textContent = "Remember: Acute (<90°), Right (90°), Obtuse (>90°)!";
+            setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
         container.appendChild(b);
