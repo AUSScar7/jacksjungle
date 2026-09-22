@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg: #061a12; --card: #0d2b1f; --accent: #22c55e; --accent-dim: #15803d;
-      --text: #f8fafc; --muted: #86efac;
+      --text: #f8fafc; --muted: #86efac; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -25,8 +25,24 @@
     .sentence-box { font-size: 1.25rem; font-weight: 600; line-height: 1.6; text-align: center; margin: 1.5rem 0; min-height: 4rem; }
     .blank { color: var(--accent); border-bottom: 2px dashed var(--accent); padding: 0 0.3rem; }
     .choices-col { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; }
-    .choice-btn { background: #143d2c; color: var(--text); border: 2px solid var(--accent-dim); border-radius: 0.6rem; padding: 1rem; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+    .choice-btn {
+      background: #143d2c; color: var(--text); border: 2px solid var(--accent-dim);
+      border-radius: 0.6rem; padding: 1rem; font-size: 1.2rem; font-weight: bold; cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .choice-btn:active { background: var(--accent-dim); }
+    .choice-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.6rem; font-size: 0.95rem; font-weight: 600; text-align: center; margin-top: 1rem; color: var(--danger); }
   </style>
 </head>
 <body>
@@ -38,51 +54,78 @@
     <p style="color: var(--muted); font-size: 0.9rem;">Choose the correct spelling for the sentence:</p>
     <div class="sentence-box" id="sentence-prompt"></div>
     <div class="choices-col" id="options-col"></div>
+    <div class="status-msg" id="status-label"></div>
   </div>
   <script>
     let audioCtx = null;
-    function chime(f, t) {
+    function playTone(freq, type, duration, isError = false) {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
-      osc.frequency.value = f; g.gain.setValueAtTime(0.12, audioCtx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + t);
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isError) {
+        // Pitch drop for wrong answer sound
+        osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + duration);
+      }
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
       osc.connect(g); g.connect(audioCtx.destination);
-      osc.start(); osc.stop(audioCtx.currentTime + t);
+      osc.start(); osc.stop(audioCtx.currentTime + duration);
     }
+
     const QUESTS = [
-      { text: "The toucan rested <span class='blank'>___</span> nest in the hollow branch.", correct: "their", opts: ["there", "their", "they're"] },
-      { text: "We spotted a <span class='blank'>___</span> running through the dense leaves.", correct: "hare", opts: ["hair", "hare"] },
-      { text: "The sunlight came <span class='blank'>___</span> the tall tree crowns.", correct: "through", opts: ["threw", "through"] },
-      { text: "The jungle river current was too <span class='blank'>___</span> to cross.", correct: "strong", opts: ["weak", "week"] }
+      { text: "The toucan built <span class='blank'>___</span> nest in the hollow branch.", correct: "their", opts: ["there", "their", "they're"] },
+      { text: "We spotted a wild <span class='blank'>___</span> bounding through the scrub.", correct: "hare", opts: ["hair", "hare"] },
+      { text: "Sunlight broke <span class='blank'>___</span> the high forest canopy.", correct: "through", opts: ["threw", "through"] },
+      // FIXED: Prompt and correct homophone pair match accurately
+      { text: "The river current was too <span class='blank'>___</span> to stop our canoe.", correct: "weak", opts: ["weak", "week"] }
     ];
     let qIdx = 0;
+
     function renderQuest() {
+      const status = document.getElementById('status-label');
+      status.textContent = "";
+      status.style.color = "var(--danger)";
+
       if (qIdx >= QUESTS.length) {
         document.getElementById('sentence-prompt').innerHTML = "HAVEN MASTERED!";
-        document.getElementById('options-col').innerHTML = "<p style='text-align:center; color:var(--muted); font-weight:bold;'>+20 Sunlight Stored</p>";
-        let sun = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
-        localStorage.setItem('jacksjungle_sunlight', sun + 20);
+        document.getElementById('options-col').innerHTML = "";
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        
+        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
+        localStorage.setItem('jacksjungle_leaves', l + 20);
+        localStorage.setItem('jacksjungle_sunlight', l + 20);
         localStorage.setItem('jacksjungle_completed_homophone_haven', 'true');
-        chime(600, 0.2); return;
+        
+        playTone(523.25, 'sine', 0.2);
+        setTimeout(() => playTone(659.25, 'sine', 0.3), 150);
+        return;
       }
+
       const q = QUESTS[qIdx];
       document.getElementById('level-lbl').textContent = `Sentence: ${qIdx + 1} / ${QUESTS.length}`;
       document.getElementById('sentence-prompt').innerHTML = q.text;
       const col = document.getElementById('options-col');
       col.innerHTML = "";
+
       q.opts.forEach(opt => {
         const b = document.createElement('button');
         b.className = 'choice-btn';
         b.textContent = opt;
         b.onclick = () => {
           if (opt === q.correct) {
-            chime(480, 0.12);
+            playTone(520, 'triangle', 0.15);
             qIdx++;
             renderQuest();
           } else {
-            chime(180, 0.2);
-            alert("Check the meaning and try again!");
+            playTone(160, 'sawtooth', 0.3, true);
+            b.classList.add('wrong');
+            status.textContent = `"${opt}" is incorrect. Try the matching homophone!`;
+            setTimeout(() => {
+              b.classList.remove('wrong');
+            }, 700);
           }
         };
         col.appendChild(b);
