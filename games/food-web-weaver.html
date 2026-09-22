@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FPNZR7VVNC', {
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Food Web Weaver - Jack's Jungle</title>
   <style>
     :root {
       --bg: #0d1a10; --card: #182e1d; --accent: #22c55e; --accent-dim: #15803d;
-      --text: #f0fdf4; --muted: #86efac;
+      --text: #f0fdf4; --muted: #86efac; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -22,11 +33,27 @@
     }
     .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
-    .chain-diagram { font-size: 1.25rem; font-weight: bold; margin: 1.5rem 0; text-align: center; color: #fff; line-height: 1.6; }
+    .chain-diagram { font-size: 1.2rem; font-weight: bold; margin: 1.5rem 0; text-align: center; color: #fff; line-height: 1.6; }
     .blank-slot { color: var(--accent); border-bottom: 3px dashed var(--accent); padding: 0 0.4rem; }
     .grid { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; }
-    .opt-btn { background: #204128; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.15rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; text-align: left; }
+    .opt-btn {
+      background: #204128; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
+      font-size: 1.05rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; text-align: left;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .opt-btn:active { background: var(--accent-dim); }
+    .opt-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -38,22 +65,51 @@
     <p style="color: var(--muted); font-size: 0.9rem;">Fill the missing biological trophic level:</p>
     <div class="chain-diagram" id="chain-view"></div>
     <div class="grid" id="choices-field"></div>
+    <div class="status-msg" id="status-label"></div>
   </div>
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const WEBS = [
       { chain: "Sunlight &rarr; Rainforest Fig (Producer) &rarr; <span class='blank-slot'>???</span> &rarr; Harpy Eagle (Apex)", correct: "Fruit Bat (Primary Consumer)", opts: ["Fruit Bat (Primary Consumer)", "Fungi (Decomposer)", "Jaguar (Apex)"] },
       { chain: "Sunlight &rarr; Canopy Fern &rarr; Caterpillar &rarr; <span class='blank-slot'>???</span> &rarr; Python", correct: "Tree Frog (Secondary Consumer)", opts: ["Tree Frog (Secondary Consumer)", "Soil Bacteria", "Wild Boar"] },
       { chain: "Dead Foliage &rarr; <span class='blank-slot'>???</span> &rarr; Soil Nutrients &rarr; Ancient Cedar", correct: "Termites (Decomposers)", opts: ["Termites (Decomposers)", "Ocelot (Predator)", "Macaw (Herbivore)"] }
     ];
     let wIdx = 0;
+
     function renderWeb() {
+      const status = document.getElementById('status-label');
+      status.textContent = "";
+
       if (wIdx >= WEBS.length) {
         document.getElementById('chain-view').innerHTML = "ECOSYSTEM BALANCED!";
-        document.getElementById('choices-field').innerHTML = "<p style='text-align:center; font-weight:bold; color:var(--muted);'>+20 Leaves Added</p>";
-        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
-        localStorage.setItem('jacksjungle_leaves', l + 20);
-        localStorage.setItem('jacksjungle_sunlight', l + 20);
-        localStorage.setItem('jacksjungle_completed_food_web_weaver', 'true');
+        document.getElementById('choices-field').innerHTML = "";
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('food_web_weaver');
+        playTone(520, 'sine', 0.2);
         return;
       }
       const item = WEBS[wIdx];
@@ -68,9 +124,13 @@
         b.textContent = opt;
         b.onclick = () => {
           if (opt === item.correct) {
+            playTone(480, 'triangle', 0.15);
             wIdx++; renderWeb();
           } else {
-            alert("Check energy transfer hierarchy (Producer -> Consumer -> Apex)!");
+            playTone(160, 'sawtooth', 0.25, true);
+            b.classList.add('wrong');
+            status.textContent = "Check trophic transfer order: Producer -> Consumer -> Predator!";
+            setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
         fld.appendChild(b);
