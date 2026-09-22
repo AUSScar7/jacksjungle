@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Sorting Matrix - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #111a24; --card: #1b2938; --accent: #60a5fa; --accent-dim: #2563eb;
+      --text: #f0f9ff; --muted: #93c5fd;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .creature-card { font-size: 2.2rem; font-weight: 800; color: #fff; margin: 1.5rem 0; letter-spacing: 0.05rem; }
+    .grid { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; }
+    .zone-btn { background: #23374d; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.05rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; text-align: left; }
+    .zone-btn:active { background: var(--accent-dim); }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span id="tier-indicator">Species: 1 / 4</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.9rem;">Sort the species by Set Properties:</p>
+    <div class="creature-card" id="creature-display">PLATYPUS</div>
+    <div class="grid">
+      <button class="zone-btn" onclick="checkSort('MAMMAL_ONLY')">A: Mammal Only (Does not lay eggs)</button>
+      <button class="zone-btn" onclick="checkSort('BOTH')">A ∩ B: Both (Mammal AND Egg-Laying)</button>
+      <button class="zone-btn" onclick="checkSort('EGG_ONLY')">B: Egg-Laying Only (Not a Mammal)</button>
+    </div>
+  </div>
+  <script>
+    const SET_QUESTIONS = [
+      { name: "PLATYPUS", correct: "BOTH" },
+      { name: "KANGAROO", correct: "MAMMAL_ONLY" },
+      { name: "TREE FROG", correct: "EGG_ONLY" },
+      { name: "ECHIDNA", correct: "BOTH" }
+    ];
+    let qIdx = 0;
+    function renderQuestion() {
+      if (qIdx >= SET_QUESTIONS.length) {
+        document.getElementById('creature-display').textContent = "MATRIX SORTED!";
+        document.querySelector('.grid').innerHTML = "<p style='text-align:center; font-weight:bold; color:var(--muted);'>+20 Leaves Added</p>";
+        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
+        localStorage.setItem('jacksjungle_leaves', l + 20);
+        localStorage.setItem('jacksjungle_sunlight', l + 20);
+        localStorage.setItem('jacksjungle_completed_sorting_matrix', 'true');
+        return;
+      }
+      document.getElementById('tier-indicator').textContent = `Species: ${qIdx + 1} / ${SET_QUESTIONS.length}`;
+      document.getElementById('creature-display').textContent = SET_QUESTIONS[qIdx].name;
+    }
+    function checkSort(zone) {
+      if (zone === SET_QUESTIONS[qIdx].correct) {
+        qIdx++; renderQuestion();
+      } else {
+        alert("Consider monotremes and taxonomic classifications carefully!");
+      }
+    }
+    renderQuestion();
+  </script>
+</body>
+</html>
