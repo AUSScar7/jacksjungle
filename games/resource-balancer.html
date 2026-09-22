@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Resource Balancer - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #141c14; --card: #202e20; --accent: #22c55e; --accent-dim: #15803d;
+      --text: #f0fdf4; --muted: #86efac; --danger: #f87171;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .meter-row { width: 100%; margin-bottom: 1rem; }
+    .meter-lbl { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; margin-bottom: 0.3rem; }
+    .bar-track { width: 100%; height: 14px; background: rgba(0,0,0,0.4); border-radius: 7px; overflow: hidden; border: 1px solid var(--accent-dim); }
+    .bar-fill { height: 100%; width: 50%; transition: width 0.3s ease; }
+    .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; width: 100%; margin-top: 1rem; }
+    .act-btn { background: #164024; border: 2px solid var(--accent-dim); color: #fff; padding: 0.75rem 0.2rem; font-size: 0.85rem; font-weight: bold; border-radius: 0.5rem; cursor: pointer; text-align: center; }
+    .act-btn:active { background: var(--accent-dim); }
+    .cycle-count { font-size: 1.2rem; font-weight: 800; color: #fff; margin: 0.5rem 0; }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span>Multi-Variable Balancer</span>
+    </div>
+    <div class="cycle-count" id="cycle-label">Cycle: 1 / 4 (Target: Keep 40-70%)</div>
+    <div class="meter-row">
+      <div class="meter-lbl"><span>💧 Moisture Level</span><span id="moist-val">50%</span></div>
+      <div class="bar-track"><div class="bar-fill" id="moist-fill" style="width: 50%; background: #06b6d4;"></div></div>
+    </div>
+    <div class="meter-row">
+      <div class="meter-lbl"><span>🐛 Parasite Mites</span><span id="mite-val">50%</span></div>
+      <div class="bar-track"><div class="bar-fill" id="mite-fill" style="width: 50%; background: #f87171;"></div></div>
+    </div>
+    <div class="meter-row">
+      <div class="meter-lbl"><span>🌱 Soil Nitrogen</span><span id="nitro-val">50%</span></div>
+      <div class="bar-track"><div class="bar-fill" id="nitro-fill" style="width: 50%; background: #22c55e;"></div></div>
+    </div>
+    <div class="actions">
+      <button class="act-btn" onclick="applyAction('RAIN')">🌧️ Cloud Seeding (+Moist, -Nitro)</button>
+      <button class="act-btn" onclick="applyAction('WASPS')">🐝 Introduce Wasps (-Mites, -Moist)</button>
+      <button class="act-btn" onclick="applyAction('MULCH')">🍂 Add Mulch (+Nitro, +Mites)</button>
+    </div>
+  </div>
+  <script>
+    let moisture = 50, mites = 50, nitrogen = 50;
+    let cycles = 1;
+
+    function updateBars() {
+      document.getElementById('moist-val').textContent = `${moisture}%`;
+      document.getElementById('moist-fill').style.width = `${moisture}%`;
+
+      document.getElementById('mite-val').textContent = `${mites}%`;
+      document.getElementById('mite-fill').style.width = `${mites}%`;
+
+      document.getElementById('nitro-val').textContent = `${nitrogen}%`;
+      document.getElementById('nitro-fill').style.width = `${nitrogen}%`;
+    }
+
+    function applyAction(type) {
+      if (type === 'RAIN') {
+        moisture = Math.min(100, moisture + 20);
+        nitrogen = Math.max(0, nitrogen - 15);
+      } else if (type === 'WASPS') {
+        mites = Math.max(0, mites - 25);
+        moisture = Math.max(0, moisture - 10);
+      } else if (type === 'MULCH') {
+        nitrogen = Math.min(100, nitrogen + 25);
+        mites = Math.min(100, mites + 15);
+      }
+
+      // Ecological check
+      if (moisture < 20 || moisture > 85 || mites > 80 || nitrogen < 20) {
+        alert('Ecosystem Collapsed! Parameters breached safety limits. Restarting...');
+        moisture = 50; mites = 50; nitrogen = 50; cycles = 1;
+        document.getElementById('cycle-label').textContent = `Cycle: 1 / 4 (Target: Keep 40-70%)`;
+        updateBars();
+        return;
+      }
+
+      cycles++;
+      if (cycles > 4) {
+        alert('Canopy Equilibrium Stabilized! +20 Leaves Claimed.');
+        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
+        localStorage.setItem('jacksjungle_leaves', l + 20);
+        localStorage.setItem('jacksjungle_sunlight', l + 20);
+        localStorage.setItem('jacksjungle_completed_resource_balancer', 'true');
+        cycles = 4;
+      }
+      document.getElementById('cycle-label').textContent = `Cycle: ${cycles} / 4 (Target: Keep 40-70%)`;
+      updateBars();
+    }
+  </script>
+</body>
+</html>
