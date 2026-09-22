@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Pathfinding Drone - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #091924; --card: #122838; --accent: #38bdf8; --accent-dim: #0284c7;
+      --text: #f0f9ff; --muted: #7dd3fc; --danger: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 440px; padding: 1.25rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .grid { display: grid; grid-template-columns: repeat(4, 52px); grid-template-rows: repeat(4, 52px); gap: 6px; margin: 1rem 0; }
+    .cell {
+      background: #17364b; border: 2px solid #234b67; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+    }
+    .cell.drone { background: var(--accent-dim); color: #fff; }
+    .cell.goal { background: rgba(34, 197, 94, 0.3); border-color: #22c55e; }
+    .cell.block { background: #0c1822; border-color: transparent; }
+    .queue-bar { min-height: 2.2rem; width: 100%; background: rgba(0,0,0,0.3); border-radius: 6px; display: flex; align-items: center; padding: 0.4rem; gap: 4px; overflow-x: auto; margin-bottom: 0.75rem; font-size: 0.85rem; color: var(--muted); }
+    .cmd-chip { background: var(--accent-dim); color: #fff; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold; }
+    .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; margin-bottom: 0.5rem; }
+    .ctrl-btn { background: #1f4762; border: 1px solid var(--accent-dim); color: #fff; padding: 0.75rem 0; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+    .ctrl-btn:active { background: var(--accent-dim); }
+    .exec-btn { background: #22c55e; color: #061a12; border: none; width: 100%; padding: 0.85rem; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span>Algorithmic Pathing</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.85rem; text-align: center;">Queue directional commands to land on the 🎯 Solar Pad:</p>
+    <div class="grid" id="grid-view"></div>
+    <div class="queue-bar" id="queue-view">Queue: Empty</div>
+    <div class="controls">
+      <button class="ctrl-btn" onclick="addCmd('STEP')">⬆ Step</button>
+      <button class="ctrl-btn" onclick="addCmd('LEFT')">↺ Left</button>
+      <button class="ctrl-btn" onclick="addCmd('RIGHT')">↻ Right</button>
+    </div>
+    <button class="exec-btn" onclick="executeCommands()">▶ Execute Program</button>
+    <button style="margin-top:0.4rem; background:none; border:none; color:var(--muted); font-size:0.8rem; cursor:pointer;" onclick="clearQueue()">Reset Queue</button>
+  </div>
+  <script>
+    const DIRS = ['UP', 'RIGHT', 'DOWN', 'LEFT'];
+    const DIR_ICONS = { UP: '▲', RIGHT: '▶', DOWN: '▼', LEFT: '◀' };
+    let droneX = 0, droneY = 3, droneDir = 'UP';
+    const goalX = 3, goalY = 0;
+    const blocks = [[1, 2], [2, 1], [1, 1]];
+    let commands = [];
+    let isExecuting = false;
+
+    function renderGrid() {
+      const g = document.getElementById('grid-view');
+      g.innerHTML = '';
+      for (let y = 0; y < 4; y++) {
+        for (let x = 0; x < 4; x++) {
+          const c = document.createElement('div');
+          c.className = 'cell';
+          if (x === droneX && y === droneY) {
+            c.classList.add('drone');
+            c.textContent = DIR_ICONS[droneDir];
+          } else if (x === goalX && y === goalY) {
+            c.classList.add('goal');
+            c.textContent = '🎯';
+          } else if (blocks.some(b => b[0] === x && b[1] === y)) {
+            c.classList.add('block');
+            c.textContent = '🌿';
+          }
+          g.appendChild(c);
+        }
+      }
+    }
+
+    function addCmd(cmd) {
+      if (isExecuting) return;
+      commands.push(cmd);
+      renderQueue();
+    }
+
+    function clearQueue() {
+      if (isExecuting) return;
+      commands = [];
+      droneX = 0; droneY = 3; droneDir = 'UP';
+      renderQueue();
+      renderGrid();
+    }
+
+    function renderQueue() {
+      const q = document.getElementById('queue-view');
+      if (commands.length === 0) {
+        q.textContent = 'Queue: Empty';
+      } else {
+        q.innerHTML = commands.map(c => `<span class="cmd-chip">${c}</span>`).join('');
+      }
+    }
+
+    async function executeCommands() {
+      if (isExecuting || commands.length === 0) return;
+      isExecuting = true;
+
+      for (const cmd of commands) {
+        if (cmd === 'LEFT') {
+          let idx = (DIRS.indexOf(droneDir) + 3) % 4;
+          droneDir = DIRS[idx];
+        } else if (cmd === 'RIGHT') {
+          let idx = (DIRS.indexOf(droneDir) + 1) % 4;
+          droneDir = DIRS[idx];
+        } else if (cmd === 'STEP') {
+          let nx = droneX, ny = droneY;
+          if (droneDir === 'UP') ny--;
+          if (droneDir === 'DOWN') ny++;
+          if (droneDir === 'LEFT') nx--;
+          if (droneDir === 'RIGHT') nx++;
+
+          // Boundary or block collision
+          if (nx < 0 || nx > 3 || ny < 0 || ny > 3 || blocks.some(b => b[0] === nx && b[1] === ny)) {
+            alert('Navigation Collision! Reroute algorithm.');
+            clearQueue();
+            isExecuting = false;
+            return;
+          }
+          droneX = nx; droneY = ny;
+        }
+        renderGrid();
+        await new Promise(r => setTimeout(r, 450));
+      }
+
+      if (droneX === goalX && droneY === goalY) {
+        alert('Landing Confirmed! +20 Leaves Earned.');
+        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
+        localStorage.setItem('jacksjungle_leaves', l + 20);
+        localStorage.setItem('jacksjungle_sunlight', l + 20);
+        localStorage.setItem('jacksjungle_completed_pathfinding_drone', 'true');
+      } else {
+        alert('Drone ran out of commands before reaching the solar pad. Try again!');
+        clearQueue();
+      }
+      isExecuting = false;
+    }
+
+    renderGrid();
+  </script>
+</body>
+</html>
