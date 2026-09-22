@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Pattern Pioneer - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #18141e; --card: #272132; --accent: #c084fc; --accent-dim: #9333ea;
+      --text: #faf5ff; --muted: #e9d5ff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .sequence-display { font-size: 2.6rem; letter-spacing: 0.4rem; margin: 1.5rem 0; color: #fff; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; width: 100%; }
+    .glyph-btn { background: #3b324c; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 2rem; border-radius: 0.6rem; cursor: pointer; }
+    .glyph-btn:active { background: var(--accent-dim); }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span id="glyph-counter">Ruin: 1 / 3</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.9rem;">What glyph completes the inductive sequence?</p>
+    <div class="sequence-display" id="sequence-text">▲ ■ ▲ ■ ?</div>
+    <div class="grid" id="choices-field"></div>
+  </div>
+  <script>
+    const SEQUENCES = [
+      { seq: "▲ ■ ▲ ■ ?", correct: "▲", opts: ["▲", "●", "◆"] },
+      { seq: "● ◆ ● ◆ ?", correct: "●", opts: ["■", "●", "▲"] },
+      { seq: "1 2 4 8 ?", correct: "16", opts: ["12", "14", "16"] }
+    ];
+    let sIdx = 0;
+    function renderSequence() {
+      if (sIdx >= SEQUENCES.length) {
+        document.getElementById('sequence-text').textContent = "RUINS DECODED!";
+        document.getElementById('choices-field').innerHTML = "<p style='grid-column:span 3; text-align:center; font-weight:bold; color:var(--muted);'>+20 Leaves Added</p>";
+        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
+        localStorage.setItem('jacksjungle_leaves', l + 20);
+        localStorage.setItem('jacksjungle_sunlight', l + 20);
+        localStorage.setItem('jacksjungle_completed_pattern_pioneer', 'true');
+        return;
+      }
+      const s = SEQUENCES[sIdx];
+      document.getElementById('glyph-counter').textContent = `Ruin: ${sIdx + 1} / ${SEQUENCES.length}`;
+      document.getElementById('sequence-text').textContent = s.seq;
+
+      const fld = document.getElementById('choices-field');
+      fld.innerHTML = "";
+      s.opts.forEach(opt => {
+        const b = document.createElement('button');
+        b.className = 'glyph-btn';
+        b.textContent = opt;
+        b.onclick = () => {
+          if (opt === s.correct) {
+            sIdx++; renderSequence();
+          } else {
+            alert("Analyze the repeating alternation or mathematical delta!");
+          }
+        };
+        fld.appendChild(b);
+      });
+    }
+    renderSequence();
+  </script>
+</body>
+</html>
