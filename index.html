@@ -26,7 +26,7 @@
       user-select: none;
       -webkit-user-select: none;
       touch-action: manipulation;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     body {
@@ -333,7 +333,6 @@
       margin-top: 0.5rem;
     }
 
-    /* Achievement / Certificate Section */
     .achievement-card {
       background: linear-gradient(135deg, rgba(13, 43, 31, 0.95), rgba(6, 26, 18, 0.95));
       border: 2px solid var(--accent);
@@ -546,7 +545,7 @@
         <div class="layer-status-pill" id="l1-pill">
           <span>Level 1: Unlocked</span>
           <span style="color:var(--text-muted);">&bull;</span>
-          <span id="l1-tracker">0 / 5 Complete</span>
+          <span id="l1-tracker">0 / 5 to Unlock Level 2</span>
         </div>
       </div>
       <div class="game-grid">
@@ -600,7 +599,7 @@
         <div class="layer-status-pill" id="l2-pill">
           <span id="l2-lock-label">🔒 Need 5 Lvl 1 Games</span>
           <span style="color:var(--text-muted);">&bull;</span>
-          <span id="l2-tracker">0 / 5 Complete</span>
+          <span id="l2-tracker">0 / 5 to Unlock Level 3</span>
         </div>
       </div>
       <div class="game-grid" id="understory-grid">
@@ -654,7 +653,7 @@
         <div class="layer-status-pill" id="l3-pill">
           <span id="l3-lock-label">🔒 Need 5 Lvl 2 Games</span>
           <span style="color:var(--text-muted);">&bull;</span>
-          <span id="l3-tracker">0 / 5 Complete</span>
+          <span id="l3-tracker">0 / 10 Mastered</span>
         </div>
       </div>
       <div class="game-grid" id="emergent-grid">
@@ -742,7 +741,6 @@
     </footer>
   </div>
 
-  <!-- Print Modal -->
   <div id="print-modal">
     <div class="cert-frame">
       <h2 id="cert-title">Certificate of Completion</h2>
@@ -759,7 +757,7 @@
   </div>
 
   <script>
-    // --- Session Exploration Stopwatch ---
+    // --- Session Stopwatch ---
     let sessionStartTime = parseInt(localStorage.getItem('jacksjungle_session_start'), 10);
     if (!sessionStartTime) {
       sessionStartTime = Date.now();
