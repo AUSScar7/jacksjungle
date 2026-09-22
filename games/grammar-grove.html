@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg: #061a12; --card: #0d2b1f; --accent: #22c55e; --accent-dim: #15803d;
-      --text: #f8fafc; --muted: #86efac;
+      --text: #f8fafc; --muted: #86efac; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -24,9 +24,24 @@
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
     .leaf-word { font-size: 2.4rem; font-weight: 800; color: #fff; margin: 1.5rem 0; letter-spacing: 0.05rem; }
     .bins-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; }
-    .bin-btn { background: #143d2c; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.15rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; }
+    .bin-btn {
+      background: #143d2c; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
+      font-size: 1.15rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .bin-btn:active { background: var(--accent-dim); }
-    .feedback { height: 1.5rem; margin-top: 1rem; font-size: 0.95rem; font-weight: 600; text-align: center; }
+    .bin-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .feedback { height: 1.5rem; margin-top: 1rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); }
   </style>
 </head>
 <body>
@@ -38,14 +53,38 @@
     <p style="color: var(--muted); font-size: 0.9rem;">Sort the leaf into the right grammar log:</p>
     <div class="leaf-word" id="leaf-word">SLOTH</div>
     <div class="bins-grid">
-      <button class="bin-btn" onclick="sortWord('NOUN')">Noun</button>
-      <button class="bin-btn" onclick="sortWord('VERB')">Verb</button>
-      <button class="bin-btn" onclick="sortWord('ADJECTIVE')">Adjective</button>
-      <button class="bin-btn" onclick="sortWord('ADVERB')">Adverb</button>
+      <button class="bin-btn" onclick="sortWord('NOUN', this)">Noun</button>
+      <button class="bin-btn" onclick="sortWord('VERB', this)">Verb</button>
+      <button class="bin-btn" onclick="sortWord('ADJECTIVE', this)">Adjective</button>
+      <button class="bin-btn" onclick="sortWord('ADVERB', this)">Adverb</button>
     </div>
     <div class="feedback" id="feedback-msg"></div>
   </div>
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const WORDS = [
       { word: "SLOTH", pos: "NOUN" },
       { word: "CLIMB", pos: "VERB" },
@@ -54,26 +93,34 @@
       { word: "WATERFALL", pos: "NOUN" }
     ];
     let curr = 0;
+
     function renderLeaf() {
+      const fb = document.getElementById('feedback-msg');
+      fb.textContent = "";
+
       if (curr >= WORDS.length) {
         document.getElementById('leaf-word').textContent = "GROVE CLEARED!";
         document.querySelector('.bins-grid').innerHTML = "";
-        document.getElementById('feedback-msg').textContent = "+20 Sunlight Earned!";
-        let sun = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
-        localStorage.setItem('jacksjungle_sunlight', sun + 20);
-        localStorage.setItem('jacksjungle_completed_grammar_grove', 'true');
+        fb.style.color = "var(--muted)";
+        fb.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('grammar_grove');
+        playTone(520, 'sine', 0.2);
         return;
       }
       document.getElementById('streak-lbl').textContent = `Leaf: ${curr + 1} / ${WORDS.length}`;
       document.getElementById('leaf-word').textContent = WORDS[curr].word;
     }
-    function sortWord(selectedPos) {
+
+    function sortWord(selectedPos, btn) {
       if (selectedPos === WORDS[curr].pos) {
+        playTone(480, 'triangle', 0.15);
         curr++;
         renderLeaf();
       } else {
-        document.getElementById('feedback-msg').textContent = "Incorrect part of speech!";
-        setTimeout(() => { document.getElementById('feedback-msg').textContent = ""; }, 1000);
+        playTone(160, 'sawtooth', 0.25, true);
+        btn.classList.add('wrong');
+        document.getElementById('feedback-msg').textContent = `"${WORDS[curr].word}" is not a ${selectedPos.toLowerCase()}!`;
+        setTimeout(() => btn.classList.remove('wrong'), 700);
       }
     }
     renderLeaf();
