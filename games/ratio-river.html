@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FPNZR7VVNC');
+</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Ratio River - Jack's Jungle</title>
   <style>
     :root {
       --bg: #061e24; --card: #0d323a; --accent: #06b6d4; --accent-dim: #0891b2;
-      --text: #ecfeff; --muted: #a5f3fc;
+      --text: #ecfeff; --muted: #a5f3fc; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -24,8 +33,24 @@
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
     .ratio-banner { font-size: 2.5rem; font-weight: 800; color: #fff; margin: 1.5rem 0; letter-spacing: 0.1rem; }
     .grid { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; }
-    .ans-btn { background: #154d58; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.15rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; text-align: left; }
+    .ans-btn {
+      background: #154d58; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
+      font-size: 1.15rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; text-align: left;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .ans-btn:active { background: var(--accent-dim); }
+    .ans-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -37,8 +62,33 @@
     <p style="color: var(--muted); font-size: 0.95rem; text-align:center;" id="ratio-clue"></p>
     <div class="ratio-banner" id="ratio-display">2 : 3</div>
     <div class="grid" id="choices-stack"></div>
+    <div class="status-msg" id="status-label"></div>
   </div>
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const PUZZLES = [
       { ratio: "2 : 3", clue: "If you have 6 drops of Orchid Tonic, how many cups of River Water are needed?", ans: "9 cups Water", opts: ["7 cups Water", "9 cups Water", "12 cups Water"] },
       { ratio: "1 : 4", clue: "For every 1 scoop of Mineral Sand, mix 4 scoops of Silt. You have 5 scoops of Sand.", ans: "20 scoops Silt", opts: ["16 scoops Silt", "20 scoops Silt", "25 scoops Silt"] },
@@ -46,15 +96,19 @@
       { ratio: "4 : 1", clue: "Rainwater to Sap ratio is 4 : 1. If 8 drops of Sap are poured, how much Rainwater is required?", ans: "32 drops Rainwater", opts: ["24 drops Rainwater", "32 drops Rainwater", "40 drops Rainwater"] }
     ];
     let pIdx = 0;
+
     function renderPuzzle() {
+      const status = document.getElementById('status-label');
+      status.textContent = "";
+
       if (pIdx >= PUZZLES.length) {
         document.getElementById('ratio-clue').textContent = "Nutrient mixtures balanced!";
         document.getElementById('ratio-display').textContent = "BALANCED";
-        document.getElementById('choices-stack').innerHTML = "<p style='text-align:center; font-weight:bold; color:var(--muted);'>+20 Leaves Added</p>";
-        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
-        localStorage.setItem('jacksjungle_leaves', l + 20);
-        localStorage.setItem('jacksjungle_sunlight', l + 20);
-        localStorage.setItem('jacksjungle_completed_ratio_river', 'true');
+        document.getElementById('choices-stack').innerHTML = "";
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('ratio_river');
+        playTone(520, 'sine', 0.2);
         return;
       }
       const p = PUZZLES[pIdx];
@@ -70,9 +124,13 @@
         b.textContent = opt;
         b.onclick = () => {
           if (opt === p.ans) {
+            playTone(480, 'triangle', 0.15);
             pIdx++; renderPuzzle();
           } else {
-            alert("Scale the proportions equally!");
+            playTone(160, 'sawtooth', 0.25, true);
+            b.classList.add('wrong');
+            status.textContent = "Multiply both parts of the ratio by the same factor!";
+            setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
         stack.appendChild(b);
