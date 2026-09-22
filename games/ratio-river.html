@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Ratio River - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #061e24; --card: #0d323a; --accent: #06b6d4; --accent-dim: #0891b2;
+      --text: #ecfeff; --muted: #a5f3fc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .ratio-banner { font-size: 2.5rem; font-weight: 800; color: #fff; margin: 1.5rem 0; letter-spacing: 0.1rem; }
+    .grid { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; }
+    .ans-btn { background: #154d58; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.15rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; text-align: left; }
+    .ans-btn:active { background: var(--accent-dim); }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span id="step-indicator">Flask: 1 / 4</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.95rem; text-align:center;" id="ratio-clue"></p>
+    <div class="ratio-banner" id="ratio-display">2 : 3</div>
+    <div class="grid" id="choices-stack"></div>
+  </div>
+  <script>
+    const PUZZLES = [
+      { ratio: "2 : 3", clue: "If you have 6 drops of Orchid Tonic, how many cups of River Water are needed?", ans: "9 cups Water", opts: ["7 cups Water", "9 cups Water", "12 cups Water"] },
+      { ratio: "1 : 4", clue: "For every 1 scoop of Mineral Sand, mix 4 scoops of Silt. You have 5 scoops of Sand.", ans: "20 scoops Silt", opts: ["16 scoops Silt", "20 scoops Silt", "25 scoops Silt"] },
+      { ratio: "3 : 5", clue: "A batch uses 15 Sun Leaves. Following the 3 : 5 ratio, how many Fern Fronds do you harvest?", ans: "25 Fern Fronds", opts: ["20 Fern Fronds", "25 Fern Fronds", "30 Fern Fronds"] },
+      { ratio: "4 : 1", clue: "Rainwater to Sap ratio is 4 : 1. If 8 drops of Sap are poured, how much Rainwater is required?", ans: "32 drops Rainwater", opts: ["24 drops Rainwater", "32 drops Rainwater", "40 drops Rainwater"] }
+    ];
+    let pIdx = 0;
+    function renderPuzzle() {
+      if (pIdx >= PUZZLES.length) {
+        document.getElementById('ratio-clue').textContent = "Nutrient mixtures balanced!";
+        document.getElementById('ratio-display').textContent = "BALANCED";
+        document.getElementById('choices-stack').innerHTML = "<p style='text-align:center; font-weight:bold; color:var(--muted);'>+20 Leaves Added</p>";
+        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
+        localStorage.setItem('jacksjungle_leaves', l + 20);
+        localStorage.setItem('jacksjungle_sunlight', l + 20);
+        localStorage.setItem('jacksjungle_completed_ratio_river', 'true');
+        return;
+      }
+      const p = PUZZLES[pIdx];
+      document.getElementById('step-indicator').textContent = `Flask: ${pIdx + 1} / ${PUZZLES.length}`;
+      document.getElementById('ratio-clue').textContent = p.clue;
+      document.getElementById('ratio-display').textContent = p.ratio;
+
+      const stack = document.getElementById('choices-stack');
+      stack.innerHTML = "";
+      p.opts.forEach(opt => {
+        const b = document.createElement('button');
+        b.className = 'ans-btn';
+        b.textContent = opt;
+        b.onclick = () => {
+          if (opt === p.ans) {
+            pIdx++; renderPuzzle();
+          } else {
+            alert("Scale the proportions equally!");
+          }
+        };
+        stack.appendChild(b);
+      });
+    }
+    renderPuzzle();
+  </script>
+</body>
+</html>
