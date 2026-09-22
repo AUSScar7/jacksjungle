@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg: #091a10; --card: #122e1d; --accent: #22c55e; --accent-dim: #15803d;
-      --text: #f0fdf4; --muted: #86efac;
+      --text: #f0fdf4; --muted: #86efac; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -24,8 +24,24 @@
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
     .equation { font-size: 3rem; font-weight: 800; color: #fff; margin: 1.5rem 0; letter-spacing: 0.1rem; }
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; }
-    .ans-btn { background: #17422b; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.5rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; }
+    .ans-btn {
+      background: #17422b; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
+      font-size: 1.5rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .ans-btn:active { background: var(--accent-dim); }
+    .ans-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -37,16 +53,45 @@
     <p style="color: var(--muted); font-size: 0.95rem;">Rapid Multiply to jump to the next branch:</p>
     <div class="equation" id="eq-text">6 &times; 7</div>
     <div class="grid" id="btn-grid"></div>
+    <div class="status-msg" id="status-label"></div>
   </div>
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     let branch = 0;
     function nextBranch() {
+      const status = document.getElementById('status-label');
+      status.textContent = "";
+
       if (branch >= 5) {
         document.getElementById('eq-text').textContent = "SUMMIT REACHED!";
-        document.getElementById('btn-grid').innerHTML = "<p style='grid-column: span 2; text-align:center; font-weight:bold; color:var(--muted);'>+20 Sunlight Added</p>";
-        let s = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
-        localStorage.setItem('jacksjungle_sunlight', s + 20);
-        localStorage.setItem('jacksjungle_completed_times_table_treetops', 'true');
+        document.getElementById('btn-grid').innerHTML = "";
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('times_table_treetops');
+        playTone(520, 'sine', 0.2);
         return;
       }
       document.getElementById('climb-lbl').textContent = `Branch: ${branch + 1} / 5`;
@@ -69,9 +114,13 @@
         b.className = 'ans-btn'; b.textContent = val;
         b.onclick = () => {
           if (val === product) {
+            playTone(480, 'triangle', 0.15);
             branch++; nextBranch();
           } else {
-            alert("Branch slipped! Check multiplication tables.");
+            playTone(160, 'sawtooth', 0.25, true);
+            b.classList.add('wrong');
+            status.textContent = `Branch slipped! Check ${num1} × ${num2}.`;
+            setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
         grid.appendChild(b);
