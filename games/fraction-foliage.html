@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg: #061a12; --card: #0d2b1f; --accent: #10b981; --accent-dim: #047857;
-      --text: #ecfdf5; --muted: #a7f3d0;
+      --text: #ecfdf5; --muted: #a7f3d0; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -24,8 +24,24 @@
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
     .fraction-hero { font-size: 3rem; font-weight: 800; color: #fff; margin: 1.5rem 0; }
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; }
-    .leaf-btn { background: #134e4a; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.25rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; }
+    .leaf-btn {
+      background: #134e4a; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
+      font-size: 1.25rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .leaf-btn:active { background: var(--accent-dim); }
+    .leaf-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -37,8 +53,33 @@
     <p style="color: var(--muted); font-size: 0.9rem;">Match the fraction with its decimal equivalent:</p>
     <div class="fraction-hero" id="fraction-text">1 / 2</div>
     <div class="grid" id="decimal-options"></div>
+    <div class="status-msg" id="status-label"></div>
   </div>
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const PAIRS = [
       { frac: "1 / 2", dec: "0.5", distractors: ["0.2", "0.25", "0.05"] },
       { frac: "3 / 4", dec: "0.75", distractors: ["0.34", "0.50", "0.80"] },
@@ -46,13 +87,18 @@
       { frac: "1 / 5", dec: "0.20", distractors: ["0.15", "0.50", "0.02"] }
     ];
     let fIdx = 0;
+
     function renderFraction() {
+      const status = document.getElementById('status-label');
+      status.textContent = "";
+
       if (fIdx >= PAIRS.length) {
         document.getElementById('fraction-text').textContent = "FOLIAGE MATCHED!";
-        document.getElementById('decimal-options').innerHTML = "<p style='grid-column: span 2; text-align:center; font-weight:bold; color:var(--muted);'>+20 Sunlight Stored</p>";
-        let s = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
-        localStorage.setItem('jacksjungle_sunlight', s + 20);
-        localStorage.setItem('jacksjungle_completed_fraction_foliage', 'true');
+        document.getElementById('decimal-options').innerHTML = "";
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('fraction_foliage');
+        playTone(520, 'sine', 0.2);
         return;
       }
       const p = PAIRS[fIdx];
@@ -61,14 +107,19 @@
       let opts = [p.dec, ...p.distractors].sort(() => Math.random() - 0.5);
       const grid = document.getElementById('decimal-options');
       grid.innerHTML = "";
+
       opts.forEach(o => {
         const b = document.createElement('button');
         b.className = 'leaf-btn'; b.textContent = o;
         b.onclick = () => {
           if (o === p.dec) {
+            playTone(480, 'triangle', 0.15);
             fIdx++; renderFraction();
           } else {
-            alert("Check decimal places!");
+            playTone(160, 'sawtooth', 0.25, true);
+            b.classList.add('wrong');
+            status.textContent = `"${o}" is incorrect. Check your division & decimal points!`;
+            setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
         grid.appendChild(b);
