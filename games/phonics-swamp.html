@@ -6,84 +6,43 @@
   <title>Phonics Swamp - Jack's Jungle</title>
   <style>
     :root {
-      --bg: #091a1a;
-      --card: #122b2a;
-      --accent: #14b8a6;
-      --accent-dim: #0f766e;
-      --text: #f0fdfa;
-      --stone: #2dd4bf;
+      --bg: #091a1a; --card: #122b2a; --accent: #14b8a6; --accent-dim: #0f766e;
+      --text: #f0fdfa; --stone: #2dd4bf; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg); color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
     }
     .swamp-box {
-      background: var(--card);
-      border: 2px solid var(--accent-dim);
-      border-radius: 1rem;
-      width: 100%;
-      max-width: 480px;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .header-bar {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-    }
-    .back-link {
-      color: var(--stone);
-      background: none;
-      border: 1px solid var(--accent-dim);
-      padding: 0.35rem 0.75rem;
-      border-radius: 0.4rem;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .swamp-display {
-      font-size: 2.5rem;
-      font-weight: 800;
-      letter-spacing: 0.2rem;
-      margin: 2rem 0;
-      color: #fff;
-    }
-    .digraph-slot {
-      color: var(--stone);
-      border-bottom: 3px dashed var(--stone);
-      padding: 0 0.4rem;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.8rem;
-      width: 100%;
-    }
+    .header-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; }
+    .back-link { color: var(--stone); background: none; border: 1px solid var(--accent-dim); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; }
+    .swamp-display { font-size: 2.5rem; font-weight: 800; letter-spacing: 0.2rem; margin: 2rem 0; color: #fff; }
+    .digraph-slot { color: var(--stone); border-bottom: 3px dashed var(--stone); padding: 0 0.4rem; }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; width: 100%; }
     .digraph-btn {
-      background: #173837;
-      color: var(--text);
-      border: 2px solid var(--accent-dim);
-      border-radius: 0.5rem;
-      padding: 1rem;
-      font-size: 1.25rem;
-      font-weight: bold;
-      cursor: pointer;
+      background: #173837; color: var(--text); border: 2px solid var(--accent-dim);
+      border-radius: 0.5rem; padding: 1rem; font-size: 1.25rem; font-weight: bold; cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
     }
     .digraph-btn:active { background: var(--accent-dim); }
-    .status { margin-top: 1rem; height: 1.2rem; font-size: 0.95rem; text-align: center; }
+    .digraph-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status { margin-top: 1rem; height: 1.4rem; font-size: 0.95rem; text-align: center; color: var(--danger); font-weight: 600; }
   </style>
 </head>
 <body>
@@ -100,18 +59,28 @@
 
   <script>
     let audioCtx = null;
-    function ping(f, t) {
+    function ping(f, t, isErr = false) {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.frequency.value = f;
-      g.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.frequency.setValueAtTime(f, audioCtx.currentTime);
+      if (isErr) o.frequency.exponentialRampToValueAtTime(75, audioCtx.currentTime + t);
+      g.gain.setValueAtTime(0.15, audioCtx.currentTime);
       g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + t);
-      o.connect(g);
-      g.connect(audioCtx.destination);
-      o.start();
-      o.stop(audioCtx.currentTime + t);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + t);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
     }
 
     const PUZZLES = [
@@ -125,13 +94,16 @@
     let step = 0;
 
     function loadPuzzle() {
+      const status = document.getElementById('status-out');
+      status.textContent = "";
+
       if (step >= PUZZLES.length) {
         document.getElementById('word-field').innerHTML = "SWAMP CROSSED!";
         document.getElementById('choices-field').innerHTML = "";
-        document.getElementById('status-out').textContent = "+20 Sunlight Claimed!";
-        let sun = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
-        localStorage.setItem('jacksjungle_sunlight', sun + 20);
-        localStorage.setItem('jacksjungle_completed_phonics_swamp', 'true');
+        status.style.color = "var(--stone)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        
+        awardGameCompletion('phonics_swamp');
         ping(600, 0.25);
         return;
       }
@@ -154,15 +126,15 @@
             step++;
             loadPuzzle();
           } else {
-            ping(160, 0.2);
-            document.getElementById('status-out').textContent = "Water splashed! Try another sound.";
-            setTimeout(() => { document.getElementById('status-out').textContent = ""; }, 1000);
+            ping(160, 0.25, true);
+            b.classList.add('wrong');
+            status.textContent = "Splash! Try another vowel combination.";
+            setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
         grid.appendChild(b);
       });
     }
-
     loadPuzzle();
   </script>
 </body>
