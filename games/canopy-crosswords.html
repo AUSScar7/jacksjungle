@@ -1,13 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FPNZR7VVNC', {
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Canopy Crosswords - Jack's Jungle</title>
   <style>
     :root {
       --bg: #141724; --card: #1e2238; --accent: #6366f1; --accent-dim: #4338ca;
-      --text: #e0e7ff; --danger: #ef4444; --success: #4ade80;
+      --text: #e0e7ff; --muted: #a5b4fc; --danger: #ef4444; --success: #22c55e;
+      --gold: #facc15;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -17,52 +29,114 @@
     }
     .cw-box {
       background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
-      width: 100%; max-width: 440px; padding: 1.25rem; display: flex; flex-direction: column; align-items: center;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-    .back { background: none; border: 1px solid var(--accent); color: var(--text); padding: 0.3rem 0.65rem; border-radius: 0.35rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
-    .grid { display: grid; grid-template-columns: repeat(4, 52px); grid-template-rows: repeat(4, 52px); gap: 6px; margin-bottom: 1rem; }
-    .cell {
-      background: #111425; border: 2px solid #2d3356; border-radius: 6px;
-      color: #fff; font-size: 1.5rem; font-weight: 800; text-align: center; line-height: 48px; cursor: pointer;
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; }
+    .nav-btn { background: transparent; border: 1px solid var(--accent); color: var(--text); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    
+    /* Clue Selection Cards */
+    .clues-container { width: 100%; display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1rem; }
+    .clue-card {
+      background: rgba(0, 0, 0, 0.35); border: 2px solid #312e81; border-radius: 0.6rem;
+      padding: 0.75rem 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
       transition: all 0.2s ease;
     }
-    .cell.selected { border-color: var(--accent); background: #282d4c; }
-    .cell.blocked { background: #0b0d18; border-color: transparent; cursor: default; }
-    .cell.error { border-color: var(--danger) !important; background: #3d1419 !important; color: #fca5a5; }
-    .clues { font-size: 0.88rem; width: 100%; background: rgba(0,0,0,0.3); padding: 0.8rem; border-radius: 0.5rem; margin-bottom: 1rem; line-height: 1.5; }
-    .key-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; width: 100%; }
-    .key-btn { background: #2a3052; color: #fff; border: 1px solid #434c7a; border-radius: 6px; padding: 0.65rem 0.85rem; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
-    .key-btn:active { background: var(--accent-dim); }
-    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: bold; color: var(--success); text-align: center; margin-top: 0.75rem; }
+    .clue-card.active { border-color: var(--accent); background: rgba(99, 102, 241, 0.2); transform: scale(1.01); }
+    .clue-card.completed { border-color: var(--success); opacity: 0.8; }
+    .clue-title { font-weight: bold; font-size: 0.95rem; color: #fff; }
+    .clue-sub { font-size: 0.8rem; color: var(--muted); }
+    .clue-status { font-size: 1.1rem; }
+
+    /* Visual Crossword Grid */
+    .grid-container {
+      display: grid; grid-template-columns: repeat(4, 56px); grid-template-rows: repeat(4, 56px);
+      gap: 6px; margin: 1rem 0;
+    }
+    .cell {
+      background: #111425; border: 2px solid #2d3356; border-radius: 8px;
+      color: #fff; font-size: 1.6rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s ease; position: relative;
+    }
+    .cell.blocked { background: transparent; border-color: transparent; }
+    .cell.active-word { border-color: var(--accent); background: rgba(99, 102, 241, 0.15); }
+    .cell.shared-cell::after {
+      content: "⚡"; position: absolute; top: 2px; right: 2px; font-size: 0.6rem;
+    }
+    .cell.wrong {
+      border-color: var(--danger) !important;
+      background: #451a1a !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* Big Friendly Letter Bank */
+    .bank-label { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .letter-bank { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; width: 100%; margin-bottom: 0.5rem; }
+    .key-btn {
+      background: #312e81; color: #fff; border: 2px solid var(--accent); border-radius: 8px;
+      width: 48px; height: 48px; font-size: 1.3rem; font-weight: bold; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: transform 0.1s ease, background 0.15s ease;
+    }
+    .key-btn:active { transform: scale(0.95); background: var(--accent-dim); }
+    .key-btn.action-btn { width: auto; padding: 0 1rem; font-size: 0.9rem; border-color: #64748b; background: #1e293b; }
+
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: bold; text-align: center; color: var(--danger); margin-top: 0.5rem; }
   </style>
 </head>
 <body>
   <div class="cw-box">
-    <div class="bar">
-      <a class="back" href="../index.html">&larr; Canopy Hub</a>
-      <span style="font-weight: 600;">Canopy Crosswords</span>
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span style="font-weight: 700; color: var(--muted);">Forest Vocabulary</span>
     </div>
-    <div class="clues">
-      <strong>1 Across:</strong> Large wild predator cat (4) [LION]<br>
-      <strong>1 Down:</strong> Tree branch nest builder (4) [BIRD]
+
+    <!-- Friendly Clue Selectors -->
+    <div class="clues-container">
+      <div class="clue-card active" id="clue-1" onclick="selectWord(1)">
+        <div>
+          <div class="clue-title">1. ACROSS: King of the Jungle (4)</div>
+          <div class="clue-sub">Fierce wild predator cat with a golden mane</div>
+        </div>
+        <div class="clue-status" id="status-1">✏️</div>
+      </div>
+      <div class="clue-card" id="clue-2" onclick="selectWord(2)">
+        <div>
+          <div class="clue-title">2. DOWN: Tree Nest Builder (4)</div>
+          <div class="clue-sub">Feathered creature that lays eggs in high branches</div>
+        </div>
+        <div class="clue-status" id="status-2">✏️</div>
+      </div>
     </div>
-    <div class="grid" id="cw-grid"></div>
-    <div class="key-row" id="keyboard"></div>
-    <div class="status-msg" id="status-out"></div>
+
+    <!-- Visual 4x4 Grid -->
+    <div class="grid-container" id="crossword-grid"></div>
+
+    <div class="bank-label">Tap a letter to fill the highlighted word:</div>
+    <div class="letter-bank" id="letter-tray"></div>
+
+    <div style="display: flex; gap: 0.5rem; width: 100%; justify-content: center;">
+      <button class="key-btn action-btn" onclick="eraseLastLetter()">⌫ Backspace</button>
+      <button class="key-btn action-btn" style="border-color: #ef4444;" onclick="clearSelectedWord()">Clear Word</button>
+    </div>
+
+    <div class="status-msg" id="status-label"></div>
   </div>
 
   <script>
     let audioCtx = null;
-    function pingTone(f, type, dur, isErr = false) {
+    function playTone(freq, type, dur, isErr = false) {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
       osc.type = type;
-      osc.frequency.setValueAtTime(f, audioCtx.currentTime);
-      if (isErr) osc.frequency.exponentialRampToValueAtTime(75, audioCtx.currentTime + dur);
-      g.gain.setValueAtTime(0.16, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
       g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
       osc.connect(g); g.connect(audioCtx.destination);
       osc.start(); osc.stop(audioCtx.currentTime + dur);
@@ -71,108 +145,184 @@
     function awardGameCompletion(gameId) {
       localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
       localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
-
       let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
       if (isNaN(currentLeaves)) currentLeaves = 0;
-
       let updatedLeaves = currentLeaves + 20;
       localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
       localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
     }
 
-    const solution = [
-      ['L', 'I', 'O', 'N'],
-      ['B', '#', '#', '#'],
-      ['I', '#', '#', '#'],
-      ['R', '#', '#', '#']
-    ];
-    let userGrid = [
+    // Grid coordinates:
+    // Word 1 (ACROSS): [0,0]='L', [0,1]='I', [0,2]='O', [0,3]='N'
+    // Word 2 (DOWN):   [0,0]='L', [1,0]='A', [2,0]='R', [3,0]='K'  (Shared at [0,0])
+    // Or Classic BIRD: [0,1]='I' shared with BIRD down at [0,1] -> B=[0,0]
+    // Let's use clean intersection:
+    // Word 1 ACROSS (Row 0): L - I - O - N
+    // Word 2 DOWN (Col 0):   L - E - A - F  (Shared 'L' at [0,0] - perfectly thematic!)
+    const WORDS = {
+      1: { name: "ACROSS", answer: "LION", cells: [[0,0],[0,1],[0,2],[0,3]] },
+      2: { name: "DOWN", answer: "LEAF", cells: [[0,0],[1,0],[2,0],[3,0]] }
+    };
+
+    let gridState = [
       ['', '', '', ''],
       ['', '#', '#', '#'],
       ['', '#', '#', '#'],
       ['', '#', '#', '#']
     ];
-    let selR = 0, selC = 0, solved = false;
+
+    let activeWordId = 1;
+    let isCompleted = false;
+
+    function selectWord(id) {
+      if (isCompleted) return;
+      activeWordId = id;
+      document.getElementById('clue-1').classList.toggle('active', id === 1);
+      document.getElementById('clue-2').classList.toggle('active', id === 2);
+      document.getElementById('status-label').textContent = '';
+      playTone(400, 'triangle', 0.08);
+      renderGrid();
+    }
 
     function renderGrid() {
-      const g = document.getElementById('cw-grid');
-      g.innerHTML = "";
+      const g = document.getElementById('crossword-grid');
+      g.innerHTML = '';
+      const activeCoords = WORDS[activeWordId].cells;
+
       for (let r = 0; r < 4; r++) {
         for (let c = 0; c < 4; c++) {
           const d = document.createElement('div');
           d.className = 'cell';
-          if (solution[r][c] === '#') {
+          d.id = `cell-${r}-${c}`;
+
+          if (gridState[r][c] === '#') {
             d.classList.add('blocked');
           } else {
-            d.textContent = userGrid[r][c];
-            if (r === selR && c === selC && !solved) d.classList.add('selected');
-            d.onclick = () => { if (!solved) { selR = r; selC = c; renderGrid(); } };
+            d.textContent = gridState[r][c];
+            if (r === 0 && c === 0) d.classList.add('shared-cell');
+
+            const isInActive = activeCoords.some(coord => coord[0] === r && coord[1] === c);
+            if (isInActive && !isCompleted) d.classList.add('active-word');
+
+            d.onclick = () => {
+              // Auto-toggle active word if tapping on shared intersection
+              if (r === 0 && c === 0) {
+                selectWord(activeWordId === 1 ? 2 : 1);
+              } else if (r === 0) {
+                selectWord(1);
+              } else if (c === 0) {
+                selectWord(2);
+              }
+            };
           }
           g.appendChild(d);
         }
       }
-      checkWin();
+      checkCompletion();
     }
 
-    function buildKeyboard() {
-      const k = document.getElementById('keyboard');
-      "BLIONR".split("").forEach(char => {
+    function buildLetterTray() {
+      const tray = document.getElementById('letter-tray');
+      tray.innerHTML = '';
+      // Curated letter tray with target letters and light distractors
+      const letters = ['L', 'I', 'O', 'N', 'E', 'A', 'F', 'T', 'S'];
+      letters.forEach(ch => {
         const b = document.createElement('button');
-        b.className = "key-btn";
-        b.textContent = char;
-        b.onclick = () => {
-          if (!solved && solution[selR][selC] !== '#') {
-            userGrid[selR][selC] = char;
-            pingTone(420, 'triangle', 0.1);
-            advanceCursor();
-            renderGrid();
-          }
-        };
-        k.appendChild(b);
+        b.className = 'key-btn';
+        b.textContent = ch;
+        b.onclick = () => insertLetter(ch);
+        tray.appendChild(b);
       });
-      const del = document.createElement('button');
-      del.className = "key-btn";
-      del.textContent = "DEL";
-      del.onclick = () => {
-        if (!solved && solution[selR][selC] !== '#') {
-          userGrid[selR][selC] = '';
+    }
+
+    function insertLetter(ch) {
+      if (isCompleted) return;
+      const targetCells = WORDS[activeWordId].cells;
+      
+      // Find the first empty cell in the active word
+      for (const [r, c] of targetCells) {
+        if (gridState[r][c] === '') {
+          gridState[r][c] = ch;
+          playTone(460, 'triangle', 0.1);
           renderGrid();
-        }
-      };
-      k.appendChild(del);
-    }
-
-    function advanceCursor() {
-      if (selR === 0 && selC < 3) selC++;
-      else if (selC === 0 && selR < 3) selR++;
-    }
-
-    function checkWin() {
-      if (solved) return;
-      let won = true, allFilled = true;
-      for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
-          if (solution[r][c] !== '#') {
-            if (userGrid[r][c] === '') allFilled = false;
-            if (userGrid[r][c] !== solution[r][c]) won = false;
-          }
+          return;
         }
       }
 
-      if (allFilled && !won) {
-        pingTone(160, 'sawtooth', 0.3, true);
-        const cells = document.querySelectorAll('.cell:not(.blocked)');
-        cells.forEach(el => el.classList.add('error'));
-        setTimeout(() => cells.forEach(el => el.classList.remove('error')), 700);
-      } else if (allFilled && won) {
-        solved = true;
-        document.getElementById('status-out').textContent = "🍃 Crossword Solved! +20 Leaves Added.";
+      // If already full, overwrite the last cell
+      const last = targetCells[targetCells.length - 1];
+      gridState[last[0]][last[1]] = ch;
+      playTone(460, 'triangle', 0.1);
+      renderGrid();
+    }
+
+    function eraseLastLetter() {
+      if (isCompleted) return;
+      const targetCells = WORDS[activeWordId].cells;
+      for (let i = targetCells.length - 1; i >= 0; i--) {
+        const [r, c] = targetCells[i];
+        if (gridState[r][c] !== '') {
+          gridState[r][c] = '';
+          playTone(340, 'triangle', 0.08);
+          renderGrid();
+          return;
+        }
+      }
+    }
+
+    function clearSelectedWord() {
+      if (isCompleted) return;
+      const targetCells = WORDS[activeWordId].cells;
+      targetCells.forEach(([r, c]) => {
+        // Protect shared letter if other word has it right
+        if (r === 0 && c === 0) {
+          const otherWordId = activeWordId === 1 ? 2 : 1;
+          const otherWord = WORDS[otherWordId].cells.map(([ro, co]) => gridState[ro][co]).join('');
+          if (otherWord.startsWith('L')) return;
+        }
+        gridState[r][c] = '';
+      });
+      playTone(300, 'sawtooth', 0.1);
+      renderGrid();
+    }
+
+    function checkCompletion() {
+      const word1 = WORDS[1].cells.map(([r, c]) => gridState[r][c]).join('');
+      const word2 = WORDS[2].cells.map(([r, c]) => gridState[r][c]).join('');
+
+      const w1Correct = (word1 === WORDS[1].answer);
+      const w2Correct = (word2 === WORDS[2].answer);
+
+      document.getElementById('status-1').textContent = w1Correct ? '✅' : '✏️';
+      document.getElementById('clue-1').classList.toggle('completed', w1Correct);
+
+      document.getElementById('status-2').textContent = w2Correct ? '✅' : '✏️';
+      document.getElementById('clue-2').classList.toggle('completed', w2Correct);
+
+      // Check if both words are filled but wrong
+      if (word1.length === 4 && word2.length === 4 && (!w1Correct || !w2Correct)) {
+        playTone(160, 'sawtooth', 0.25, true);
+        const status = document.getElementById('status-label');
+        status.textContent = 'Some letters are out of place. Check spelling clues!';
+        document.querySelectorAll('.cell:not(.blocked)').forEach(c => c.classList.add('wrong'));
+        setTimeout(() => {
+          document.querySelectorAll('.cell').forEach(c => c.classList.remove('wrong'));
+        }, 700);
+        return;
+      }
+
+      if (w1Correct && w2Correct && !isCompleted) {
+        isCompleted = true;
+        playTone(520, 'sine', 0.2);
+        setTimeout(() => playTone(659, 'sine', 0.25), 150);
+        const status = document.getElementById('status-label');
+        status.style.color = 'var(--success)';
+        status.textContent = 'CROSSWORD SOLVED! 🍃 +20 Leaves Earned.';
         awardGameCompletion('canopy_crosswords');
-        pingTone(587.33, 'sine', 0.25);
       }
     }
 
-    buildKeyboard();
+    buildLetterTray();
     renderGrid();
   </script>
 </body>
