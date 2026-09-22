@@ -6,52 +6,44 @@
   <title>Anagram Antics - Jack's Jungle</title>
   <style>
     :root {
-      --bg: #1e1b4b;
-      --card: #2e2a72;
-      --accent: #a855f7;
-      --accent-dim: #7e22ce;
-      --text: #faf5ff;
+      --bg: #1e1b4b; --card: #2e2a72; --accent: #a855f7; --accent-dim: #7e22ce;
+      --text: #faf5ff; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg); color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
     }
     .box {
-      background: var(--card);
-      border: 2px solid var(--accent-dim);
-      border-radius: 1rem;
-      width: 100%;
-      max-width: 460px;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 460px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     .top { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-    .top a {
-      background: none; border: 1px solid var(--accent); color: var(--text);
-      padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem;
-    }
+    .top a { background: none; border: 1px solid var(--accent); color: var(--text); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
     .jumble { font-size: 2.2rem; font-weight: 800; letter-spacing: 0.3rem; margin: 1.5rem 0; color: #fff; }
     .picked-slots {
       display: flex; gap: 0.4rem; min-height: 48px; margin-bottom: 1.5rem;
       border-bottom: 2px solid var(--accent); padding-bottom: 0.4rem;
+    }
+    .picked-slots.wrong {
+      border-color: var(--danger) !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
     }
     .letter-chip {
       background: #4338ca; border: 1px solid var(--accent); color: #fff;
       font-size: 1.3rem; font-weight: bold; width: 44px; height: 44px;
       display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer;
     }
+    .letter-chip:active { background: var(--accent-dim); }
     .pool { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+    .status-msg { height: 1.4rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -60,14 +52,39 @@
       <a href="../index.html">&larr; Canopy Hub</a>
       <span id="round">Round: 1 / 3</span>
     </div>
-    <p style="font-size: 0.9rem; color: #d8b4fe;">Tap letters to identify the jungle animal:</p>
+    <p style="font-size: 0.9rem; color: #d8b4fe;">Tap letters in sequence to unscramble the creature:</p>
     <div class="jumble" id="jumble-view"></div>
     <div class="picked-slots" id="answer-row"></div>
     <div class="pool" id="pool-row"></div>
-    <button style="margin-top:1.5rem; background:none; border:1px solid #c084fc; color:#fff; padding:0.5rem 1rem; border-radius:4px; font-weight:600; cursor:pointer;" onclick="resetTurn()">Reset Input</button>
+    <button style="margin-top:1.25rem; background:none; border:1px solid #c084fc; color:#fff; padding:0.5rem 1rem; border-radius:4px; font-weight:600; cursor:pointer;" onclick="resetTurn()">Reset Input</button>
+    <div class="status-msg" id="status-out"></div>
   </div>
 
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const ANAGRAMS = [
       { jumbled: "ALOK A", correct: "KOALA" },
       { jumbled: "GNROAAOK", correct: "KANGAROO" },
@@ -77,12 +94,17 @@
     let currentInput = [];
 
     function loadGame() {
+      const status = document.getElementById('status-out');
+      status.textContent = "";
+
       if (step >= ANAGRAMS.length) {
         document.getElementById('jumble-view').textContent = "ALL SOLVED!";
-        document.getElementById('pool-row').innerHTML = "<p style='color:#c084fc; font-weight:bold;'>+20 Sunlight Stored</p>";
-        let s = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
-        localStorage.setItem('jacksjungle_sunlight', s + 20);
-        localStorage.setItem('jacksjungle_completed_anagram_antics', 'true');
+        document.getElementById('pool-row').innerHTML = "";
+        document.getElementById('answer-row').innerHTML = "";
+        status.style.color = "#d8b4fe";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('anagram_antics');
+        playTone(523.25, 'sine', 0.2);
         return;
       }
       currentInput = [];
@@ -111,11 +133,28 @@
         btn.className = "letter-chip";
         btn.textContent = ch;
         btn.onclick = () => {
-          currentInput.push(ch);
-          renderLetters();
-          if (currentInput.join("") === item.correct) {
-            step++;
-            loadGame();
+          if (currentInput.length < item.correct.length) {
+            playTone(400, 'triangle', 0.1);
+            currentInput.push(ch);
+            renderLetters();
+            if (currentInput.length === item.correct.length) {
+              if (currentInput.join("") === item.correct) {
+                playTone(587, 'sine', 0.2);
+                step++;
+                loadGame();
+              } else {
+                playTone(150, 'sawtooth', 0.3, true);
+                const ansBox = document.getElementById('answer-row');
+                ansBox.classList.add('wrong');
+                document.getElementById('status-out').textContent = "Incorrect spelling order! Resetting letters.";
+                setTimeout(() => {
+                  ansBox.classList.remove('wrong');
+                  currentInput = [];
+                  renderLetters();
+                  document.getElementById('status-out').textContent = "";
+                }, 750);
+              }
+            }
           }
         };
         poolRow.appendChild(btn);
@@ -124,6 +163,7 @@
 
     function resetTurn() {
       currentInput = [];
+      document.getElementById('status-out').textContent = "";
       renderLetters();
     }
 
