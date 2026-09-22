@@ -68,6 +68,18 @@
       osc.start(); osc.stop(audioCtx.currentTime + dur);
     }
 
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const solution = [
       ['L', 'I', 'O', 'N'],
       ['B', '#', '#', '#'],
@@ -155,10 +167,7 @@
       } else if (allFilled && won) {
         solved = true;
         document.getElementById('status-out').textContent = "🍃 Crossword Solved! +20 Leaves Added.";
-        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
-        localStorage.setItem('jacksjungle_leaves', l + 20);
-        localStorage.setItem('jacksjungle_sunlight', l + 20);
-        localStorage.setItem('jacksjungle_completed_canopy_crosswords', 'true');
+        awardGameCompletion('canopy_crosswords');
         pingTone(587.33, 'sine', 0.25);
       }
     }
