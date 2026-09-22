@@ -16,6 +16,7 @@
       --locked-bg: rgba(15, 23, 42, 0.6);
       --locked-border: #334155;
       --leaf-green: #4ade80;
+      --gold: #facc15;
     }
 
     * {
@@ -47,9 +48,31 @@
       pointer-events: none;
     }
 
+    /* Creeping Border Vines */
+    .edge-vine {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 60px;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    #left-vine {
+      left: 0;
+      transform: translateX(-40px);
+    }
+
+    #right-vine {
+      right: 0;
+      transform: translateX(40px) scaleX(-1);
+    }
+
     .content-wrapper {
       position: relative;
-      z-index: 1;
+      z-index: 2;
       max-width: 900px;
       margin: 0 auto;
       padding: 2rem 1rem 4rem;
@@ -61,7 +84,6 @@
       position: relative;
     }
 
-    /* Sound Control Bar */
     .top-controls {
       display: flex;
       justify-content: flex-end;
@@ -118,25 +140,11 @@
       letter-spacing: 0.05rem;
     }
 
-    /* Relocated AI Note */
-    .ai-top-attribution {
-      font-size: 0.78rem;
-      color: #94a3b8;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      border-radius: 0.5rem;
-      padding: 0.4rem 0.8rem;
-      margin: 0.75rem auto 0;
-      max-width: 420px;
-      line-height: 1.4;
-      font-style: italic;
-    }
-
-    /* Get Started Hero CTA (Hides once any game is completed) */
+    /* Hero CTA Button */
     .cta-container {
       text-align: center;
       margin: 1.75rem 0 2.5rem;
-      transition: opacity 0.3s ease, transform 0.3s ease;
+      transition: opacity 0.3s ease;
     }
 
     .cta-container.hidden {
@@ -152,7 +160,7 @@
       color: #061a12;
       font-size: 1.25rem;
       font-weight: 800;
-      text-decoration: none;
+      border: none;
       padding: 1rem 2.75rem;
       border-radius: 9999px;
       box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
@@ -170,7 +178,6 @@
       transform: scale(0.98);
     }
 
-    /* Cards */
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border-card);
@@ -191,7 +198,6 @@
       align-items: center;
     }
 
-    /* Biome Stage & Leaf Harvest Tracker */
     .progress-track {
       background: rgba(0, 0, 0, 0.45);
       height: 18px;
@@ -216,7 +222,6 @@
       font-weight: 600;
     }
 
-    /* Canopy Progression Tiers */
     .canopy-layer {
       margin-top: 2rem;
     }
@@ -297,7 +302,6 @@
       letter-spacing: 0.05rem;
     }
 
-    /* Completed Root Overlay */
     .root-overlay {
       position: absolute;
       bottom: 0;
@@ -309,7 +313,6 @@
       opacity: 0.9;
     }
 
-    /* Replaced 'Rooted' label with 'Completed' */
     .completed-badge {
       font-size: 0.72rem;
       color: var(--accent);
@@ -319,7 +322,6 @@
       gap: 0.2rem;
     }
 
-    /* Fog of War / Locked State */
     .game-node.locked {
       background: var(--locked-bg);
       border-color: var(--locked-border);
@@ -341,7 +343,91 @@
       margin-top: 0.5rem;
     }
 
-    /* Reset Progress Container */
+    /* Achievement / Certificate Section */
+    .achievement-card {
+      background: linear-gradient(135deg, rgba(13, 43, 31, 0.95), rgba(6, 26, 18, 0.95));
+      border: 2px solid var(--accent);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-top: 2.5rem;
+    }
+
+    .name-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin: 1rem 0 1.5rem;
+      max-width: 440px;
+    }
+
+    .name-input-group label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .name-input {
+      background: #061a12;
+      border: 1px solid var(--border-card);
+      color: #fff;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      outline: none;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .name-input:focus {
+      border-color: var(--accent);
+    }
+
+    .cert-buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.85rem;
+    }
+
+    .btn-cert {
+      background: #143d2c;
+      border: 2px solid var(--accent-dim);
+      color: #fff;
+      padding: 0.85rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-cert:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      border-color: #334155;
+      background: #0f172a;
+    }
+
+    .btn-cert.master {
+      border-color: var(--gold);
+      background: rgba(250, 204, 21, 0.15);
+      color: var(--gold);
+      grid-column: 1 / -1;
+    }
+
+    .btn-cert:not(:disabled):hover {
+      background: var(--accent-dim);
+      transform: translateY(-2px);
+    }
+
+    .btn-cert.master:not(:disabled):hover {
+      background: rgba(250, 204, 21, 0.25);
+    }
+
     .reset-container {
       text-align: center;
       margin-top: 3.5rem;
@@ -365,8 +451,112 @@
       color: #fff;
     }
 
-    .btn-reset:active {
-      transform: scale(0.97);
+    /* Print Template Modal */
+    #print-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .cert-frame {
+      background: #fff;
+      color: #061a12;
+      width: 100%;
+      max-width: 680px;
+      padding: 2.5rem;
+      border-radius: 12px;
+      border: 8px double #15803d;
+      text-align: center;
+      position: relative;
+    }
+
+    .cert-frame h2 {
+      font-size: 2.2rem;
+      color: #15803d;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05rem;
+    }
+
+    .cert-frame .sub {
+      font-size: 1.1rem;
+      color: #4b5563;
+      margin-bottom: 1.5rem;
+    }
+
+    .cert-frame .kid-name {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #047857;
+      border-bottom: 2px solid #10b981;
+      display: inline-block;
+      padding: 0 1.5rem 0.25rem;
+      margin: 0.5rem 0 1.5rem;
+    }
+
+    .cert-frame .desc {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #1f2937;
+      margin-bottom: 1.5rem;
+    }
+
+    .cert-frame .date-line {
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: #6b7280;
+    }
+
+    .modal-actions {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .modal-btn {
+      padding: 0.6rem 1.5rem;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+
+    /* Print Specific Styles */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-modal, #print-modal * {
+        visibility: visible;
+      }
+      #print-modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        background: none;
+        display: block !important;
+        padding: 0;
+      }
+      .cert-frame {
+        border: 6px double #15803d;
+        box-shadow: none;
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 2rem;
+      }
+      .modal-actions {
+        display: none !important;
+      }
     }
 
     footer {
@@ -380,8 +570,23 @@
   </style>
 </head>
 <body>
-  <!-- Ambient Background Canvas -->
+  <!-- Ambient Particle Canvas -->
   <canvas id="ambient-canvas"></canvas>
+
+  <!-- Growing Edge Vines -->
+  <svg class="edge-vine" id="left-vine" viewBox="0 0 60 800" preserveAspectRatio="none">
+    <path d="M 0,0 Q 40,150 15,300 T 45,600 T 10,800" fill="none" stroke="#22c55e" stroke-width="6" />
+    <path d="M 15,300 Q 50,330 35,360" fill="none" stroke="#15803d" stroke-width="4" />
+    <path d="M 45,600 Q 60,630 40,660" fill="none" stroke="#15803d" stroke-width="4" />
+    <circle cx="35" cy="360" r="8" fill="#4ade80" />
+    <circle cx="40" cy="660" r="8" fill="#4ade80" />
+  </svg>
+
+  <svg class="edge-vine" id="right-vine" viewBox="0 0 60 800" preserveAspectRatio="none">
+    <path d="M 0,0 Q 40,150 15,300 T 45,600 T 10,800" fill="none" stroke="#22c55e" stroke-width="6" />
+    <path d="M 15,300 Q 50,330 35,360" fill="none" stroke="#15803d" stroke-width="4" />
+    <circle cx="35" cy="360" r="8" fill="#4ade80" />
+  </svg>
 
   <div class="content-wrapper">
     <header>
@@ -398,17 +603,13 @@
       <div>
         <span class="badge">Rated: G &amp; PG-13</span>
       </div>
-
-      <div class="ai-top-attribution">
-        Please note this webpage was created with the assistance of AI.
-      </div>
     </header>
 
-    <!-- Quick Start CTA -->
+    <!-- Quick Start Hero CTA (Launches random difficulty 1 game) -->
     <div class="cta-container" id="hero-cta">
-      <a href="games/vine-climber.html" class="btn-get-started">
-        🌿 Get Started — Play Game 1
-      </a>
+      <button class="btn-get-started" onclick="startRandomTierOneGame()">
+        🌿 Get Started — Play Random Game
+      </button>
     </div>
 
     <!-- Biome Stage & Leaf Bank -->
@@ -429,132 +630,83 @@
       </div>
     </div>
 
-    <!-- About Site Concept -->
-    <div class="card">
-      <h2>Digital Canopy Ecosystem</h2>
-      <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-muted);">
-        Jack's Jungle is an online-only learning arcade. As you climb through the vertical foliage—from the root networks of the Forest Floor up to the dense Emergent Canopy—you solve spelling challenges, arithmetic bridges, and critical thinking systems.
-      </p>
-    </div>
-
     <!-- Canopy Layer 1: Forest Floor (English & Spelling) -->
     <div class="canopy-layer">
       <div class="layer-header">
         <div class="layer-title">Layer 1: The Forest Floor (English &amp; Spelling)</div>
-        <div class="layer-req" style="color: var(--accent);">Unlocked</div>
+        <div class="layer-req" style="color: var(--accent);">Level 1 &bull; Unlocked</div>
       </div>
       <div class="game-grid">
-        
-        <!-- Game 1 -->
-        <a href="games/vine-climber.html" class="game-node" data-game-id="vine_climber">
+        <a href="games/vine-climber.html" class="game-node tier-1" data-game-id="vine_climber">
           <div>
             <h3>Vine Climber</h3>
             <p>Grow jungle vines upward by picking the missing letters and completing vocabulary terms.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="game-tag">Spelling &bull; Game 1</span>
-          </div>
+          <div class="game-footer-row"><span class="game-tag">Spelling &bull; Game 1</span></div>
         </a>
-
-        <!-- Game 2 -->
-        <a href="games/phonics-swamp.html" class="game-node" data-game-id="phonics_swamp">
+        <a href="games/phonics-swamp.html" class="game-node tier-1" data-game-id="phonics_swamp">
           <div>
             <h3>Phonics Swamp</h3>
             <p>Identify missing vowel digraphs (oa, ai, ee) to create safe stone crossings over mud.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="game-tag">Phonics &bull; Game 2</span>
-          </div>
+          <div class="game-footer-row"><span class="game-tag">Phonics &bull; Game 2</span></div>
         </a>
-
-        <!-- Game 3 -->
-        <a href="games/canopy-crosswords.html" class="game-node" data-game-id="canopy_crosswords">
+        <a href="games/canopy-crosswords.html" class="game-node tier-1" data-game-id="canopy_crosswords">
           <div>
             <h3>Canopy Crosswords</h3>
             <p>Solve responsive 4x4 crossword grids derived from jungle flora and native wildlife clues.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="game-tag">Vocabulary &bull; Game 3</span>
-          </div>
+          <div class="game-footer-row"><span class="game-tag">Vocabulary &bull; Game 3</span></div>
         </a>
-
-        <!-- Game 4 -->
-        <a href="games/root-word-expedition.html" class="game-node" data-game-id="root_word_expedition">
+        <a href="games/root-word-expedition.html" class="game-node tier-1" data-game-id="root_word_expedition">
           <div>
             <h3>Root Word Expedition</h3>
             <p>Strip prefixes and suffixes away from compound words to extract base root morphemes.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="game-tag">Morphemes &bull; Game 4</span>
-          </div>
+          <div class="game-footer-row"><span class="game-tag">Morphemes &bull; Game 4</span></div>
         </a>
-
-        <!-- Game 5 -->
-        <a href="games/anagram-antics.html" class="game-node" data-game-id="anagram_antics">
+        <a href="games/anagram-antics.html" class="game-node tier-1" data-game-id="anagram_antics">
           <div>
             <h3>Anagram Antics</h3>
             <p>Unscramble scrambled jungle creature letters before the clock runs out.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="game-tag">Orthography &bull; Game 5</span>
-          </div>
+          <div class="game-footer-row"><span class="game-tag">Orthography &bull; Game 5</span></div>
         </a>
-
-        <!-- Game 6 -->
-        <a href="games/syllable-chop.html" class="game-node" data-game-id="syllable_chop">
+        <a href="games/syllable-chop.html" class="game-node tier-1" data-game-id="syllable_chop">
           <div>
             <h3>Syllable Chop</h3>
             <p>Count and slice syllables across multi-syllabic Australian and jungle species.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="game-tag">Phonics &bull; Game 6</span>
-          </div>
+          <div class="game-footer-row"><span class="game-tag">Phonics &bull; Game 6</span></div>
         </a>
-
-        <!-- Game 7 -->
-        <a href="games/homophone-haven.html" class="game-node" data-game-id="homophone_haven">
+        <a href="games/homophone-haven.html" class="game-node tier-1" data-game-id="homophone_haven">
           <div>
             <h3>Homophone Haven</h3>
             <p>Differentiate between confusing homophones to restore meaning to field journals.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="game-tag">Grammar &bull; Game 7</span>
-          </div>
+          <div class="game-footer-row"><span class="game-tag">Grammar &bull; Game 7</span></div>
         </a>
-
-        <!-- Game 8 -->
-        <a href="games/grammar-grove.html" class="game-node" data-game-id="grammar_grove">
+        <a href="games/grammar-grove.html" class="game-node tier-1" data-game-id="grammar_grove">
           <div>
             <h3>Grammar Grove</h3>
             <p>Sort falling leaves into hollow logs by identifying nouns, verbs, adjectives, and adverbs.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="game-tag">Syntax &bull; Game 8</span>
-          </div>
+          <div class="game-footer-row"><span class="game-tag">Syntax &bull; Game 8</span></div>
         </a>
-
-        <!-- Game 9 -->
-        <a href="games/spelling-bee-swarm.html" class="game-node" data-game-id="spelling_bee_swarm">
+        <a href="games/spelling-bee-swarm.html" class="game-node tier-1" data-game-id="spelling_bee_swarm">
           <div>
             <h3>Spelling Bee Swarm</h3>
             <p>Listen to audio prompts and type precise orthographic spellings to calm the hive.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="game-tag">Spelling &bull; Game 9</span>
-          </div>
+          <div class="game-footer-row"><span class="game-tag">Spelling &bull; Game 9</span></div>
         </a>
-
-        <!-- Game 10 -->
-        <a href="games/context-clue-quest.html" class="game-node" data-game-id="context_clue_quest">
+        <a href="games/context-clue-quest.html" class="game-node tier-1" data-game-id="context_clue_quest">
           <div>
             <h3>Context Clue Quest</h3>
             <p>Determine the meaning of unfamiliar vocabulary embedded inside jungle narratives.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="game-tag">Reading &bull; Game 10</span>
-          </div>
+          <div class="game-footer-row"><span class="game-tag">Reading &bull; Game 10</span></div>
         </a>
-
       </div>
     </div>
 
@@ -570,45 +722,70 @@
             <h3>Canopy Count</h3>
             <p>Fast-paced subitizing and mental arithmetic tracking clusters of rainforest amphibians.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="lock-banner">🔒 Locked by Canopy</span>
-          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
         </a>
         <a href="games/termite-trail.html" class="game-node locked" data-game-id="termite_trail">
           <div>
             <h3>Termite Trail</h3>
             <p>Fill in missing mathematical operators (+, -, *, /) to balance branch bridge paths.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="lock-banner">🔒 Locked by Canopy</span>
-          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
         </a>
         <a href="games/fraction-foliage.html" class="game-node locked" data-game-id="fraction_foliage">
           <div>
             <h3>Fraction Foliage</h3>
             <p>Match shaded canopy leaf fractions with corresponding decimal and percentage values.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="lock-banner">🔒 Locked by Canopy</span>
-          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
         </a>
         <a href="games/perimeter-patrol.html" class="game-node locked" data-game-id="perimeter_patrol">
           <div>
             <h3>Perimeter Patrol</h3>
             <p>Calculate 2D enclosure boundaries and total fence perimeters to secure plant zones.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="lock-banner">🔒 Locked by Canopy</span>
-          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
         </a>
         <a href="games/times-table-treetops.html" class="game-node locked" data-game-id="times_table_treetops">
           <div>
             <h3>Times Table Treetops</h3>
             <p>Climb branch bridges by calculating rapid multiplication facts under time pressure.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="lock-banner">🔒 Locked by Canopy</span>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/negative-nesting.html" class="game-node locked" data-game-id="negative_nesting">
+          <div>
+            <h3>Negative Nesting</h3>
+            <p>Track sub-zero temperatures and altitude adjustments for high-altitude wildlife.</p>
           </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/ratio-river.html" class="game-node locked" data-game-id="ratio_river">
+          <div>
+            <h3>Ratio River</h3>
+            <p>Mix nutrients, clean river water, and minerals in precise proportional ratios.</p>
+          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/angle-archer.html" class="game-node locked" data-game-id="angle_archer">
+          <div>
+            <h3>Angle Archer</h3>
+            <p>Estimate acute, right, and obtuse angles to slingshot seed packets into fertile clearings.</p>
+          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/number-line-leap.html" class="game-node locked" data-game-id="number_line_leap">
+          <div>
+            <h3>Number Line Leap</h3>
+            <p>Jump accurately along suspended vine number lines to place fractions and decimals.</p>
+          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/jungle-budget.html" class="game-node locked" data-game-id="jungle_budget">
+          <div>
+            <h3>Jungle Budget</h3>
+            <p>Audit and balance expedition gear purchases using Australian Dollars (AUD).</p>
+          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
         </a>
       </div>
     </div>
@@ -620,37 +797,112 @@
         <div class="layer-req" id="emergent-req">Requires 120 Leaves</div>
       </div>
       <div class="game-grid" id="emergent-grid">
-        <div class="game-node locked" data-game-id="canopy_circuit">
+        <a href="games/canopy-circuit.html" class="game-node locked" data-game-id="canopy_circuit">
           <div>
             <h3>Canopy Circuit</h3>
             <p>Rotate conduit tiles to complete solar energy paths through broken jungle relay grids.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="lock-banner">🔒 Locked by Canopy</span>
-          </div>
-        </div>
-        <div class="game-node locked" data-game-id="food_web_weaver">
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/food-web-weaver.html" class="game-node locked" data-game-id="food_web_weaver">
           <div>
             <h3>Food Web Weaver</h3>
             <p>Construct interdependent predator-prey chains and keep ecosystems in balance.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="lock-banner">🔒 Locked by Canopy</span>
-          </div>
-        </div>
-        <div class="game-node locked" data-game-id="deduction_trail">
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/deduction-trail.html" class="game-node locked" data-game-id="deduction_trail">
           <div>
             <h3>Deduction Trail</h3>
             <p>Follow elimination logic grids from field journal notes to deduce unknown animal tracks.</p>
           </div>
-          <div class="game-footer-row">
-            <span class="lock-banner">🔒 Locked by Canopy</span>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/river-crossing.html" class="game-node locked" data-game-id="river_crossing">
+          <div>
+            <h3>River Crossing</h3>
+            <p>Solve constraint planning puzzles moving animals safely across jungle waters.</p>
           </div>
-        </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/pattern-pioneer.html" class="game-node locked" data-game-id="pattern_pioneer">
+          <div>
+            <h3>Pattern Pioneer</h3>
+            <p>Decode inductive stone glyph sequences and geometric progressions in ancient ruins.</p>
+          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/pathfinding-drone.html" class="game-node locked" data-game-id="pathfinding_drone">
+          <div>
+            <h3>Pathfinding Drone</h3>
+            <p>Program directional algorithms step-by-step to guide drones through dense canopies.</p>
+          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/resource-balancer.html" class="game-node locked" data-game-id="resource_balancer">
+          <div>
+            <h3>Resource Balancer</h3>
+            <p>Optimize moisture, parasites, and soil nutrients across seasonal cycles.</p>
+          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/optical-canopy.html" class="game-node locked" data-game-id="optical_canopy">
+          <div>
+            <h3>Optical Canopy</h3>
+            <p>Redirect solar raycasts using 90° reflectors to illuminate shadowed orchids.</p>
+          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/sorting-matrix.html" class="game-node locked" data-game-id="sorting_matrix">
+          <div>
+            <h3>Sorting Matrix</h3>
+            <p>Classify species across overlapping Venn diagrams and set-theory criteria.</p>
+          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
+        <a href="games/the-false-log.html" class="game-node locked" data-game-id="the_false_log">
+          <div>
+            <h3>The False Log</h3>
+            <p>Identify cognitive biases, false causes, and sample errors in survey reports.</p>
+          </div>
+          <div class="game-footer-row"><span class="lock-banner">🔒 Locked by Canopy</span></div>
+        </a>
       </div>
     </div>
 
-    <!-- Reset Progress Action -->
+    <!-- Achievement & Certificate Station -->
+    <div class="achievement-card">
+      <h2 style="margin-bottom: 0.5rem; color: #fff;">🏆 Canopy Explorer Achievements</h2>
+      <p style="font-size: 0.9rem; color: var(--text-muted);">
+        Complete challenge tiers to unlock personalized, printable certificates.
+      </p>
+
+      <div class="name-input-group">
+        <label for="student-name">Enter Student Name:</label>
+        <input type="text" id="student-name" class="name-input" placeholder="e.g. Charlie" oninput="saveStudentName(this.value)" />
+      </div>
+
+      <div class="cert-buttons-grid">
+        <button class="btn-cert" id="cert-btn-1" disabled onclick="generateCertificate(1)">
+          <span>📜 Level 1 Certificate</span>
+          <span style="font-size: 0.75rem; font-weight: normal;">Forest Floor Complete</span>
+        </button>
+        <button class="btn-cert" id="cert-btn-2" disabled onclick="generateCertificate(2)">
+          <span>📜 Level 2 Certificate</span>
+          <span style="font-size: 0.75rem; font-weight: normal;">Understory Complete</span>
+        </button>
+        <button class="btn-cert" id="cert-btn-3" disabled onclick="generateCertificate(3)">
+          <span>📜 Level 3 Certificate</span>
+          <span style="font-size: 0.75rem; font-weight: normal;">Emergent Canopy Complete</span>
+        </button>
+        <button class="btn-cert master" id="cert-btn-master" disabled onclick="generateCertificate('MASTER')">
+          <span style="font-size: 1.1rem;">🌟 Master Canopy Explorer Award</span>
+          <span style="font-size: 0.8rem; font-weight: normal;">All 30 Jungle Challenges Completed</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Reset Progress -->
     <div class="reset-container">
       <button class="btn-reset" onclick="resetProgress()">🗑️ Reset Canopy Progress</button>
     </div>
@@ -660,13 +912,48 @@
     </footer>
   </div>
 
+  <!-- Print Modal -->
+  <div id="print-modal">
+    <div class="cert-frame">
+      <h2 id="cert-title">Certificate of Completion</h2>
+      <div class="sub">Jack's Jungle Educational Arcade</div>
+      <p>This certifies that</p>
+      <div class="kid-name" id="cert-kid-name">Student Name</div>
+      <p class="desc" id="cert-desc">Has successfully solved educational challenges.</p>
+      <div class="date-line" id="cert-date">Date: 22 September 2026</div>
+      <div class="modal-actions">
+        <button class="modal-btn" style="background:#22c55e; color:#061a12;" onclick="window.print()">🖨️ Print Certificate</button>
+        <button class="modal-btn" style="background:#e5e7eb; color:#1f2937;" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // --- Ambient Canopy Floating Leaves Canvas ---
+    // --- Random Tier 1 Game Launch ---
+    const TIER_ONE_GAMES = [
+      'games/vine-climber.html',
+      'games/phonics-swamp.html',
+      'games/canopy-crosswords.html',
+      'games/root-word-expedition.html',
+      'games/anagram-antics.html',
+      'games/syllable-chop.html',
+      'games/homophone-haven.html',
+      'games/grammar-grove.html',
+      'games/spelling-bee-swarm.html',
+      'games/context-clue-quest.html'
+    ];
+
+    function startRandomTierOneGame() {
+      const target = TIER_ONE_GAMES[Math.floor(Math.random() * TIER_ONE_GAMES.length)];
+      window.location.href = target;
+    }
+
+    // --- Ambient Canopy Canvas with Scaled Leaf Density ---
     const canvas = document.getElementById('ambient-canvas');
     const ctx = canvas.getContext('2d');
     let width, height;
     const particles = [];
-    const PARTICLE_COUNT = 36;
+    let baseParticleCount = 30;
 
     function resizeCanvas() {
       width = canvas.width = window.innerWidth;
@@ -679,11 +966,11 @@
         this.x = Math.random() * width;
         this.y = Math.random() * height;
         this.size = Math.random() * 3 + 2;
-        this.speedX = (Math.random() - 0.5) * 0.5;
-        this.speedY = Math.random() * 0.4 + 0.2;
-        this.alpha = Math.random() * 0.4 + 0.2;
+        this.speedX = (Math.random() - 0.5) * 0.6;
+        this.speedY = Math.random() * 0.45 + 0.25;
+        this.alpha = Math.random() * 0.4 + 0.25;
         this.rotation = Math.random() * Math.PI * 2;
-        this.rotSpeed = (Math.random() - 0.5) * 0.02;
+        this.rotSpeed = (Math.random() - 0.5) * 0.025;
       }
       update() {
         this.x += this.speedX;
@@ -708,10 +995,10 @@
       }
     }
 
-    function initParticles() {
+    function initParticles(count) {
       resizeCanvas();
       particles.length = 0;
-      for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new LeafParticle());
+      for (let i = 0; i < count; i++) particles.push(new LeafParticle());
     }
 
     function animate() {
@@ -721,25 +1008,16 @@
     }
 
     window.addEventListener('resize', resizeCanvas);
-    initParticles();
+    initParticles(baseParticleCount);
     animate();
 
-    // --- Procedural Ambient Jungle Sound Synthesizer ---
-    let audioCtx = null;
-    let isSoundOn = false;
-    let ambientNoiseNode = null;
-    let ambientGainNode = null;
-    let chimeInterval = null;
+    // --- Audio Engine ---
+    let audioCtx = null, isSoundOn = false, ambientNoise = null, gainNode = null, chimeTimer = null;
 
     function initAmbientSoundEngine() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
 
-      // Gentle filtered pink noise simulating a soft canopy breeze
       const bufferSize = audioCtx.sampleRate * 2;
       const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
       const output = noiseBuffer.getChannelData(0);
@@ -752,47 +1030,43 @@
         output[i] = (b0 + b1 + b2) * 0.08;
       }
 
-      ambientNoiseNode = audioCtx.createBufferSource();
-      ambientNoiseNode.buffer = noiseBuffer;
-      ambientNoiseNode.loop = true;
+      ambientNoise = audioCtx.createBufferSource();
+      ambientNoise.buffer = noiseBuffer;
+      ambientNoise.loop = true;
 
-      // Filter to keep only warm, low-frequency rustling
       const filter = audioCtx.createBiquadFilter();
       filter.type = 'lowpass';
       filter.frequency.value = 340;
 
-      ambientGainNode = audioCtx.createGain();
-      ambientGainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
-      ambientGainNode.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 2.5);
+      gainNode = audioCtx.createGain();
+      gainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 2.5);
 
-      ambientNoiseNode.connect(filter);
-      filter.connect(ambientGainNode);
-      ambientGainNode.connect(audioCtx.destination);
-      ambientNoiseNode.start();
+      ambientNoise.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      ambientNoise.start();
 
-      // Occasional peaceful pentatonic chime
-      const pentatonic = [392.00, 440.00, 523.25, 659.25, 783.99]; // G4, A4, C5, E5, G5
-      chimeInterval = setInterval(() => {
+      const pentatonic = [392.00, 440.00, 523.25, 659.25, 783.99];
+      chimeTimer = setInterval(() => {
         if (!isSoundOn || !audioCtx) return;
         if (Math.random() > 0.4) {
-          playCanopyChime(pentatonic[Math.floor(Math.random() * pentatonic.length)]);
+          playChime(pentatonic[Math.floor(Math.random() * pentatonic.length)]);
         }
       }, 4500);
     }
 
-    function playCanopyChime(freq) {
+    function playChime(freq) {
       if (!audioCtx || audioCtx.state === 'suspended') return;
       const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
+      const g = audioCtx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
-      gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.04, audioCtx.currentTime + 0.3);
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 3.0);
-
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
+      g.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.04, audioCtx.currentTime + 0.3);
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 3.0);
+      osc.connect(g);
+      g.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + 3.1);
     }
@@ -809,11 +1083,11 @@
         icon.textContent = '🔊';
         txt.textContent = 'Sound: On';
       } else {
-        if (ambientGainNode && audioCtx) {
-          ambientGainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+        if (gainNode && audioCtx) {
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
           setTimeout(() => {
-            if (ambientNoiseNode) ambientNoiseNode.stop();
-            if (chimeInterval) clearInterval(chimeInterval);
+            if (ambientNoise) ambientNoise.stop();
+            if (chimeTimer) clearInterval(chimeTimer);
             if (audioCtx) audioCtx.suspend();
           }, 500);
         }
@@ -824,116 +1098,175 @@
       }
     }
 
-    // --- SVG Root Network Vector ---
+    // --- Progression, Vines & Achievements ---
     const rootSvgTemplate = `
       <svg class="root-overlay" viewBox="0 0 200 32" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M0 32 Q 35 15, 60 28 T 110 20 T 160 27 T 200 32" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" opacity="0.85" />
         <path d="M20 32 Q 45 22, 70 30 T 130 18 T 180 32" fill="none" stroke="#15803d" stroke-width="1.8" stroke-linecap="round" opacity="0.6" />
-        <path d="M60 28 Q 75 32, 90 24" fill="none" stroke="#22c55e" stroke-width="1.2" stroke-linecap="round" opacity="0.7" />
-        <path d="M130 20 Q 145 28, 155 22" fill="none" stroke="#86efac" stroke-width="1" stroke-linecap="round" opacity="0.8" />
+        <circle cx="90" cy="24" r="3" fill="#86efac" />
+        <circle cx="155" cy="22" r="3" fill="#86efac" />
       </svg>
     `;
 
-    // --- Progression Engine (Leaves & Completed Mapping) ---
+    const LAYER_IDS = {
+      1: ['vine_climber', 'phonics_swamp', 'canopy_crosswords', 'root_word_expedition', 'anagram_antics', 'syllable_chop', 'homophone_haven', 'grammar_grove', 'spelling_bee_swarm', 'context_clue_quest'],
+      2: ['canopy_count', 'termite_trail', 'fraction_foliage', 'perimeter_patrol', 'times_table_treetops', 'negative_nesting', 'ratio_river', 'angle_archer', 'number_line_leap', 'jungle_budget'],
+      3: ['canopy_circuit', 'food_web_weaver', 'deduction_trail', 'river_crossing', 'pattern_pioneer', 'pathfinding_drone', 'resource_balancer', 'optical_canopy', 'sorting_matrix', 'the_false_log']
+    };
+
+    function saveStudentName(name) {
+      localStorage.setItem('jacksjungle_student_name', name.trim());
+    }
+
     function updateProgress() {
       let leaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
       if (isNaN(leaves)) {
         const legacySun = parseInt(localStorage.getItem('jacksjungle_sunlight'), 10);
         leaves = !isNaN(legacySun) ? legacySun : 0;
       }
-
       document.getElementById('leaf-readout').textContent = `🍃 ${leaves} Leaves`;
 
       const percent = Math.min(100, Math.round((leaves / 200) * 100));
       document.getElementById('leaf-progress-bar').style.width = `${percent}%`;
       document.getElementById('progress-percent-label').textContent = `Canopy Density: ${percent}%`;
 
-      let hasCompletedAnyGame = leaves > 0;
+      // Restore Student Name
+      const savedName = localStorage.getItem('jacksjungle_student_name') || '';
+      document.getElementById('student-name').value = savedName;
 
-      // Scan games and attach completed roots + labels
-      const allGameNodes = document.querySelectorAll('.game-node[data-game-id]');
-      allGameNodes.forEach(node => {
-        const gameId = node.getAttribute('data-game-id');
-        const isDone = localStorage.getItem(`jacksjungle_completed_${gameId}`) === 'true';
+      let completedCount = 0;
+      let layer1Done = 0, layer2Done = 0, layer3Done = 0;
 
-        if (isDone) {
-          hasCompletedAnyGame = true;
+      const allNodes = document.querySelectorAll('.game-node[data-game-id]');
+      allNodes.forEach(node => {
+        const id = node.getAttribute('data-game-id');
+        const done = localStorage.getItem(`jacksjungle_completed_${id}`) === 'true';
+
+        if (done) {
+          completedCount++;
+          if (LAYER_IDS[1].includes(id)) layer1Done++;
+          if (LAYER_IDS[2].includes(id)) layer2Done++;
+          if (LAYER_IDS[3].includes(id)) layer3Done++;
+
           if (!node.querySelector('.root-overlay')) {
             node.insertAdjacentHTML('beforeend', rootSvgTemplate);
-            const footerRow = node.querySelector('.game-footer-row');
-            if (footerRow && !footerRow.querySelector('.completed-badge')) {
-              const badge = document.createElement('span');
-              badge.className = 'completed-badge';
-              badge.innerHTML = '🌿 Completed';
-              footerRow.appendChild(badge);
+            const foot = node.querySelector('.game-footer-row');
+            if (foot && !foot.querySelector('.completed-badge')) {
+              const b = document.createElement('span');
+              b.className = 'completed-badge';
+              b.innerHTML = '🌿 Completed';
+              foot.appendChild(b);
             }
           }
         }
       });
 
-      // Hide "Get Started" CTA button if any game is completed or leaves > 0
-      const heroCta = document.getElementById('hero-cta');
-      if (heroCta) {
-        if (hasCompletedAnyGame) {
-          heroCta.classList.add('hidden');
-        } else {
-          heroCta.classList.remove('hidden');
-        }
+      // Hide Hero CTA if any game is finished
+      const hero = document.getElementById('hero-cta');
+      if (hero) {
+        if (completedCount > 0) hero.classList.add('hidden');
+        else hero.classList.remove('hidden');
       }
 
-      // Layer 2 Unlock Check (50 Leaves)
+      // Grow border vines and scale leaf particles based on completed games
+      const vineGrowth = Math.min(1, completedCount / 15);
+      const leftVine = document.getElementById('left-vine');
+      const rightVine = document.getElementById('right-vine');
+      if (leftVine && rightVine) {
+        leftVine.style.opacity = vineGrowth;
+        leftVine.style.transform = `translateX(${-40 + (vineGrowth * 40)}px)`;
+        rightVine.style.opacity = vineGrowth;
+        rightVine.style.transform = `translateX(${40 - (vineGrowth * 40)}px) scaleX(-1)`;
+      }
+
+      // Increase falling leaf density dynamically
+      const newParticleCount = Math.floor(baseParticleCount + (completedCount * 2.5));
+      if (particles.length !== newParticleCount) {
+        initParticles(newParticleCount);
+      }
+
+      // Unlock Layer 2 (50 Leaves)
       if (leaves >= 50) {
-        const underReq = document.getElementById('understory-req');
-        if (underReq) {
-          underReq.textContent = "Unlocked";
-          underReq.style.color = "var(--accent)";
+        const req2 = document.getElementById('understory-req');
+        if (req2) {
+          req2.textContent = "Level 2 • Unlocked";
+          req2.style.color = "var(--accent)";
         }
-        const underNodes = document.querySelectorAll('#understory-grid .game-node');
-        underNodes.forEach(node => {
+        document.querySelectorAll('#understory-grid .game-node').forEach(node => {
           node.classList.remove('locked');
           const banner = node.querySelector('.lock-banner');
-          if (banner) {
-            banner.textContent = "Understory • Unlocked";
-            banner.style.color = "var(--accent)";
-          }
+          if (banner) { banner.textContent = "Understory • Unlocked"; banner.style.color = "var(--accent)"; }
         });
       }
 
-      // Layer 3 Unlock Check (120 Leaves)
+      // Unlock Layer 3 (120 Leaves)
       if (leaves >= 120) {
-        const emergReq = document.getElementById('emergent-req');
-        if (emergReq) {
-          emergReq.textContent = "Unlocked";
-          emergReq.style.color = "var(--accent)";
+        const req3 = document.getElementById('emergent-req');
+        if (req3) {
+          req3.textContent = "Level 3 • Unlocked";
+          req3.style.color = "var(--accent)";
         }
-        const emergNodes = document.querySelectorAll('#emergent-grid .game-node');
-        emergNodes.forEach(node => {
+        document.querySelectorAll('#emergent-grid .game-node').forEach(node => {
           node.classList.remove('locked');
           const banner = node.querySelector('.lock-banner');
-          if (banner) {
-            banner.textContent = "Canopy • Unlocked";
-            banner.style.color = "var(--accent)";
-          }
+          if (banner) { banner.textContent = "Canopy • Unlocked"; banner.style.color = "var(--accent)"; }
         });
       }
+
+      // Certificate eligibility
+      document.getElementById('cert-btn-1').disabled = (layer1Done < 10);
+      document.getElementById('cert-btn-2').disabled = (layer2Done < 10);
+      document.getElementById('cert-btn-3').disabled = (layer3Done < 10);
+      document.getElementById('cert-btn-master').disabled = (completedCount < 30);
     }
 
-    // --- Reset Progress Function ---
+    // --- Certificate Generation Engine ---
+    function generateCertificate(tier) {
+      const nameInput = document.getElementById('student-name');
+      const kidName = nameInput.value.trim() || 'Trailblazing Explorer';
+      const today = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      const modal = document.getElementById('print-modal');
+      const titleEl = document.getElementById('cert-title');
+      const nameEl = document.getElementById('cert-kid-name');
+      const descEl = document.getElementById('cert-desc');
+      const dateEl = document.getElementById('cert-date');
+
+      nameEl.textContent = kidName;
+      dateEl.textContent = `Awarded on: ${today}`;
+
+      if (tier === 1) {
+        titleEl.textContent = "Level 1: Forest Floor Certificate";
+        descEl.textContent = "For demonstrating orthographic accuracy, spelling excellence, and phonics mastery across all 10 Forest Floor modules.";
+      } else if (tier === 2) {
+        titleEl.textContent = "Level 2: Understory Explorer Award";
+        descEl.textContent = "For conquering arithmetic balance, angles, negative integers, and financial ledgers throughout the Understory layer.";
+      } else if (tier === 3) {
+        titleEl.textContent = "Level 3: Emergent Canopy Honors";
+        descEl.textContent = "For outstanding deductive reasoning, systems optimization, raycast reflection, and critical thinking at the canopy apex.";
+      } else if (tier === 'MASTER') {
+        titleEl.textContent = "🌟 Master Canopy Explorer 🌟";
+        descEl.textContent = "Has completed all 30 challenges in Jack's Jungle! Recognized as an apex naturalist, mathematician, and critical thinker.";
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('print-modal').style.display = 'none';
+    }
+
     function resetProgress() {
-      const confirmReset = window.confirm("Are you sure you want to reset all canopy progress and collected leaves? This cannot be undone.");
+      const confirmReset = window.confirm("Are you sure you want to reset all canopy progress, leaves, and certificate unlocks? This cannot be undone.");
       if (confirmReset) {
         const keysToRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
-          if (key && key.startsWith('jacksjungle_')) {
-            keysToRemove.push(key);
-          }
+          if (key && key.startsWith('jacksjungle_')) keysToRemove.push(key);
         }
         keysToRemove.forEach(k => localStorage.removeItem(k));
-        
         localStorage.setItem('jacksjungle_leaves', '0');
         localStorage.setItem('jacksjungle_sunlight', '0');
-
         window.location.reload();
       }
     }
