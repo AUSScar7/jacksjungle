@@ -58,7 +58,7 @@
 
   <script>
     let audioCtx = null;
-    function playBeep(freq, type, dur, isErr = false) {
+    function playTone(freq, type, dur, isErr = false) {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
@@ -69,6 +69,16 @@
       g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
       osc.connect(g); g.connect(audioCtx.destination);
       osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
     }
 
     const STAGES = [
@@ -88,13 +98,8 @@
         document.getElementById('btn-stack').innerHTML = "";
         status.style.color = "#fdba74";
         status.textContent = "🍃 +20 Leaves Earned!";
-        
-        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
-        localStorage.setItem('jacksjungle_leaves', l + 20);
-        localStorage.setItem('jacksjungle_sunlight', l + 20);
-        localStorage.setItem('jacksjungle_completed_root_word_expedition', 'true');
-        
-        playBeep(523.25, 'sine', 0.2);
+        awardGameCompletion('root_word_expedition');
+        playTone(523.25, 'sine', 0.2);
         return;
       }
 
@@ -110,13 +115,13 @@
         b.textContent = ch;
         b.onclick = () => {
           if (ch === s.root) {
-            playBeep(480, 'triangle', 0.15);
+            playTone(480, 'triangle', 0.15);
             idx++;
             render();
           } else {
-            playBeep(150, 'sawtooth', 0.3, true);
+            playTone(150, 'sawtooth', 0.3, true);
             b.classList.add('wrong');
-            status.textContent = `"${ch}" is an affix. Find the base root word!`;
+            status.textContent = `"${ch}" is an affix. Extract the base root!`;
             setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
