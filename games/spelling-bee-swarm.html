@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg: #1c1917; --card: #292524; --accent: #facc15; --accent-dim: #ca8a04;
-      --text: #fef08a; --border: #44403c;
+      --text: #fef08a; --border: #44403c; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -22,11 +22,23 @@
     }
     .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; }
     .nav-btn { background: transparent; border: 1px solid var(--accent); color: var(--text); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
-    .listen-btn { background: var(--accent); color: #000; border: none; padding: 0.8rem 1.5rem; border-radius: 2rem; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin: 1rem 0; }
-    .input-display { font-size: 2rem; letter-spacing: 0.2rem; min-height: 3rem; border-bottom: 2px solid var(--accent); margin-bottom: 1.2rem; width: 80%; text-align: center; color: #fff; }
+    .listen-btn { background: var(--accent); color: #000; border: none; padding: 0.8rem 1.5rem; border-radius: 2rem; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin: 0.75rem 0; }
+    .listen-btn:active { background: var(--accent-dim); }
+    .input-display { font-size: 2rem; letter-spacing: 0.2rem; min-height: 3rem; border-bottom: 2px solid var(--accent); margin-bottom: 1rem; width: 80%; text-align: center; color: #fff; }
+    .input-display.wrong {
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
     .keypad { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; width: 100%; }
-    .key-b { background: #44403c; border: 1px solid #57534e; color: #fff; padding: 0.6rem 0; font-size: 1.1rem; font-weight: bold; border-radius: 4px; cursor: pointer; }
+    .key-b { background: #44403c; border: 1px solid #57534e; color: #fff; padding: 0.65rem 0; font-size: 1.1rem; font-weight: bold; border-radius: 4px; cursor: pointer; }
     .key-b:active { background: var(--accent-dim); }
+    .status-msg { height: 1.4rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 0.75rem; }
   </style>
 </head>
 <body>
@@ -39,36 +51,70 @@
     <p style="font-size:0.85rem; color:#d6d3d1; margin-bottom:0.5rem;" id="clue-text">Clue: Large tropical snake</p>
     <div class="input-display" id="spelled-box"></div>
     <div class="keypad" id="keyboard"></div>
-    <button style="margin-top:1rem; background:none; border:1px solid #78716c; color:#d6d3d1; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer;" onclick="clearWord()">Clear</button>
+    <button style="margin-top:0.75rem; background:none; border:1px solid #78716c; color:#d6d3d1; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer;" onclick="clearWord()">Clear</button>
+    <div class="status-msg" id="status-out"></div>
   </div>
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const WORDS = [
       { word: "PYTHON", clue: "Large non-venomous constrictor snake" },
       { word: "FERN", clue: "Ancient green feather-shaped canopy plant" },
       { word: "JAGUAR", clue: "Strong spotted apex predator of the rainforest" }
     ];
     let wIdx = 0, buffer = "";
+
     function speakCurrentWord() {
       if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(WORDS[wIdx].word);
-        u.rate = 0.85; window.speechSynthesis.speak(u);
+        u.rate = 0.85;
+        window.speechSynthesis.speak(u);
       } else {
-        alert("Audio speech unavailable on this device. Word is: " + WORDS[wIdx].word);
+        document.getElementById('status-out').textContent = `Audio unavailable. Word has ${WORDS[wIdx].word.length} letters.`;
       }
     }
+
     function renderUI() {
+      const status = document.getElementById('status-out');
+      status.textContent = "";
+
       if (wIdx >= WORDS.length) {
         document.getElementById('spelled-box').textContent = "SWARM CALMED!";
         document.getElementById('keyboard').innerHTML = "";
-        let sun = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
-        localStorage.setItem('jacksjungle_sunlight', sun + 20);
-        localStorage.setItem('jacksjungle_completed_spelling_bee_swarm', 'true');
+        status.style.color = "var(--text)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('spelling_bee_swarm');
+        playTone(520, 'sine', 0.2);
         return;
       }
       document.getElementById('hive-stat').textContent = `Word: ${wIdx + 1} / ${WORDS.length}`;
       document.getElementById('clue-text').textContent = "Clue: " + WORDS[wIdx].clue;
       document.getElementById('spelled-box').textContent = buffer;
     }
+
     function initKeys() {
       const kb = document.getElementById('keyboard');
       "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(ch => {
@@ -76,15 +122,32 @@
         b.className = 'key-b'; b.textContent = ch;
         b.onclick = () => {
           buffer += ch;
+          playTone(420, 'triangle', 0.08);
           renderUI();
-          if (buffer === WORDS[wIdx].word) {
-            wIdx++; buffer = ""; renderUI();
+          if (buffer.length === WORDS[wIdx].word.length) {
+            if (buffer === WORDS[wIdx].word) {
+              playTone(587, 'sine', 0.2);
+              wIdx++;
+              buffer = "";
+              renderUI();
+            } else {
+              playTone(150, 'sawtooth', 0.3, true);
+              const box = document.getElementById('spelled-box');
+              box.classList.add('wrong');
+              document.getElementById('status-out').textContent = "Incorrect spelling! Tap Clear to retry.";
+              setTimeout(() => box.classList.remove('wrong'), 700);
+            }
           }
         };
         kb.appendChild(b);
       });
     }
-    function clearWord() { buffer = ""; renderUI(); }
+
+    function clearWord() {
+      buffer = "";
+      document.getElementById('status-out').textContent = "";
+      renderUI();
+    }
     initKeys(); renderUI();
   </script>
 </body>
