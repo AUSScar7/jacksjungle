@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FPNZR7VVNC', {
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Pattern Pioneer - Jack's Jungle</title>
   <style>
     :root {
       --bg: #18141e; --card: #272132; --accent: #c084fc; --accent-dim: #9333ea;
-      --text: #faf5ff; --muted: #e9d5ff;
+      --text: #faf5ff; --muted: #e9d5ff; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -24,8 +35,24 @@
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
     .sequence-display { font-size: 2.6rem; letter-spacing: 0.4rem; margin: 1.5rem 0; color: #fff; }
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; width: 100%; }
-    .glyph-btn { background: #3b324c; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 2rem; border-radius: 0.6rem; cursor: pointer; }
+    .glyph-btn {
+      background: #3b324c; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
+      font-size: 2rem; border-radius: 0.6rem; cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .glyph-btn:active { background: var(--accent-dim); }
+    .glyph-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -37,22 +64,51 @@
     <p style="color: var(--muted); font-size: 0.9rem;">What glyph completes the inductive sequence?</p>
     <div class="sequence-display" id="sequence-text">▲ ■ ▲ ■ ?</div>
     <div class="grid" id="choices-field"></div>
+    <div class="status-msg" id="status-label"></div>
   </div>
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const SEQUENCES = [
       { seq: "▲ ■ ▲ ■ ?", correct: "▲", opts: ["▲", "●", "◆"] },
       { seq: "● ◆ ● ◆ ?", correct: "●", opts: ["■", "●", "▲"] },
       { seq: "1 2 4 8 ?", correct: "16", opts: ["12", "14", "16"] }
     ];
     let sIdx = 0;
+
     function renderSequence() {
+      const status = document.getElementById('status-label');
+      status.textContent = "";
+
       if (sIdx >= SEQUENCES.length) {
         document.getElementById('sequence-text').textContent = "RUINS DECODED!";
-        document.getElementById('choices-field').innerHTML = "<p style='grid-column:span 3; text-align:center; font-weight:bold; color:var(--muted);'>+20 Leaves Added</p>";
-        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
-        localStorage.setItem('jacksjungle_leaves', l + 20);
-        localStorage.setItem('jacksjungle_sunlight', l + 20);
-        localStorage.setItem('jacksjungle_completed_pattern_pioneer', 'true');
+        document.getElementById('choices-field').innerHTML = "";
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('pattern_pioneer');
+        playTone(520, 'sine', 0.2);
         return;
       }
       const s = SEQUENCES[sIdx];
@@ -67,9 +123,13 @@
         b.textContent = opt;
         b.onclick = () => {
           if (opt === s.correct) {
+            playTone(480, 'triangle', 0.15);
             sIdx++; renderSequence();
           } else {
-            alert("Analyze the repeating alternation or mathematical delta!");
+            playTone(160, 'sawtooth', 0.25, true);
+            b.classList.add('wrong');
+            status.textContent = "Analyze the repeating alternating delta!";
+            setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
         fld.appendChild(b);
