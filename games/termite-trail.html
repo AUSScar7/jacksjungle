@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg: #1a1208; --card: #2a1c0d; --accent: #f59e0b; --accent-dim: #b45309;
-      --text: #fef3c7; --muted: #fde68a;
+      --text: #fef3c7; --muted: #fde68a; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -25,8 +25,24 @@
     .eq-row { font-size: 2.2rem; font-weight: 800; margin: 2rem 0; color: #fff; }
     .op-slot { color: var(--accent); border-bottom: 3px dashed var(--accent); padding: 0 0.5rem; }
     .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; width: 100%; }
-    .op-btn { background: #3d2913; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.6rem; font-weight: bold; border-radius: 0.5rem; cursor: pointer; }
+    .op-btn {
+      background: #3d2913; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
+      font-size: 1.6rem; font-weight: bold; border-radius: 0.5rem; cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .op-btn:active { background: var(--accent-dim); }
+    .op-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -37,14 +53,39 @@
     </div>
     <p style="color: var(--muted); font-size: 0.9rem;">Pick the missing mathematical operator:</p>
     <div class="eq-row" id="eq-display"></div>
-    <div class="grid">
-      <button class="op-btn" onclick="checkOp('+')">+</button>
-      <button class="op-btn" onclick="checkOp('-')">&minus;</button>
-      <button class="op-btn" onclick="checkOp('*')">&times;</button>
-      <button class="op-btn" onclick="checkOp('/')">&divide;</button>
+    <div class="grid" id="op-grid">
+      <button class="op-btn" onclick="checkOp('+', this)">+</button>
+      <button class="op-btn" onclick="checkOp('-', this)">&minus;</button>
+      <button class="op-btn" onclick="checkOp('*', this)">&times;</button>
+      <button class="op-btn" onclick="checkOp('/', this)">&divide;</button>
     </div>
+    <div class="status-msg" id="status-label"></div>
   </div>
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const EQS = [
       { a: 12, b: 4, res: 16, op: '+' },
       { a: 18, b: 3, res: 6, op: '/' },
@@ -52,24 +93,34 @@
       { a: 25, b: 9, res: 16, op: '-' }
     ];
     let idx = 0;
+
     function renderEq() {
+      const status = document.getElementById('status-label');
+      status.textContent = "";
+
       if (idx >= EQS.length) {
         document.getElementById('eq-display').textContent = "TRAIL BALANCED!";
-        document.querySelector('.grid').innerHTML = "<p style='grid-column: span 4; text-align:center; font-weight:bold; color:var(--muted);'>+20 Sunlight Stored</p>";
-        let s = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
-        localStorage.setItem('jacksjungle_sunlight', s + 20);
-        localStorage.setItem('jacksjungle_completed_termite_trail', 'true');
+        document.getElementById('op-grid').innerHTML = "";
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('termite_trail');
+        playTone(520, 'sine', 0.2);
         return;
       }
       const e = EQS[idx];
       document.getElementById('step-lbl').textContent = `Equation: ${idx + 1} / ${EQS.length}`;
       document.getElementById('eq-display').innerHTML = `${e.a} <span class="op-slot">?</span> ${e.b} = ${e.res}`;
     }
-    function checkOp(op) {
+
+    function checkOp(op, btn) {
       if (op === EQS[idx].op) {
+        playTone(480, 'triangle', 0.15);
         idx++; renderEq();
       } else {
-        alert("The branch tilts! Re-evaluate the equation.");
+        playTone(160, 'sawtooth', 0.25, true);
+        btn.classList.add('wrong');
+        document.getElementById('status-label').textContent = "The branch tilts! Re-evaluate the equation.";
+        setTimeout(() => btn.classList.remove('wrong'), 700);
       }
     }
     renderEq();
