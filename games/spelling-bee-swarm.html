@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FPNZR7VVNC', {
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Spelling Bee Swarm - Jack's Jungle</title>
@@ -47,11 +58,11 @@
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
       <span id="hive-stat">Word: 1 / 3</span>
     </div>
-    <button class="listen-btn" onclick="speakCurrentWord()">🔊 Hear Word</button>
+    <button class="listen-btn" id="hear-btn" onclick="speakCurrentWord()">🔊 Hear Word</button>
     <p style="font-size:0.85rem; color:#d6d3d1; margin-bottom:0.5rem;" id="clue-text">Clue: Large tropical snake</p>
     <div class="input-display" id="spelled-box"></div>
     <div class="keypad" id="keyboard"></div>
-    <button style="margin-top:0.75rem; background:none; border:1px solid #78716c; color:#d6d3d1; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer;" onclick="clearWord()">Clear</button>
+    <button style="margin-top:0.75rem; background:none; border:1px solid #78716c; color:#d6d3d1; padding:0.4rem 0.8rem; border-radius:4px; cursor:pointer;" id="clear-btn" onclick="clearWord()">Clear</button>
     <div class="status-msg" id="status-out"></div>
   </div>
   <script>
@@ -103,7 +114,19 @@
 
       if (wIdx >= WORDS.length) {
         document.getElementById('spelled-box').textContent = "SWARM CALMED!";
+        
+        // Remove Hear Word button, keyboard, clear button, and clue text on completion
+        const hearBtn = document.getElementById('hear-btn');
+        if (hearBtn) hearBtn.remove();
+        
+        const clearBtn = document.getElementById('clear-btn');
+        if (clearBtn) clearBtn.remove();
+        
+        const clueText = document.getElementById('clue-text');
+        if (clueText) clueText.remove();
+
         document.getElementById('keyboard').innerHTML = "";
+        
         status.style.color = "var(--text)";
         status.textContent = "🍃 +20 Leaves Earned!";
         awardGameCompletion('spelling_bee_swarm');
