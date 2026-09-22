@@ -6,112 +6,46 @@
   <title>Vine Climber - Jack's Jungle</title>
   <style>
     :root {
-      --bg: #061a12;
-      --card: #0d2b1f;
-      --accent: #22c55e;
-      --accent-dim: #15803d;
-      --text: #f8fafc;
-      --muted: #86efac;
-      --danger: #ef4444;
+      --bg: #061a12; --card: #0d2b1f; --accent: #22c55e; --accent-dim: #15803d;
+      --text: #f8fafc; --muted: #86efac; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg); color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
     }
     .game-box {
-      background: var(--card);
-      border: 2px solid var(--accent-dim);
-      border-radius: 1rem;
-      width: 100%;
-      max-width: 480px;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .top-bar {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-    .nav-btn {
-      background: transparent;
-      border: 1px solid var(--accent-dim);
-      color: var(--muted);
-      padding: 0.35rem 0.75rem;
-      border-radius: 0.4rem;
-      cursor: pointer;
-      font-size: 0.85rem;
-      text-decoration: none;
-    }
-    .vine-meter-track {
-      width: 100%;
-      height: 14px;
-      background: rgba(0,0,0,0.4);
-      border-radius: 7px;
-      overflow: hidden;
-      margin-bottom: 1.5rem;
-      border: 1px solid var(--accent-dim);
-    }
-    .vine-meter-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #15803d, var(--accent));
-      transition: width 0.3s ease;
-    }
-    .word-prompt {
-      font-size: 1.05rem;
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-      text-align: center;
-      min-height: 2.5rem;
-    }
-    .word-display {
-      font-size: 2.2rem;
-      font-weight: 800;
-      letter-spacing: 0.25rem;
-      color: #ffffff;
-      margin-bottom: 1.5rem;
-      display: flex;
-      gap: 0.4rem;
-    }
-    .letter-slot {
-      border-bottom: 3px solid var(--accent);
-      min-width: 2rem;
-      text-align: center;
-    }
-    .options-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.75rem;
-      width: 100%;
-      margin-bottom: 1rem;
-    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .vine-meter-track { width: 100%; height: 14px; background: rgba(0,0,0,0.4); border-radius: 7px; overflow: hidden; margin-bottom: 1.5rem; border: 1px solid var(--accent-dim); }
+    .vine-meter-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #15803d, var(--accent)); transition: width 0.3s ease; }
+    .word-prompt { font-size: 1.05rem; color: var(--muted); margin-bottom: 0.5rem; text-align: center; min-height: 2.5rem; }
+    .word-display { font-size: 2.2rem; font-weight: 800; letter-spacing: 0.25rem; color: #ffffff; margin-bottom: 1.5rem; display: flex; gap: 0.4rem; }
+    .letter-slot { border-bottom: 3px solid var(--accent); min-width: 2rem; text-align: center; }
+    .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; margin-bottom: 1rem; }
     .opt-btn {
-      background: #143d2c;
-      color: var(--text);
-      border: 2px solid var(--accent-dim);
-      border-radius: 0.6rem;
-      padding: 1rem;
-      font-size: 1.3rem;
-      font-weight: bold;
-      cursor: pointer;
+      background: #143d2c; color: var(--text); border: 2px solid var(--accent-dim);
+      border-radius: 0.6rem; padding: 1rem; font-size: 1.3rem; font-weight: bold; cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
     }
     .opt-btn:active { background: var(--accent-dim); }
-    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; }
+    .opt-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); }
   </style>
 </head>
 <body>
@@ -120,9 +54,7 @@
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
       <span id="score-readout">Height: 0m</span>
     </div>
-    <div class="vine-meter-track">
-      <div id="vine-fill" class="vine-meter-fill"></div>
-    </div>
+    <div class="vine-meter-track"><div id="vine-fill" class="vine-meter-fill"></div></div>
     <div class="word-prompt" id="prompt-clue">Definition: A dense tropical forest</div>
     <div class="word-display" id="word-target"></div>
     <div class="options-grid" id="options-container"></div>
@@ -131,19 +63,19 @@
 
   <script>
     let audioCtx = null;
-    function playBeep(freq, type, duration) {
+    function playBeep(freq, type, duration, isError = false) {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
+      const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
       osc.type = type;
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isError) {
+        osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + duration);
+      }
+      gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + duration);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + duration);
     }
 
     const WORDS = [
@@ -154,16 +86,25 @@
       { clue: "Tropical tree-dwelling flower", full: "ORCHID", missing: 4 }
     ];
 
-    let currentIdx = 0;
-    let score = 0;
+    let currentIdx = 0, score = 0;
 
     function renderQuestion() {
+      const status = document.getElementById('status-label');
+      status.textContent = "";
+      status.style.color = "var(--danger)";
+
       if (currentIdx >= WORDS.length) {
         document.getElementById('word-target').innerHTML = "CANOPY REACHED!";
         document.getElementById('prompt-clue').textContent = "Vine successfully anchored to the treetops.";
         document.getElementById('options-container').innerHTML = "";
-        document.getElementById('status-label').textContent = "+20 Sunlight Claimed!";
-        saveProgress();
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        
+        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
+        localStorage.setItem('jacksjungle_leaves', l + 20);
+        localStorage.setItem('jacksjungle_sunlight', l + 20);
+        localStorage.setItem('jacksjungle_completed_vine_climber', 'true');
+        
         playBeep(523.25, 'sine', 0.15);
         setTimeout(() => playBeep(659.25, 'sine', 0.25), 140);
         return;
@@ -175,11 +116,7 @@
       
       let displayHtml = "";
       for (let i = 0; i < q.full.length; i++) {
-        if (i === q.missing) {
-          displayHtml += `<span class="letter-slot">_</span>`;
-        } else {
-          displayHtml += `<span class="letter-slot">${q.full[i]}</span>`;
-        }
+        displayHtml += (i === q.missing) ? `<span class="letter-slot">_</span>` : `<span class="letter-slot">${q.full[i]}</span>`;
       }
       document.getElementById('word-target').innerHTML = displayHtml;
 
@@ -197,32 +134,24 @@
         const btn = document.createElement('button');
         btn.className = "opt-btn";
         btn.textContent = char;
-        btn.onclick = () => submitAnswer(char, targetChar);
+        btn.onclick = () => {
+          if (char === targetChar) {
+            playBeep(440, 'triangle', 0.15);
+            score += 20;
+            document.getElementById('score-readout').textContent = `Height: ${score}m`;
+            document.getElementById('vine-fill').style.width = `${(score / 100) * 100}%`;
+            currentIdx++;
+            renderQuestion();
+          } else {
+            playBeep(160, 'sawtooth', 0.3, true);
+            btn.classList.add('wrong');
+            status.textContent = `"${char}" is incorrect! Choose another letter.`;
+            setTimeout(() => btn.classList.remove('wrong'), 700);
+          }
+        };
         optsBox.appendChild(btn);
       });
     }
-
-    function submitAnswer(picked, correct) {
-      if (picked === correct) {
-        playBeep(440, 'triangle', 0.15);
-        score += 20;
-        document.getElementById('score-readout').textContent = `Height: ${score}m`;
-        document.getElementById('vine-fill').style.width = `${(score / 100) * 100}%`;
-        currentIdx++;
-        renderQuestion();
-      } else {
-        playBeep(180, 'sawtooth', 0.25);
-        document.getElementById('status-label').textContent = "Try again!";
-        setTimeout(() => { document.getElementById('status-label').textContent = ""; }, 1000);
-      }
-    }
-
-    function saveProgress() {
-      let currentSunlight = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
-      localStorage.setItem('jacksjungle_sunlight', currentSunlight + 20);
-      localStorage.setItem('jacksjungle_completed_vine_climber', 'true');
-    }
-
     renderQuestion();
   </script>
 </body>
