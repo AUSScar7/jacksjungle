@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FPNZR7VVNC');
+</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Negative Nesting - Jack's Jungle</title>
@@ -24,9 +33,24 @@
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
     .temp-readout { font-size: 2.8rem; font-weight: 800; color: #fff; margin: 1.25rem 0; letter-spacing: 0.05rem; }
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; }
-    .opt-btn { background: #243356; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.3rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; }
+    .opt-btn {
+      background: #243356; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
+      font-size: 1.3rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .opt-btn:active { background: var(--accent-dim); }
-    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; margin-top: 1rem; }
+    .opt-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -35,22 +59,36 @@
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
       <span id="round-indicator">Roost: 1 / 4</span>
     </div>
-    <p style="color: var(--muted); font-size: 0.95rem; text-align: center;" id="scenario-text">The temperature starts at 3°C and drops by 7°C at night.</p>
+    <p style="color: var(--muted); font-size: 0.95rem; text-align: center;" id="scenario-text"></p>
     <div class="temp-readout" id="target-temp">? °C</div>
     <div class="grid" id="choices-grid"></div>
     <div class="status-msg" id="status-label"></div>
   </div>
   <script>
     let audioCtx = null;
-    function ping(f, t) {
+    function playTone(freq, type, dur, isErr = false) {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-      o.frequency.value = f; g.gain.setValueAtTime(0.15, audioCtx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + t);
-      o.connect(g); g.connect(audioCtx.destination);
-      o.start(); o.stop(audioCtx.currentTime + t);
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
     }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const ROOSTS = [
       { text: "Starting at 3°C, the cold canopy wind drops the temperature by 7°C.", ans: -4, distractors: [-3, 4, -10] },
       { text: "At high altitude, it is -6°C. Morning sun warms it up by 9°C.", ans: 3, distractors: [-3, -15, 15] },
@@ -58,14 +96,20 @@
       { text: "Deep hollow temperature is -8°C. A thermal draft raises it by 11°C.", ans: 3, distractors: [-19, -3, 19] }
     ];
     let idx = 0;
+
     function renderRoost() {
+      const status = document.getElementById('status-label');
+      status.textContent = "";
+
       if (idx >= ROOSTS.length) {
         document.getElementById('scenario-text').textContent = "All high-altitude roosts calculated!";
         document.getElementById('target-temp').textContent = "ROOST SECURE";
         document.getElementById('choices-grid').innerHTML = "";
-        document.getElementById('status-label').textContent = "+20 Leaves Claimed!";
-        saveLeaves('negative_nesting');
-        ping(600, 0.25); return;
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('negative_nesting');
+        playTone(520, 'sine', 0.2);
+        return;
       }
       const r = ROOSTS[idx];
       document.getElementById('round-indicator').textContent = `Roost: ${idx + 1} / ${ROOSTS.length}`;
@@ -81,22 +125,17 @@
         b.textContent = `${val > 0 ? '+' : ''}${val}°C`;
         b.onclick = () => {
           if (val === r.ans) {
-            ping(480, 0.15);
+            playTone(480, 'triangle', 0.15);
             idx++; renderRoost();
           } else {
-            ping(160, 0.2);
-            document.getElementById('status-label').textContent = "Check negative values on the number line!";
-            setTimeout(() => { document.getElementById('status-label').textContent = ""; }, 1200);
+            playTone(160, 'sawtooth', 0.25, true);
+            b.classList.add('wrong');
+            status.textContent = `Check direction on the temperature scale below 0°C!`;
+            setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
         grid.appendChild(b);
       });
-    }
-    function saveLeaves(gameId) {
-      let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
-      localStorage.setItem('jacksjungle_leaves', l + 20);
-      localStorage.setItem('jacksjungle_sunlight', l + 20);
-      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
     }
     renderRoost();
   </script>
