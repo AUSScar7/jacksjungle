@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Angle Archer - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #151a08; --card: #252e0e; --accent: #84cc16; --accent-dim: #65a30d;
+      --text: #f7fee7; --muted: #d9f99d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    canvas { background: #131707; border: 1px solid var(--accent-dim); border-radius: 0.5rem; width: 240px; height: 160px; margin: 1rem 0; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; width: 100%; }
+    .angle-btn { background: #354215; border: 2px solid var(--accent-dim); color: #fff; padding: 0.85rem 0; font-size: 1.1rem; font-weight: bold; border-radius: 0.5rem; cursor: pointer; }
+    .angle-btn:active { background: var(--accent-dim); }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span id="target-count">Target: 1 / 4</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.9rem;">Estimate the angle between the vines:</p>
+    <canvas id="angle-canvas" width="240" height="160"></canvas>
+    <div class="grid" id="opts-container"></div>
+  </div>
+  <script>
+    const ANGLES = [
+      { deg: 45, type: "Acute (45°)", distractors: ["90°", "135°"] },
+      { deg: 90, type: "Right Angle (90°)", distractors: ["60°", "120°"] },
+      { deg: 120, type: "Obtuse (120°)", distractors: ["45°", "85°"] },
+      { deg: 30, type: "Acute (30°)", distractors: ["75°", "110°"] }
+    ];
+    let aIdx = 0;
+    const canvas = document.getElementById('angle-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function drawAngle(deg) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const cx = 60, cy = 120, r = 70;
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#84cc16";
+
+      // Base arm
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + r, cy);
+      ctx.stroke();
+
+      // Angled arm
+      const rad = -(deg * Math.PI / 180);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + r * Math.cos(rad), cy + r * Math.sin(rad));
+      ctx.stroke();
+
+      // Arc
+      ctx.beginPath();
+      ctx.arc(cx, cy, 25, 0, rad, true);
+      ctx.strokeStyle = "#a3e635";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    function renderQuestion() {
+      if (aIdx >= ANGLES.length) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById('opts-container').innerHTML = "<p style='grid-column:span 3; text-align:center; font-weight:bold; color:var(--muted);'>+20 Leaves Added</p>";
+        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
+        localStorage.setItem('jacksjungle_leaves', l + 20);
+        localStorage.setItem('jacksjungle_sunlight', l + 20);
+        localStorage.setItem('jacksjungle_completed_angle_archer', 'true');
+        return;
+      }
+      const item = ANGLES[aIdx];
+      document.getElementById('target-count').textContent = `Target: ${aIdx + 1} / ${ANGLES.length}`;
+      drawAngle(item.deg);
+
+      let choices = [item.type, ...item.distractors].sort(() => Math.random() - 0.5);
+      const container = document.getElementById('opts-container');
+      container.innerHTML = "";
+      choices.forEach(ch => {
+        const b = document.createElement('button');
+        b.className = 'angle-btn';
+        b.textContent = ch;
+        b.onclick = () => {
+          if (ch === item.type) {
+            aIdx++; renderQuestion();
+          } else {
+            alert("Review angle categories: Acute (<90°), Right (90°), Obtuse (>90°)");
+          }
+        };
+        container.appendChild(b);
+      });
+    }
+    renderQuestion();
+  </script>
+</body>
+</html>
