@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Optical Canopy - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #1a1608; --card: #2e2612; --accent: #facc15; --accent-dim: #ca8a04;
+      --text: #fefce8; --muted: #fef08a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 440px; padding: 1.25rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .grid { display: grid; grid-template-columns: repeat(3, 72px); grid-template-rows: repeat(3, 72px); gap: 6px; margin: 1.2rem 0; }
+    .cell {
+      background: #3e3318; border: 2px solid #574822; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer;
+    }
+    .cell.mirror { color: var(--accent); font-weight: bold; }
+    .cell.sun { background: rgba(250, 204, 21, 0.2); border-color: var(--accent); }
+    .cell.flower { background: rgba(34, 197, 94, 0.2); border-color: #22c55e; }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span>Raycast Reflection</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.85rem; text-align: center;">Tap mirrors to redirect the beam ☀️ into the 🌸 Orchid:</p>
+    <div class="grid" id="optics-grid"></div>
+    <button style="width:100%; padding:0.85rem; background:var(--accent); color:#000; font-weight:800; border:none; border-radius:6px; cursor:pointer;" onclick="traceBeam()">⚡ Trace Solar Beam</button>
+  </div>
+  <script>
+    // Mirrors: 0 = '\' (Down-Right / Up-Left), 1 = '/' (Down-Left / Up-Right)
+    let m1 = 0, m2 = 1;
+
+    function renderGrid() {
+      const g = document.getElementById('optics-grid');
+      g.innerHTML = '';
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          const d = document.createElement('div');
+          d.className = 'cell';
+          if (r === 0 && c === 0) {
+            d.classList.add('sun'); d.textContent = '☀️';
+          } else if (r === 0 && c === 2) {
+            d.classList.add('mirror');
+            d.textContent = m1 === 0 ? '╲' : '╱';
+            d.onclick = () => { m1 = (m1 + 1) % 2; renderGrid(); };
+          } else if (r === 2 && c === 2) {
+            d.classList.add('mirror');
+            d.textContent = m2 === 0 ? '╲' : '╱';
+            d.onclick = () => { m2 = (m2 + 1) % 2; renderGrid(); };
+          } else if (r === 2 && c === 0) {
+            d.classList.add('flower'); d.textContent = '🌸';
+          } else {
+            d.style.opacity = '0.25'; d.textContent = '•';
+          }
+          g.appendChild(d);
+        }
+      }
+    }
+
+    function traceBeam() {
+      // Beam enters (0,0) traveling RIGHT towards (0,2)
+      // Mirror at (0,2) must be '╲' (m1 === 0) to bounce beam DOWN towards (2,2)
+      // Mirror at (2,2) must be '╱' (m2 === 1) to bounce beam LEFT towards (2,0)
+      if (m1 === 0 && m2 === 1) {
+        alert('Solar Beam Connected! Orchid Blooming. +20 Leaves Added.');
+        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
+        localStorage.setItem('jacksjungle_leaves', l + 20);
+        localStorage.setItem('jacksjungle_sunlight', l + 20);
+        localStorage.setItem('jacksjungle_completed_optical_canopy', 'true');
+      } else {
+        alert('The light ray bounced away into the dense brush! Re-orient the reflective glass.');
+      }
+    }
+
+    renderGrid();
+  </script>
+</body>
+</html>
