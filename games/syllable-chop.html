@@ -24,9 +24,24 @@
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
     .word-display { font-size: 2.2rem; font-weight: 800; letter-spacing: 0.15rem; color: #fff; margin: 2rem 0; text-align: center; }
     .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; width: 100%; }
-    .num-btn { background: #143d2c; color: var(--text); border: 2px solid var(--accent-dim); border-radius: 0.6rem; padding: 1rem; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
+    .num-btn {
+      background: #143d2c; color: var(--text); border: 2px solid var(--accent-dim);
+      border-radius: 0.6rem; padding: 1rem; font-size: 1.5rem; font-weight: bold; cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .num-btn:active { background: var(--accent-dim); }
-    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; margin-top: 1rem; }
+    .num-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; margin-top: 1rem; color: var(--danger); }
   </style>
 </head>
 <body>
@@ -38,24 +53,38 @@
     <p style="color: var(--muted); font-size: 0.95rem;">Count the syllables in the word:</p>
     <div class="word-display" id="word-target">CATERPILLAR</div>
     <div class="grid">
-      <button class="num-btn" onclick="checkSyllables(1)">1</button>
-      <button class="num-btn" onclick="checkSyllables(2)">2</button>
-      <button class="num-btn" onclick="checkSyllables(3)">3</button>
-      <button class="num-btn" onclick="checkSyllables(4)">4</button>
+      <button class="num-btn" onclick="checkSyllables(1, this)">1</button>
+      <button class="num-btn" onclick="checkSyllables(2, this)">2</button>
+      <button class="num-btn" onclick="checkSyllables(3, this)">3</button>
+      <button class="num-btn" onclick="checkSyllables(4, this)">4</button>
     </div>
     <div class="status-msg" id="status-label"></div>
   </div>
   <script>
     let audioCtx = null;
-    function beep(f, t) {
+    function playTone(freq, type, dur, isErr = false) {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
-      osc.frequency.value = f; g.gain.setValueAtTime(0.15, audioCtx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + t);
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
       osc.connect(g); g.connect(audioCtx.destination);
-      osc.start(); osc.stop(audioCtx.currentTime + t);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
     }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const WORDS = [
       { word: "CATERPILLAR", count: 4 },
       { word: "JUNGLE", count: 2 },
@@ -64,28 +93,34 @@
       { word: "CROCODILE", count: 3 }
     ];
     let idx = 0;
+
     function renderWord() {
+      const status = document.getElementById('status-label');
+      status.textContent = "";
+
       if (idx >= WORDS.length) {
         document.getElementById('word-target').textContent = "ALL CHOPPED!";
         document.querySelector('.grid').innerHTML = "";
-        document.getElementById('status-label').textContent = "+20 Sunlight Earned!";
-        let sun = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
-        localStorage.setItem('jacksjungle_sunlight', sun + 20);
-        localStorage.setItem('jacksjungle_completed_syllable_chop', 'true');
-        beep(520, 0.2); return;
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('syllable_chop');
+        playTone(520, 'sine', 0.2);
+        return;
       }
       document.getElementById('round-indicator').textContent = `Word: ${idx + 1} / ${WORDS.length}`;
       document.getElementById('word-target').textContent = WORDS[idx].word;
     }
-    function checkSyllables(n) {
+
+    function checkSyllables(n, btn) {
       if (n === WORDS[idx].count) {
-        beep(440, 0.15);
+        playTone(440, 'triangle', 0.15);
         idx++;
         renderWord();
       } else {
-        beep(160, 0.25);
-        document.getElementById('status-label').textContent = "Incorrect count. Listen closely!";
-        setTimeout(() => { document.getElementById('status-label').textContent = ""; }, 1000);
+        playTone(160, 'sawtooth', 0.25, true);
+        btn.classList.add('wrong');
+        document.getElementById('status-label').textContent = `${n} is incorrect. Clapped beats do not match!`;
+        setTimeout(() => btn.classList.remove('wrong'), 700);
       }
     }
     renderWord();
