@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>The False Log - Jack's Jungle</title>
+  <style>
+    :root {
+      --bg: #1c1417; --card: #2e1d23; --accent: #f43f5e; --accent-dim: #be123c;
+      --text: #fff1f2; --muted: #fecdd3;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .game-box {
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .report-card {
+      background: rgba(0,0,0,0.35); border-left: 3px solid var(--accent); padding: 1rem;
+      border-radius: 0.5rem; width: 100%; font-size: 0.95rem; line-height: 1.6; margin: 1rem 0;
+    }
+    .grid { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; }
+    .flaw-btn { background: #44242e; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; text-align: left; }
+    .flaw-btn:active { background: var(--accent-dim); }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <div class="top-bar">
+      <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
+      <span id="log-count">Log: 1 / 3</span>
+    </div>
+    <p style="color: var(--muted); font-size: 0.9rem;">What reasoning fallacy exists in this field report?</p>
+    <div class="report-card" id="report-text"></div>
+    <div class="grid" id="choices-field"></div>
+  </div>
+  <script>
+    const LOGS = [
+      {
+        report: "\"We saw 4 toucans feeding on figs at 7 AM, and it rained at 8 AM. Therefore, toucan calls trigger tropical downpours.\"",
+        flaw: "Correlation does not imply Causation (False Cause)",
+        opts: ["Correlation does not imply Causation (False Cause)", "Small Sample Confirmation Bias", "Circular Reasoning"]
+      },
+      {
+        report: "\"I walked 50 meters into the 100,000-hectare rainforest and saw zero koalas. Therefore, koalas are completely extinct in Australia.\"",
+        flaw: "Hasty Generalization (Insufficient Sample Size)",
+        opts: ["Hasty Generalization (Insufficient Sample Size)", "False Dilemma", "Ad Hominem Attack"]
+      },
+      {
+        report: "\"Either we cut down every vine to stop invasive snakes, or the entire canopy ecosystem will immediately collapse.\"",
+        flaw: "False Dilemma (Black-and-White Fallacy)",
+        opts: ["False Dilemma (Black-and-White Fallacy)", "Slippery Slope", "Anecdotal Fallacy"]
+      }
+    ];
+    let lIdx = 0;
+    function renderLog() {
+      if (lIdx >= LOGS.length) {
+        document.getElementById('report-text').textContent = "ALL SCIENTIFIC LOGS AUDITED! Canopy Apex Cleared.";
+        document.getElementById('choices-field').innerHTML = "<p style='text-align:center; font-weight:bold; color:var(--muted);'>+20 Leaves Added</p>";
+        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
+        localStorage.setItem('jacksjungle_leaves', l + 20);
+        localStorage.setItem('jacksjungle_sunlight', l + 20);
+        localStorage.setItem('jacksjungle_completed_the_false_log', 'true');
+        return;
+      }
+      const item = LOGS[lIdx];
+      document.getElementById('log-count').textContent = `Log: ${lIdx + 1} / ${LOGS.length}`;
+      document.getElementById('report-text').textContent = item.report;
+
+      const fld = document.getElementById('choices-field');
+      fld.innerHTML = "";
+      item.opts.forEach(opt => {
+        const b = document.createElement('button');
+        b.className = 'flaw-btn';
+        b.textContent = opt;
+        b.onclick = () => {
+          if (opt === item.flaw) {
+            lIdx++; renderLog();
+          } else {
+            alert("Critique the deductive jump between observation and premise!");
+          }
+        };
+        fld.appendChild(b);
+      });
+    }
+    renderLog();
+  </script>
+</body>
+</html>
