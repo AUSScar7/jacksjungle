@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg: #091815; --card: #132a24; --accent: #10b981; --accent-dim: #059669;
-      --text: #f0fdf4; --muted: #6ee7b7;
+      --text: #f0fdf4; --muted: #6ee7b7; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -28,8 +28,24 @@
       font-weight: bold; font-size: 1.1rem; color: #fff;
     }
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; }
-    .choice-btn { background: #1d3d34; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem; font-size: 1.25rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; }
+    .choice-btn {
+      background: #1d3d34; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
+      font-size: 1.25rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .choice-btn:active { background: var(--accent-dim); }
+    .choice-btn.wrong {
+      background: #451a1a !important;
+      border-color: var(--danger) !important;
+      color: #fca5a5 !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -38,7 +54,7 @@
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
       <span id="patrol-lbl">Enclosure: 1 / 3</span>
     </div>
-    <p style="color: var(--muted); font-size: 0.9rem;">Calculate the total Perimeter (all 4 sides):</p>
+    <p style="color: var(--muted); font-size: 0.9rem;">Calculate the total Perimeter (sum of all 4 sides):</p>
     <div class="fence-diagram">
       <span id="top-w">6m</span>
       <div style="width: 100%; display: flex; justify-content: space-between;">
@@ -48,21 +64,51 @@
       <span id="bot-w">6m</span>
     </div>
     <div class="grid" id="patrol-options"></div>
+    <div class="status-msg" id="status-label"></div>
   </div>
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     const FENCES = [
       { w: 6, h: 4, perim: 20, distractors: [24, 10, 16] },
       { w: 8, h: 5, perim: 26, distractors: [40, 13, 28] },
       { w: 10, h: 3, perim: 26, distractors: [30, 16, 20] }
     ];
     let pStep = 0;
+
     function loadFence() {
+      const status = document.getElementById('status-label');
+      status.textContent = "";
+
       if (pStep >= FENCES.length) {
         document.querySelector('.fence-diagram').innerHTML = "PATROL SECURED!";
-        document.getElementById('patrol-options').innerHTML = "<p style='grid-column: span 2; text-align:center; font-weight:bold; color:var(--muted);'>+20 Sunlight Added</p>";
-        let s = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
-        localStorage.setItem('jacksjungle_sunlight', s + 20);
-        localStorage.setItem('jacksjungle_completed_perimeter_patrol', 'true');
+        document.getElementById('patrol-options').innerHTML = "";
+        status.style.color = "var(--muted)";
+        status.textContent = "🍃 +20 Leaves Earned!";
+        awardGameCompletion('perimeter_patrol');
+        playTone(520, 'sine', 0.2);
         return;
       }
       const f = FENCES[pStep];
@@ -80,9 +126,13 @@
         b.className = 'choice-btn'; b.textContent = `${ans}m`;
         b.onclick = () => {
           if (ans === f.perim) {
+            playTone(480, 'triangle', 0.15);
             pStep++; loadFence();
           } else {
-            alert("Add all four boundary lengths together!");
+            playTone(160, 'sawtooth', 0.25, true);
+            b.classList.add('wrong');
+            status.textContent = `Remember: Perimeter = ${f.w} + ${f.h} + ${f.w} + ${f.h}!`;
+            setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
         box.appendChild(b);
