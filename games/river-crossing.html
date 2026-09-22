@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FPNZR7VVNC', {
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>River Crossing - Jack's Jungle</title>
   <style>
     :root {
       --bg: #091a18; --card: #132d29; --accent: #14b8a6; --accent-dim: #0f766e;
-      --text: #f0fdfa; --muted: #99f6e4; --danger: #f87171;
+      --text: #f0fdfa; --muted: #99f6e4; --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -25,10 +36,25 @@
     .river-scene {
       width: 100%; background: #0c201d; border: 1px solid var(--accent-dim); border-radius: 0.5rem;
       padding: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .river-scene.wrong {
+      background: #3d1419 !important;
+      border-color: var(--danger) !important;
+      animation: shake 0.35s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
     }
     .bank { min-height: 2.5rem; border-bottom: 1px dashed var(--accent-dim); padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
     .btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; width: 100%; }
-    .action-btn { background: #19443e; border: 2px solid var(--accent-dim); color: #fff; padding: 0.85rem; font-weight: bold; border-radius: 0.5rem; cursor: pointer; font-size: 0.95rem; }
+    .action-btn {
+      background: #19443e; border: 2px solid var(--accent-dim); color: #fff; padding: 0.85rem;
+      font-weight: bold; border-radius: 0.5rem; cursor: pointer; font-size: 0.95rem;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
     .action-btn:active { background: var(--accent-dim); }
     .status-lbl { height: 1.5rem; font-weight: 600; color: var(--danger); font-size: 0.9rem; text-align: center; margin-top: 0.75rem; }
   </style>
@@ -40,7 +66,7 @@
       <span>Constraint Logic</span>
     </div>
     <p style="color: var(--muted); font-size: 0.85rem; text-align: center;">Rule: The Dingo cannot be left alone with the Bush Turkey without the Ranger!</p>
-    <div class="river-scene">
+    <div class="river-scene" id="river-box">
       <div class="bank" id="left-bank"><strong>Left Bank:</strong> Ranger, Dingo, Turkey</div>
       <div class="bank" style="border-bottom:none;" id="right-bank"><strong>Right Bank:</strong> (Empty)</div>
     </div>
@@ -53,32 +79,63 @@
     <div class="status-lbl" id="error-msg"></div>
   </div>
   <script>
+    let audioCtx = null;
+    function playTone(freq, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function awardGameCompletion(gameId) {
+      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
+      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
+      if (isNaN(currentLeaves)) currentLeaves = 0;
+      let updatedLeaves = currentLeaves + 20;
+      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
+      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    }
+
     let left = ['Dingo', 'Turkey'], right = [], rangerPos = 'left';
+    let isFinished = false;
 
     function updateView() {
       document.getElementById('left-bank').innerHTML = `<strong>Left Bank:</strong> ${rangerPos === 'left' ? '🤠 Ranger, ' : ''}${left.join(', ') || '(Empty)'}`;
       document.getElementById('right-bank').innerHTML = `<strong>Right Bank:</strong> ${rangerPos === 'right' ? '🤠 Ranger, ' : ''}${right.join(', ') || '(Empty)'}`;
 
-      // Check failure condition: Dingo & Turkey alone on either bank
       const dingoOnLeft = left.includes('Dingo') && left.includes('Turkey') && rangerPos === 'right';
       const dingoOnRight = right.includes('Dingo') && right.includes('Turkey') && rangerPos === 'left';
+
       if (dingoOnLeft || dingoOnRight) {
-        document.getElementById('error-msg').textContent = "The Dingo chased the Turkey away! Restarting...";
-        setTimeout(resetPuzzle, 1500);
+        playTone(160, 'sawtooth', 0.3, true);
+        const rBox = document.getElementById('river-box');
+        rBox.classList.add('wrong');
+        document.getElementById('error-msg').textContent = "The Dingo chased the Turkey away! Resetting crossing...";
+        setTimeout(() => {
+          rBox.classList.remove('wrong');
+          resetPuzzle();
+        }, 1200);
         return;
       }
 
-      if (right.length === 2 && right.includes('Dingo') && right.includes('Turkey')) {
-        document.getElementById('error-msg').style.color = 'var(--accent)';
-        document.getElementById('error-msg').textContent = "CROSSING COMPLETE! +20 Leaves Added.";
-        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
-        localStorage.setItem('jacksjungle_leaves', l + 20);
-        localStorage.setItem('jacksjungle_sunlight', l + 20);
-        localStorage.setItem('jacksjungle_completed_river_crossing', 'true');
+      if (right.length === 2 && right.includes('Dingo') && right.includes('Turkey') && rangerPos === 'right' && !isFinished) {
+        isFinished = true;
+        playTone(520, 'sine', 0.2);
+        document.getElementById('error-msg').style.color = 'var(--muted)';
+        document.getElementById('error-msg').textContent = "CROSSING COMPLETE! 🍃 +20 Leaves Earned.";
+        awardGameCompletion('river_crossing');
       }
     }
 
     function takeItem(item) {
+      if (isFinished) return;
       document.getElementById('error-msg').textContent = "";
       if (rangerPos === 'left') {
         if (item !== 'Alone') {
@@ -97,6 +154,7 @@
         }
         rangerPos = 'left';
       }
+      playTone(420, 'triangle', 0.1);
       updateView();
     }
 
