@@ -6,100 +6,36 @@
   <title>Canopy Crosswords - Jack's Jungle</title>
   <style>
     :root {
-      --bg: #141724;
-      --card: #1e2238;
-      --accent: #6366f1;
-      --accent-dim: #4338ca;
-      --text: #e0e7ff;
+      --bg: #141724; --card: #1e2238; --accent: #6366f1; --accent-dim: #4338ca;
+      --text: #e0e7ff; --danger: #ef4444; --success: #4ade80;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg); color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem;
     }
     .cw-box {
-      background: var(--card);
-      border: 2px solid var(--accent-dim);
-      border-radius: 1rem;
-      width: 100%;
-      max-width: 440px;
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
+      width: 100%; max-width: 440px; padding: 1.25rem; display: flex; flex-direction: column; align-items: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .bar {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    .back {
-      background: none;
-      border: 1px solid var(--accent);
-      color: var(--text);
-      padding: 0.3rem 0.65rem;
-      border-radius: 0.35rem;
-      cursor: pointer;
-      text-decoration: none;
-      font-size: 0.85rem;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 52px);
-      grid-template-rows: repeat(4, 52px);
-      gap: 6px;
-      margin-bottom: 1.2rem;
-    }
+    .bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .back { background: none; border: 1px solid var(--accent); color: var(--text); padding: 0.3rem 0.65rem; border-radius: 0.35rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    .grid { display: grid; grid-template-columns: repeat(4, 52px); grid-template-rows: repeat(4, 52px); gap: 6px; margin-bottom: 1rem; }
     .cell {
-      background: #111425;
-      border: 2px solid #2d3356;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 1.5rem;
-      font-weight: 800;
-      text-align: center;
-      line-height: 48px;
-      cursor: pointer;
+      background: #111425; border: 2px solid #2d3356; border-radius: 6px;
+      color: #fff; font-size: 1.5rem; font-weight: 800; text-align: center; line-height: 48px; cursor: pointer;
+      transition: all 0.2s ease;
     }
     .cell.selected { border-color: var(--accent); background: #282d4c; }
     .cell.blocked { background: #0b0d18; border-color: transparent; cursor: default; }
-    .clues {
-      font-size: 0.88rem;
-      width: 100%;
-      background: rgba(0,0,0,0.3);
-      padding: 0.8rem;
-      border-radius: 0.5rem;
-      margin-bottom: 1.2rem;
-      line-height: 1.5;
-    }
-    .key-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      justify-content: center;
-      width: 100%;
-    }
-    .key-btn {
-      background: #2a3052;
-      color: #fff;
-      border: 1px solid #434c7a;
-      border-radius: 6px;
-      padding: 0.65rem 0.85rem;
-      font-weight: bold;
-      font-size: 1.1rem;
-      cursor: pointer;
-    }
+    .cell.error { border-color: var(--danger) !important; background: #3d1419 !important; color: #fca5a5; }
+    .clues { font-size: 0.88rem; width: 100%; background: rgba(0,0,0,0.3); padding: 0.8rem; border-radius: 0.5rem; margin-bottom: 1rem; line-height: 1.5; }
+    .key-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; width: 100%; }
+    .key-btn { background: #2a3052; color: #fff; border: 1px solid #434c7a; border-radius: 6px; padding: 0.65rem 0.85rem; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
     .key-btn:active { background: var(--accent-dim); }
+    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: bold; color: var(--success); text-align: center; margin-top: 0.75rem; }
   </style>
 </head>
 <body>
@@ -108,32 +44,43 @@
       <a class="back" href="../index.html">&larr; Canopy Hub</a>
       <span style="font-weight: 600;">Canopy Crosswords</span>
     </div>
-
     <div class="clues">
       <strong>1 Across:</strong> Large wild predator cat (4) [LION]<br>
       <strong>1 Down:</strong> Tree branch nest builder (4) [BIRD]
     </div>
-
     <div class="grid" id="cw-grid"></div>
     <div class="key-row" id="keyboard"></div>
+    <div class="status-msg" id="status-out"></div>
   </div>
 
   <script>
+    let audioCtx = null;
+    function pingTone(f, type, dur, isErr = false) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+      if (isErr) osc.frequency.exponentialRampToValueAtTime(75, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(0.16, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(g); g.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+
     const solution = [
       ['L', 'I', 'O', 'N'],
       ['B', '#', '#', '#'],
       ['I', '#', '#', '#'],
       ['R', '#', '#', '#']
     ];
-
     let userGrid = [
       ['', '', '', ''],
       ['', '#', '#', '#'],
       ['', '#', '#', '#'],
       ['', '#', '#', '#']
     ];
-
-    let selR = 0, selC = 0;
+    let selR = 0, selC = 0, solved = false;
 
     function renderGrid() {
       const g = document.getElementById('cw-grid');
@@ -146,8 +93,8 @@
             d.classList.add('blocked');
           } else {
             d.textContent = userGrid[r][c];
-            if (r === selR && c === selC) d.classList.add('selected');
-            d.onclick = () => { selR = r; selC = c; renderGrid(); };
+            if (r === selR && c === selC && !solved) d.classList.add('selected');
+            d.onclick = () => { if (!solved) { selR = r; selC = c; renderGrid(); } };
           }
           g.appendChild(d);
         }
@@ -162,8 +109,10 @@
         b.className = "key-btn";
         b.textContent = char;
         b.onclick = () => {
-          if (solution[selR][selC] !== '#') {
+          if (!solved && solution[selR][selC] !== '#') {
             userGrid[selR][selC] = char;
+            pingTone(420, 'triangle', 0.1);
+            advanceCursor();
             renderGrid();
           }
         };
@@ -172,13 +121,23 @@
       const del = document.createElement('button');
       del.className = "key-btn";
       del.textContent = "DEL";
-      del.onclick = () => { userGrid[selR][selC] = ''; renderGrid(); };
+      del.onclick = () => {
+        if (!solved && solution[selR][selC] !== '#') {
+          userGrid[selR][selC] = '';
+          renderGrid();
+        }
+      };
       k.appendChild(del);
     }
 
+    function advanceCursor() {
+      if (selR === 0 && selC < 3) selC++;
+      else if (selC === 0 && selR < 3) selR++;
+    }
+
     function checkWin() {
-      let won = true;
-      let allFilled = true;
+      if (solved) return;
+      let won = true, allFilled = true;
       for (let r = 0; r < 4; r++) {
         for (let c = 0; c < 4; c++) {
           if (solution[r][c] !== '#') {
@@ -187,11 +146,20 @@
           }
         }
       }
-      if (allFilled && won) {
-        alert("Crossword Solved! +20 Sunlight added.");
-        let s = parseInt(localStorage.getItem('jacksjungle_sunlight') || '0', 10);
-        localStorage.setItem('jacksjungle_sunlight', s + 20);
+
+      if (allFilled && !won) {
+        pingTone(160, 'sawtooth', 0.3, true);
+        const cells = document.querySelectorAll('.cell:not(.blocked)');
+        cells.forEach(el => el.classList.add('error'));
+        setTimeout(() => cells.forEach(el => el.classList.remove('error')), 700);
+      } else if (allFilled && won) {
+        solved = true;
+        document.getElementById('status-out').textContent = "🍃 Crossword Solved! +20 Leaves Added.";
+        let l = parseInt(localStorage.getItem('jacksjungle_leaves') || '0', 10);
+        localStorage.setItem('jacksjungle_leaves', l + 20);
+        localStorage.setItem('jacksjungle_sunlight', l + 20);
         localStorage.setItem('jacksjungle_completed_canopy_crosswords', 'true');
+        pingTone(587.33, 'sine', 0.25);
       }
     }
 
