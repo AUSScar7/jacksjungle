@@ -14,7 +14,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Angle Archer - Jack's Jungle</title>
+  <title>Shape Safari - Jack's Jungle</title>
   <style>
     :root {
       --bg: #151a08; --card: #252e0e; --accent: #84cc16; --accent-dim: #65a30d;
@@ -34,26 +34,23 @@
     .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--muted); }
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
     
-    .canvas-container {
-      background: #111605; border: 2px solid var(--accent-dim); border-radius: 0.75rem;
-      padding: 0.5rem; margin: 0.75rem 0; display: flex; justify-content: center; width: 100%;
+    .display-card {
+      background: rgba(0,0,0,0.35); border: 2px dashed var(--accent-dim); border-radius: 0.75rem;
+      width: 100%; padding: 1.5rem 1rem; margin: 0.75rem 0; text-align: center;
     }
-    canvas { width: 260px; height: 170px; }
+    .shape-hero { font-size: 4.5rem; margin-bottom: 0.5rem; }
+    .shape-clue { font-size: 1.1rem; font-weight: 700; color: #fff; line-height: 1.4; }
 
-    .hint-bubble {
-      font-size: 0.9rem; color: var(--muted); min-height: 1.4rem; text-align: center; margin-bottom: 0.75rem;
-    }
-
-    .btn-col { display: flex; flex-direction: column; gap: 0.6rem; width: 100%; }
-    .angle-btn {
-      background: #354215; border: 2px solid var(--accent); color: #fff; padding: 0.95rem 1rem;
-      font-size: 1.1rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer;
-      display: flex; justify-content: space-between; align-items: center;
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; margin-top: 0.5rem; }
+    .shape-btn {
+      background: #354215; border: 2px solid var(--accent); color: #fff; padding: 1rem;
+      font-size: 1.15rem; font-weight: 900; border-radius: 0.6rem; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.3rem;
       transition: background-color 0.15s ease, transform 0.1s ease;
     }
-    .angle-btn span.sub { font-size: 0.8rem; color: var(--muted); font-weight: normal; }
-    .angle-btn:active { background: var(--accent-dim); transform: scale(0.98); }
-    .angle-btn.wrong {
+    .shape-btn span.sub { font-size: 0.8rem; color: var(--muted); font-weight: normal; }
+    .shape-btn:active { background: var(--accent-dim); transform: scale(0.97); }
+    .shape-btn.wrong {
       background: #451a1a !important;
       border-color: var(--danger) !important;
       color: #fca5a5 !important;
@@ -71,31 +68,16 @@
   <div class="game-box">
     <div class="top-bar">
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
-      <span id="target-count">Target: 1 / 4</span>
+      <span id="target-count">Safari: 1 / 4</span>
     </div>
-    <p style="color: var(--muted); font-size: 0.95rem; text-align: center;">How wide is this vine branch open?</p>
+    <p style="color: var(--muted); font-size: 0.95rem; text-align: center;">Count the sides and corners to spot the shape!</p>
     
-    <div class="canvas-container">
-      <canvas id="angle-canvas" width="260" height="170"></canvas>
+    <div class="display-card">
+      <div class="shape-hero" id="shape-icon">🔺</div>
+      <div class="shape-clue" id="clue-text">I have 3 straight sides and 3 sharp corners.</div>
     </div>
 
-    <div class="hint-bubble" id="hint-text">Look at how the two branches meet at the center dot!</div>
-
-    <div class="btn-col" id="opts-container">
-      <button class="angle-btn" onclick="checkAngle('ACUTE', this)">
-        <span>Sharp & Narrow</span>
-        <span class="sub">Pinched closed (Acute)</span>
-      </button>
-      <button class="angle-btn" onclick="checkAngle('RIGHT', this)">
-        <span>Square Corner</span>
-        <span class="sub">Perfect "L" shape (Right)</span>
-      </button>
-      <button class="angle-btn" onclick="checkAngle('OBTUSE', this)">
-        <span>Wide Open</span>
-        <span class="sub">Stretched apart (Obtuse)</span>
-      </button>
-    </div>
-
+    <div class="grid" id="choices-grid"></div>
     <div class="status-msg" id="status-label"></div>
   </div>
 
@@ -117,15 +99,11 @@
     function awardGameCompletion(gameId) {
       const k1 = `jacksjungle_completed_${gameId}`;
       const k2 = `jacksjungle_completed_${gameId.replace(/_/g, '-')}`;
-      
       const alreadyFinished = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
-      
       localStorage.setItem(k1, 'true');
       localStorage.setItem(k2, 'true');
 
-      if (alreadyFinished) {
-        return false;
-      }
+      if (alreadyFinished) return false;
 
       let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
       if (isNaN(currentLeaves)) currentLeaves = 0;
@@ -136,103 +114,107 @@
       return true;
     }
 
-    // 4 High-contrast angles kids can instantly distinguish
-    const ROUNDS = [
-      { deg: 90, type: "RIGHT", hint: "It forms a boxy square corner, like a book corner!" },
-      { deg: 35, type: "ACUTE", hint: "It's sharp and pinched close like an alligator beak!" },
-      { deg: 135, type: "OBTUSE", hint: "It's spread wide open like arms stretching out!" },
-      { deg: 90, type: "RIGHT", hint: "A clean square corner!" }
-    ];
-    let aIdx = 0;
-    const canvas = document.getElementById('angle-canvas');
-    const ctx = canvas.getContext('2d');
-
-    function drawBranch(deg, type) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const cx = 80, cy = 125, len = 105;
-
-      // Base horizontal branch
-      ctx.lineWidth = 7;
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = '#84cc16';
-
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(cx + len, cy);
-      ctx.stroke();
-
-      // Angled branch
-      const rad = -(deg * Math.PI / 180);
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(cx + len * Math.cos(rad), cy + len * Math.sin(rad));
-      ctx.stroke();
-
-      // Visual indicator between branches
-      if (type === 'RIGHT') {
-        // Draw square corner box
-        ctx.lineWidth = 2.5;
-        ctx.strokeStyle = '#facc15';
-        ctx.strokeRect(cx, cy - 24, 24, 24);
-      } else {
-        // Draw soft curve arc
-        ctx.lineWidth = 2.5;
-        ctx.strokeStyle = '#facc15';
-        ctx.beginPath();
-        ctx.arc(cx, cy, 32, 0, rad, true);
-        ctx.stroke();
+    // 4 High-engagement shape rounds for ages 6-10
+    const SHAPES = [
+      {
+        icon: "🔺",
+        clue: "I have 3 straight sides and 3 pointy corners!",
+        ans: "Triangle",
+        opts: [
+          { name: "Triangle", sub: "3 Sides" },
+          { name: "Square", sub: "4 Equal Sides" },
+          { name: "Circle", sub: "Round Curve" },
+          { name: "Hexagon", sub: "6 Sides" }
+        ],
+        hint: "Count: 1, 2, 3 sides = Triangle!"
+      },
+      {
+        icon: "🟩",
+        clue: "I have 4 equal sides and 4 square corners!",
+        ans: "Square",
+        opts: [
+          { name: "Square", sub: "4 Equal Sides" },
+          { name: "Triangle", sub: "3 Sides" },
+          { name: "Star", sub: "5 Points" },
+          { name: "Circle", sub: "0 Straight Sides" }
+        ],
+        hint: "All 4 sides are exactly the same length!"
+      },
+      {
+        icon: "🟡",
+        clue: "I have 0 straight sides and 0 sharp corners. I roll smoothly!",
+        ans: "Circle",
+        opts: [
+          { name: "Circle", sub: "0 Straight Sides" },
+          { name: "Square", sub: "4 Sides" },
+          { name: "Rectangle", sub: "4 Sides" },
+          { name: "Pentagon", sub: "5 Sides" }
+        ],
+        hint: "It's round like the full jungle moon!"
+      },
+      {
+        icon: "⬡",
+        clue: "I have 6 straight sides, just like a honeybee's comb!",
+        ans: "Hexagon",
+        opts: [
+          { name: "Hexagon", sub: "6 Sides" },
+          { name: "Triangle", sub: "3 Sides" },
+          { name: "Square", sub: "4 Sides" },
+          { name: "Octagon", sub: "8 Sides" }
+        ],
+        hint: "Count the 6 flat edges around the outside!"
       }
+    ];
 
-      // Center pivot leaf/knot
-      ctx.beginPath();
-      ctx.arc(cx, cy, 6, 0, Math.PI * 2);
-      ctx.fillStyle = '#facc15';
-      ctx.fill();
-    }
+    let sIdx = 0;
 
     function renderRound() {
       const status = document.getElementById('status-label');
       status.textContent = "";
 
-      if (aIdx >= ROUNDS.length) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        document.getElementById('hint-text').textContent = "Target sighted! Seed slingshot loaded.";
-        document.getElementById('opts-container').innerHTML = "";
-        
+      if (sIdx >= SHAPES.length) {
+        document.getElementById('shape-icon').textContent = "🏆";
+        document.getElementById('clue-text').textContent = "SHAPE SAFARI MASTERED! You spotted every jungle shape.";
+        document.getElementById('choices-grid').innerHTML = "";
+
         const isNew = awardGameCompletion('angle_archer');
         status.style.color = "var(--success)";
         if (isNew) {
           status.textContent = "🍃 +20 Leaves Earned!";
         } else {
-          status.textContent = "🌿 Archer Re-cleared! (Leaves already collected)";
+          status.textContent = "🌿 Safari Re-cleared! (Leaves already collected)";
         }
-        
+
         playTone(520, 'sine', 0.2);
         setTimeout(() => playTone(659, 'sine', 0.25), 150);
         return;
       }
 
-      const r = ROUNDS[aIdx];
-      document.getElementById('target-count').textContent = `Target: ${aIdx + 1} / ${ROUNDS.length}`;
-      document.getElementById('hint-text').textContent = r.hint;
-      drawBranch(r.deg, r.type);
-    }
+      const s = SHAPES[sIdx];
+      document.getElementById('target-count').textContent = `Safari: ${sIdx + 1} / ${SHAPES.length}`;
+      document.getElementById('shape-icon').textContent = s.icon;
+      document.getElementById('clue-text').textContent = s.clue;
 
-    function checkAngle(selectedType, btn) {
-      const current = ROUNDS[aIdx];
-      if (selectedType === current.type) {
-        playTone(480, 'triangle', 0.15);
-        aIdx++;
-        renderRound();
-      } else {
-        playTone(160, 'sawtooth', 0.25, true);
-        btn.classList.add('wrong');
-        const status = document.getElementById('status-label');
-        if (current.type === 'RIGHT') status.textContent = "Look for the square box corner!";
-        else if (current.type === 'ACUTE') status.textContent = "This one is sharp and pinched closed!";
-        else status.textContent = "This one is opened extra wide!";
-        setTimeout(() => btn.classList.remove('wrong'), 700);
-      }
+      const grid = document.getElementById('choices-grid');
+      grid.innerHTML = "";
+      s.opts.forEach(opt => {
+        const b = document.createElement('button');
+        b.className = 'shape-btn';
+        b.innerHTML = `<span>${opt.name}</span><span class="sub">${opt.sub}</span>`;
+        b.onclick = () => {
+          if (opt.name === s.ans) {
+            playTone(480, 'triangle', 0.15);
+            sIdx++;
+            renderRound();
+          } else {
+            playTone(160, 'sawtooth', 0.25, true);
+            b.classList.add('wrong');
+            status.textContent = s.hint;
+            setTimeout(() => b.classList.remove('wrong'), 700);
+          }
+        };
+        grid.appendChild(b);
+      });
     }
 
     renderRound();
