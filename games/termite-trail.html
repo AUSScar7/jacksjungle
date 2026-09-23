@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FPNZR7VVNC', {
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Termite Trail - Jack's Jungle</title>
   <style>
     :root {
       --bg: #1a1208; --card: #2a1c0d; --accent: #f59e0b; --accent-dim: #b45309;
-      --text: #fef3c7; --muted: #fde68a; --danger: #ef4444;
+      --text: #fef3c7; --muted: #fde68a; --danger: #ef4444; --success: #22c55e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -22,15 +33,27 @@
     }
     .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
-    .eq-row { font-size: 2.2rem; font-weight: 800; margin: 2rem 0; color: #fff; }
-    .op-slot { color: var(--accent); border-bottom: 3px dashed var(--accent); padding: 0 0.5rem; }
-    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; width: 100%; }
-    .op-btn {
-      background: #3d2913; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
-      font-size: 1.6rem; font-weight: bold; border-radius: 0.5rem; cursor: pointer;
-      transition: background-color 0.15s ease, border-color 0.15s ease;
+    
+    .wood-bridge {
+      background: rgba(0, 0, 0, 0.35); border: 2px dashed var(--accent-dim); border-radius: 0.75rem;
+      width: 100%; padding: 1.5rem 1rem; margin: 1rem 0; text-align: center;
     }
-    .op-btn:active { background: var(--accent-dim); }
+    .eq-row { font-size: 2.6rem; font-weight: 900; color: #fff; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .op-slot {
+      color: var(--accent); background: rgba(245, 158, 11, 0.15); border: 2px solid var(--accent);
+      border-radius: 8px; min-width: 48px; height: 56px; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .termite-helper { font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem; min-height: 1.2rem; }
+
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; margin-top: 0.5rem; }
+    .op-btn {
+      background: #3d2913; border: 2px solid var(--accent); color: #fff; padding: 1.25rem 1rem;
+      font-size: 2rem; font-weight: 900; border-radius: 0.75rem; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .op-btn span.label { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+    .op-btn:active { background: var(--accent-dim); transform: scale(0.97); }
     .op-btn.wrong {
       background: #451a1a !important;
       border-color: var(--danger) !important;
@@ -49,18 +72,35 @@
   <div class="game-box">
     <div class="top-bar">
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
-      <span id="step-lbl">Equation: 1 / 4</span>
+      <span id="step-lbl">Bridge: 1 / 5</span>
     </div>
-    <p style="color: var(--muted); font-size: 0.9rem;">Pick the missing mathematical operator:</p>
-    <div class="eq-row" id="eq-display"></div>
+    <p style="color: var(--muted); font-size: 0.95rem; text-align: center;">Does the number get <strong>bigger</strong> or <strong>smaller</strong>?</p>
+    
+    <div class="wood-bridge">
+      <div class="eq-row" id="eq-display">
+        <span id="num-a">5</span>
+        <span class="op-slot" id="slot-box">?</span>
+        <span id="num-b">3</span>
+        <span>=</span>
+        <span id="num-res">8</span>
+      </div>
+      <div class="termite-helper" id="helper-text">Tip: 5 became 8, so we added more termites!</div>
+    </div>
+
     <div class="grid" id="op-grid">
-      <button class="op-btn" onclick="checkOp('+', this)">+</button>
-      <button class="op-btn" onclick="checkOp('-', this)">&minus;</button>
-      <button class="op-btn" onclick="checkOp('*', this)">&times;</button>
-      <button class="op-btn" onclick="checkOp('/', this)">&divide;</button>
+      <button class="op-btn" onclick="checkOp('+', this)">
+        +
+        <span class="label">ADD (Plus)</span>
+      </button>
+      <button class="op-btn" onclick="checkOp('-', this)">
+        &minus;
+        <span class="label">TAKE AWAY (Minus)</span>
+      </button>
     </div>
+
     <div class="status-msg" id="status-label"></div>
   </div>
+
   <script>
     let audioCtx = null;
     function playTone(freq, type, dur, isErr = false) {
@@ -77,20 +117,34 @@
     }
 
     function awardGameCompletion(gameId) {
-      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
-      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      const k1 = `jacksjungle_completed_${gameId}`;
+      const k2 = `jacksjungle_completed_${gameId.replace(/_/g, '-')}`;
+      
+      const alreadyFinished = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
+      
+      localStorage.setItem(k1, 'true');
+      localStorage.setItem(k2, 'true');
+
+      if (alreadyFinished) {
+        return false;
+      }
+
       let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
       if (isNaN(currentLeaves)) currentLeaves = 0;
+
       let updatedLeaves = currentLeaves + 20;
       localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
       localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+      return true;
     }
 
-    const EQS = [
-      { a: 12, b: 4, res: 16, op: '+' },
-      { a: 18, b: 3, res: 6, op: '/' },
-      { a: 7, b: 6, res: 42, op: '*' },
-      { a: 25, b: 9, res: 16, op: '-' }
+    // Friendly 5-bridge progression for Ages 6-10
+    const PUZZLES = [
+      { a: 5, b: 3, res: 8, op: '+', hint: "5 became 8 (it got bigger!)" },
+      { a: 9, b: 4, res: 5, op: '-', hint: "9 became 5 (some marched away!)" },
+      { a: 6, b: 6, res: 12, op: '+', hint: "Two groups of 6 joined together!" },
+      { a: 10, b: 3, res: 7, op: '-', hint: "10 dropped down to 7!" },
+      { a: 8, b: 7, res: 15, op: '+', hint: "8 climbed up to 15!" }
     ];
     let idx = 0;
 
@@ -98,31 +152,49 @@
       const status = document.getElementById('status-label');
       status.textContent = "";
 
-      if (idx >= EQS.length) {
-        document.getElementById('eq-display').textContent = "TRAIL BALANCED!";
+      if (idx >= PUZZLES.length) {
+        document.getElementById('eq-display').textContent = "BRIDGE BALANCED! 🐜";
+        document.getElementById('helper-text').textContent = "All termites safely crossed the canyon.";
         document.getElementById('op-grid').innerHTML = "";
-        status.style.color = "var(--muted)";
-        status.textContent = "🍃 +20 Leaves Earned!";
-        awardGameCompletion('termite_trail');
+        
+        const isNew = awardGameCompletion('termite_trail');
+        status.style.color = "var(--success)";
+        if (isNew) {
+          status.textContent = "🍃 +20 Leaves Earned!";
+        } else {
+          status.textContent = "🌿 Bridge Re-crossed! (Leaves already collected)";
+        }
+        
         playTone(520, 'sine', 0.2);
+        setTimeout(() => playTone(659, 'sine', 0.25), 150);
         return;
       }
-      const e = EQS[idx];
-      document.getElementById('step-lbl').textContent = `Equation: ${idx + 1} / ${EQS.length}`;
-      document.getElementById('eq-display').innerHTML = `${e.a} <span class="op-slot">?</span> ${e.b} = ${e.res}`;
+
+      const p = PUZZLES[idx];
+      document.getElementById('step-lbl').textContent = `Bridge: ${idx + 1} / ${PUZZLES.length}`;
+      document.getElementById('num-a').textContent = p.a;
+      document.getElementById('num-b').textContent = p.b;
+      document.getElementById('num-res').textContent = p.res;
+      document.getElementById('slot-box').textContent = "?";
+      document.getElementById('helper-text').textContent = p.hint;
     }
 
-    function checkOp(op, btn) {
-      if (op === EQS[idx].op) {
+    function checkOp(chosenOp, btn) {
+      const p = PUZZLES[idx];
+      if (chosenOp === p.op) {
         playTone(480, 'triangle', 0.15);
-        idx++; renderEq();
+        document.getElementById('slot-box').textContent = chosenOp;
+        idx++;
+        setTimeout(renderEq, 400);
       } else {
         playTone(160, 'sawtooth', 0.25, true);
         btn.classList.add('wrong');
-        document.getElementById('status-label').textContent = "The branch tilts! Re-evaluate the equation.";
+        const status = document.getElementById('status-label');
+        status.textContent = chosenOp === '+' ? "Oops! Adding would make the number bigger." : "Oops! Minus would make the number smaller.";
         setTimeout(() => btn.classList.remove('wrong'), 700);
       }
     }
+
     renderEq();
   </script>
 </body>
