@@ -18,7 +18,7 @@
   <style>
     :root {
       --bg: #18141e; --card: #272132; --accent: #c084fc; --accent-dim: #9333ea;
-      --text: #faf5ff; --muted: #e9d5ff; --danger: #ef4444;
+      --text: #faf5ff; --muted: #e9d5ff; --danger: #ef4444; --success: #22c55e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -33,14 +33,30 @@
     }
     .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
-    .sequence-display { font-size: 2.6rem; letter-spacing: 0.4rem; margin: 1.5rem 0; color: #fff; }
-    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; width: 100%; }
-    .glyph-btn {
-      background: #3b324c; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
-      font-size: 2rem; border-radius: 0.6rem; cursor: pointer;
-      transition: background-color 0.15s ease, border-color 0.15s ease;
+    
+    .ruin-wall {
+      background: rgba(0, 0, 0, 0.4); border: 2px dashed var(--accent-dim); border-radius: 0.75rem;
+      width: 100%; padding: 1.25rem 0.5rem; margin: 0.75rem 0; text-align: center;
     }
-    .glyph-btn:active { background: var(--accent-dim); }
+    .sequence-display {
+      font-size: 2.2rem; font-weight: 800; letter-spacing: 0.25rem; color: #fff;
+      display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.4rem;
+      min-height: 3.5rem;
+    }
+    .slot-q {
+      color: var(--accent); background: rgba(192, 132, 252, 0.15); border: 2px solid var(--accent);
+      border-radius: 8px; min-width: 44px; height: 50px; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .hint-text { font-size: 0.9rem; color: var(--muted); margin-top: 0.4rem; min-height: 1.2rem; text-align: center; }
+
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; width: 100%; margin-top: 0.75rem; }
+    .glyph-btn {
+      background: #3b324c; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem 0.5rem;
+      font-size: 1.8rem; font-weight: 800; border-radius: 0.6rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .glyph-btn:active { background: var(--accent-dim); transform: scale(0.97); }
     .glyph-btn.wrong {
       background: #451a1a !important;
       border-color: var(--danger) !important;
@@ -52,20 +68,26 @@
       20%, 60% { transform: translateX(-6px); }
       40%, 80% { transform: translateX(6px); }
     }
-    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
+    .status-msg { height: 1.5rem; font-size: 0.92rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 0.75rem; }
   </style>
 </head>
 <body>
   <div class="game-box">
     <div class="top-bar">
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
-      <span id="glyph-counter">Ruin: 1 / 3</span>
+      <span id="glyph-counter">Ruin: 1 / 4</span>
     </div>
-    <p style="color: var(--muted); font-size: 0.9rem;">What glyph completes the inductive sequence?</p>
-    <div class="sequence-display" id="sequence-text">▲ ■ ▲ ■ ?</div>
+    <p style="color: var(--muted); font-size: 0.92rem; text-align: center;">What comes next in the pattern?</p>
+
+    <div class="ruin-wall">
+      <div class="sequence-display" id="sequence-text"></div>
+      <div class="hint-text" id="pattern-hint"></div>
+    </div>
+
     <div class="grid" id="choices-field"></div>
     <div class="status-msg" id="status-label"></div>
   </div>
+
   <script>
     let audioCtx = null;
     function playTone(freq, type, dur, isErr = false) {
@@ -82,20 +104,55 @@
     }
 
     function awardGameCompletion(gameId) {
-      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
-      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      const k1 = `jacksjungle_completed_${gameId}`;
+      const k2 = `jacksjungle_completed_${gameId.replace(/_/g, '-')}`;
+      
+      const alreadyFinished = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
+      
+      localStorage.setItem(k1, 'true');
+      localStorage.setItem(k2, 'true');
+
+      if (alreadyFinished) {
+        return false;
+      }
+
       let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
       if (isNaN(currentLeaves)) currentLeaves = 0;
+
       let updatedLeaves = currentLeaves + 20;
       localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
       localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+      return true;
     }
 
+    // 4 Progressive, kid-friendly sequences
     const SEQUENCES = [
-      { seq: "▲ ■ ▲ ■ ?", correct: "▲", opts: ["▲", "●", "◆"] },
-      { seq: "● ◆ ● ◆ ?", correct: "●", opts: ["■", "●", "▲"] },
-      { seq: "1 2 4 8 ?", correct: "16", opts: ["12", "14", "16"] }
+      {
+        tokens: ["▲", "■", "▲", "■"],
+        correct: "▲",
+        opts: ["▲", "●", "■"],
+        hint: "Triangle, Square, Triangle, Square... what's next?"
+      },
+      {
+        tokens: ["🥥", "🥥", "🍌", "🥥", "🥥"],
+        correct: "🍌",
+        opts: ["🥥", "🍌", "🌴"],
+        hint: "Coconut, Coconut, Banana... Coconut, Coconut...?"
+      },
+      {
+        tokens: ["🐸", "🦜", "🐒", "🐸", "🦜"],
+        correct: "🐒",
+        opts: ["🐸", "🦜", "🐒"],
+        hint: "Frog, Toucan, Monkey... Frog, Toucan...?"
+      },
+      {
+        tokens: ["2", "4", "6", "8"],
+        correct: "10",
+        opts: ["9", "10", "12"],
+        hint: "Count up by 2s: 2, 4, 6, 8...?"
+      }
     ];
+
     let sIdx = 0;
 
     function renderSequence() {
@@ -103,17 +160,40 @@
       status.textContent = "";
 
       if (sIdx >= SEQUENCES.length) {
-        document.getElementById('sequence-text').textContent = "RUINS DECODED!";
+        document.getElementById('sequence-text').textContent = "RUINS DECODED! 🏛️";
+        document.getElementById('pattern-hint').textContent = "All ancient stone glyphs aligned.";
         document.getElementById('choices-field').innerHTML = "";
-        status.style.color = "var(--muted)";
-        status.textContent = "🍃 +20 Leaves Earned!";
-        awardGameCompletion('pattern_pioneer');
+        
+        const isNew = awardGameCompletion('pattern_pioneer');
+        status.style.color = "var(--success)";
+        if (isNew) {
+          status.textContent = "🍃 +20 Leaves Earned!";
+        } else {
+          status.textContent = "🌿 Ruins Re-solved! (Leaves already collected)";
+        }
+        
         playTone(520, 'sine', 0.2);
+        setTimeout(() => playTone(659, 'sine', 0.25), 150);
         return;
       }
+
       const s = SEQUENCES[sIdx];
       document.getElementById('glyph-counter').textContent = `Ruin: ${sIdx + 1} / ${SEQUENCES.length}`;
-      document.getElementById('sequence-text').textContent = s.seq;
+      
+      const seqBox = document.getElementById('sequence-text');
+      seqBox.innerHTML = "";
+      s.tokens.forEach(tok => {
+        const sp = document.createElement('span');
+        sp.textContent = tok;
+        seqBox.appendChild(sp);
+      });
+      const qSlot = document.createElement('span');
+      qSlot.className = "slot-q";
+      qSlot.id = "active-slot";
+      qSlot.textContent = "?";
+      seqBox.appendChild(qSlot);
+
+      document.getElementById('pattern-hint').textContent = s.hint;
 
       const fld = document.getElementById('choices-field');
       fld.innerHTML = "";
@@ -124,17 +204,20 @@
         b.onclick = () => {
           if (opt === s.correct) {
             playTone(480, 'triangle', 0.15);
-            sIdx++; renderSequence();
+            document.getElementById('active-slot').textContent = opt;
+            sIdx++;
+            setTimeout(renderSequence, 350);
           } else {
             playTone(160, 'sawtooth', 0.25, true);
             b.classList.add('wrong');
-            status.textContent = "Analyze the repeating alternating delta!";
+            status.textContent = "Look closely at the pattern rhythm!";
             setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
         fld.appendChild(b);
       });
     }
+
     renderSequence();
   </script>
 </body>
