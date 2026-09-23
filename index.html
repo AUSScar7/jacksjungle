@@ -24,8 +24,6 @@
       --accent-hover: #16a34a;
       --text: #f8fafc;
       --text-muted: #86efac;
-      --locked-bg: rgba(15, 23, 42, 0.6);
-      --locked-border: #334155;
       --leaf-green: #4ade80;
       --gold: #facc15;
     }
@@ -57,20 +55,6 @@
       z-index: 0;
       pointer-events: none;
     }
-
-    .edge-vine {
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      width: 60px;
-      z-index: 1;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.8s ease, transform 0.8s ease;
-    }
-
-    #left-vine { left: 0; transform: translateX(-40px); }
-    #right-vine { right: 0; transform: translateX(40px) scaleX(-1); }
 
     .content-wrapper {
       position: relative;
@@ -231,9 +215,9 @@
       font-weight: 600;
     }
 
-    .canopy-layer { margin-top: 2rem; }
+    .arcade-section { margin-top: 2rem; }
 
-    .layer-header {
+    .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -241,22 +225,22 @@
       gap: 0.5rem;
       border-bottom: 2px solid var(--border-card);
       padding-bottom: 0.5rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
     }
 
-    .layer-title {
-      font-size: 1.25rem;
+    .section-title {
+      font-size: 1.3rem;
       font-weight: 700;
       color: #fff;
     }
 
-    .layer-status-pill {
+    .status-pill {
       font-size: 0.85rem;
       font-weight: 700;
       padding: 0.25rem 0.65rem;
       border-radius: 9999px;
       background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--border-card);
+      border: 1px solid var(--accent);
       color: var(--leaf-green);
       display: inline-flex;
       align-items: center;
@@ -328,23 +312,6 @@
       gap: 0.2rem;
     }
 
-    .game-node.locked {
-      background: var(--locked-bg);
-      border-color: var(--locked-border);
-      pointer-events: none;
-      opacity: 0.6;
-    }
-
-    .game-node.locked h3, .game-node.locked p, .game-node.locked .game-tag { color: #64748b; }
-
-    .lock-banner {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #94a3b8;
-      margin-top: 0.5rem;
-    }
-
     .achievement-card {
       background: linear-gradient(135deg, rgba(13, 43, 31, 0.95), rgba(6, 26, 18, 0.95));
       border: 2px solid var(--accent);
@@ -357,7 +324,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
-      margin: 1rem 0 1.5rem;
+      margin: 1rem 0 1.25rem;
       max-width: 440px;
     }
 
@@ -378,49 +345,34 @@
 
     .name-input:focus { border-color: var(--accent); }
 
-    .cert-buttons-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 0.85rem;
-    }
-
-    .btn-cert {
-      background: #143d2c;
-      border: 2px solid var(--accent-dim);
-      color: #fff;
-      padding: 0.85rem 1rem;
-      border-radius: 0.5rem;
-      font-weight: bold;
-      font-size: 0.95rem;
+    .btn-cert-master {
+      width: 100%;
+      background: rgba(250, 204, 21, 0.15);
+      border: 2px solid var(--gold);
+      color: var(--gold);
+      padding: 1.1rem 1.5rem;
+      border-radius: 0.75rem;
+      font-weight: 900;
+      font-size: 1.15rem;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.3rem;
+      gap: 0.35rem;
       transition: all 0.2s ease;
     }
 
-    .btn-cert:disabled {
+    .btn-cert-master:disabled {
       opacity: 0.4;
       cursor: not-allowed;
       border-color: #334155;
       background: #0f172a;
+      color: #94a3b8;
     }
 
-    .btn-cert.master {
-      border-color: var(--gold);
-      background: rgba(250, 204, 21, 0.15);
-      color: var(--gold);
-      grid-column: 1 / -1;
-    }
-
-    .btn-cert:not(:disabled):hover {
-      background: var(--accent-dim);
-      transform: translateY(-2px);
-    }
-
-    .btn-cert.master:not(:disabled):hover {
+    .btn-cert-master:not(:disabled):hover {
       background: rgba(250, 204, 21, 0.25);
+      transform: translateY(-2px);
     }
 
     .reset-container {
@@ -500,17 +452,6 @@
 <body>
   <canvas id="ambient-canvas"></canvas>
 
-  <svg class="edge-vine" id="left-vine" viewBox="0 0 60 800" preserveAspectRatio="none">
-    <path d="M 0,0 Q 40,150 15,300 T 45,600 T 10,800" fill="none" stroke="#22c55e" stroke-width="6" />
-    <circle cx="35" cy="360" r="8" fill="#4ade80" />
-    <circle cx="40" cy="660" r="8" fill="#4ade80" />
-  </svg>
-
-  <svg class="edge-vine" id="right-vine" viewBox="0 0 60 800" preserveAspectRatio="none">
-    <path d="M 0,0 Q 40,150 15,300 T 45,600 T 10,800" fill="none" stroke="#22c55e" stroke-width="6" />
-    <circle cx="35" cy="360" r="8" fill="#4ade80" />
-  </svg>
-
   <div class="content-wrapper">
     <header>
       <div class="top-controls">
@@ -522,25 +463,25 @@
 
       <h1>Jack's Jungle</h1>
       <div><span class="dev-banner">🚧 Currently in Active Development</span></div>
-      <p>Interactive web-based educational games designed for curious minds.</p>
-      <div><span class="badge">Rated: G &amp; PG-13</span></div>
+      <p>Interactive web-based educational games designed for curious young minds.</p>
+      <div><span class="badge">Ages: 6–10 Years</span></div>
     </header>
 
     <!-- Quick Start Hero CTA -->
     <div class="cta-container" id="hero-cta">
-      <button class="btn-get-started" onclick="startRandomTierOneGame()">
-        🎲 Play a Random Level 1 Game
+      <button class="btn-get-started" onclick="startRandomGame()">
+        🎲 Play a Random Game
       </button>
     </div>
 
-    <!-- Biome Stage & Leaf Bank -->
+    <!-- Leaf Bank & Journey Status -->
     <div class="card">
       <h2>
         <span>Your Jungle Journey</span>
         <span id="leaf-readout" style="color: var(--leaf-green); font-size: 1.1rem;">🍃 0 Leaves</span>
       </h2>
       <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5;">
-        Play games to collect shiny jungle leaves! Finish all 10 games on the Forest Floor to climb up into Level 2. Can you make it all the way to the top of the trees?
+        Play all 10 jungle games to collect shiny leaves! Complete every challenge to earn your official printable Canopy Explorer Certificate.
       </p>
       <div class="progress-track">
         <div class="progress-bar-fill" id="leaf-progress-bar" style="width: 0%;"></div>
@@ -551,16 +492,17 @@
       </div>
     </div>
 
-    <!-- Level 1: Foundational Challenges (10 Games) -->
-    <div class="canopy-layer">
-      <div class="layer-header">
-        <div class="layer-title">Level 1: The Forest Floor (Foundational)</div>
-        <div class="layer-status-pill" id="l1-pill">
-          <span>Level 1: Unlocked</span>
+    <!-- The 10 Core Games (All Unlocked) -->
+    <div class="arcade-section">
+      <div class="section-header">
+        <div class="section-title">🌿 Jungle Arcade Challenges</div>
+        <div class="status-pill">
+          <span>All Games Unlocked</span>
           <span style="color:var(--text-muted);">&bull;</span>
-          <span id="l1-tracker">0 / 10 to Unlock Level 2</span>
+          <span id="game-tracker">0 / 10 Completed</span>
         </div>
       </div>
+
       <div class="game-grid">
         <a href="games/vine-climber.html" class="game-node" data-game-id="vine_climber">
           <div><h3>Vine Climber</h3><p>Grow jungle vines upward by picking missing letters.</p></div>
@@ -605,119 +547,11 @@
       </div>
     </div>
 
-    <!-- Level 2: Intermediate Challenges (10 Games) -->
-    <div class="canopy-layer">
-      <div class="layer-header">
-        <div class="layer-title">Level 2: The Understory (Intermediate)</div>
-        <div class="layer-status-pill" id="l2-pill">
-          <span id="l2-lock-label">🔒 Need 10 Lvl 1 Games</span>
-          <span style="color:var(--text-muted);">&bull;</span>
-          <span id="l2-tracker">0 / 10 to Unlock Level 3</span>
-        </div>
-      </div>
-      <div class="game-grid" id="understory-grid">
-        <a href="games/times-table-treetops.html" class="game-node locked" data-game-id="times_table_treetops">
-          <div><h3>Times Table Treetops</h3><p>Climb branch bridges with 2s, 5s, and 10s skip-counting recall.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/fraction-foliage.html" class="game-node locked" data-game-id="fraction_foliage">
-          <div><h3>Fraction Foliage</h3><p>Match shaded canopy leaf slices with halves, thirds, and quarters.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/negative-nesting.html" class="game-node locked" data-game-id="negative_nesting">
-          <div><h3>Negative Nesting</h3><p>Ride the tree elevator between canopy branches and root burrows.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/number-line-leap.html" class="game-node locked" data-game-id="number_line_leap">
-          <div><h3>Number Line Leap</h3><p>Jump accurately along suspended vine number lines.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/perimeter-patrol.html" class="game-node locked" data-game-id="perimeter_patrol">
-          <div><h3>Perimeter Patrol</h3><p>Calculate 2D enclosure boundaries and total fence perimeters.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/homophone-haven.html" class="game-node locked" data-game-id="homophone_haven">
-          <div><h3>Homophone Haven</h3><p>Differentiate between confusing homophones in nature passages.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/root-word-expedition.html" class="game-node locked" data-game-id="root_word_expedition">
-          <div><h3>Root Word Expedition</h3><p>Strip prefixes and suffixes to extract base root morphemes.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/anagram-antics.html" class="game-node locked" data-game-id="anagram_antics">
-          <div><h3>Anagram Antics</h3><p>Unscramble scrambled jungle creature names.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/river-crossing.html" class="game-node locked" data-game-id="river_crossing">
-          <div><h3>River Crossing</h3><p>Ferry the Koala and Crocodile safely across the river.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/canopy-circuit.html" class="game-node locked" data-game-id="canopy_circuit">
-          <div><h3>Canopy Circuit</h3><p>Rotate conduit tiles to complete solar energy paths.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-      </div>
-    </div>
-
-    <!-- Level 3: Advanced Challenges (10 Games) -->
-    <div class="canopy-layer">
-      <div class="layer-header">
-        <div class="layer-title">Level 3: The Emergent Canopy (Advanced Mastery)</div>
-        <div class="layer-status-pill" id="l3-pill">
-          <span id="l3-lock-label">🔒 Need 10 Lvl 2 Games</span>
-          <span style="color:var(--text-muted);">&bull;</span>
-          <span id="l3-tracker">0 / 10 Mastered</span>
-        </div>
-      </div>
-      <div class="game-grid" id="emergent-grid">
-        <a href="games/jungle-budget.html" class="game-node locked" data-game-id="jungle_budget">
-          <div><h3>Jungle Budget</h3><p>Audit and balance expedition gear purchases using AUD ($).</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/ratio-river.html" class="game-node locked" data-game-id="ratio_river">
-          <div><h3>Ratio River</h3><p>Mix nutrients, clean river water, and minerals in precise ratios.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/spelling-bee-swarm.html" class="game-node locked" data-game-id="spelling_bee_swarm">
-          <div><h3>Spelling Bee Swarm</h3><p>Listen to audio prompts and type precise orthographic spellings.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/food-web-weaver.html" class="game-node locked" data-game-id="food_web_weaver">
-          <div><h3>Food Web Weaver</h3><p>Connect plant eaters, meat eaters, and predators in food chains.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/deduction-trail.html" class="game-node locked" data-game-id="deduction_trail">
-          <div><h3>Deduction Trail</h3><p>Follow elimination logic grids from field journal notes.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/pathfinding-drone.html" class="game-node locked" data-game-id="pathfinding_drone">
-          <div><h3>Pathfinding Drone</h3><p>Program directional algorithms to guide research drones.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/resource-balancer.html" class="game-node locked" data-game-id="resource_balancer">
-          <div><h3>Resource Balancer</h3><p>Optimize moisture, parasites, and soil nutrients across cycles.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/optical-canopy.html" class="game-node locked" data-game-id="optical_canopy">
-          <div><h3>Optical Canopy</h3><p>Redirect solar raycasts using 90° reflectors onto orchids.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/sorting-matrix.html" class="game-node locked" data-game-id="sorting_matrix">
-          <div><h3>Sorting Matrix</h3><p>Classify species across overlapping Venn diagram sets.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-        <a href="games/the-false-log.html" class="game-node locked" data-game-id="the_false_log">
-          <div><h3>The False Log</h3><p>Audit ranger notes to spot real facts versus silly guesses.</p></div>
-          <div class="game-footer-row"><span class="lock-banner">🔒 Locked</span></div>
-        </a>
-      </div>
-    </div>
-
-    <!-- Achievement & Certificate Station -->
+    <!-- Official Certificate Station -->
     <div class="achievement-card">
-      <h2 style="margin-bottom: 0.5rem; color: #fff;">🏆 Canopy Explorer Achievements</h2>
+      <h2 style="margin-bottom: 0.5rem; color: #fff;">🏆 Canopy Explorer Achievement</h2>
       <p style="font-size: 0.9rem; color: var(--text-muted);">
-        Complete all 10 games in each tier to unlock official printable certificates.
+        Complete all 10 games to unlock your official printable certificate!
       </p>
 
       <div class="name-input-group">
@@ -725,26 +559,13 @@
         <input type="text" id="student-name" class="name-input" placeholder="e.g. Charlie" oninput="saveStudentName(this.value)" />
       </div>
 
-      <div class="cert-buttons-grid">
-        <button class="btn-cert" id="cert-btn-1" disabled onclick="generateCertificate(1)">
-          <span>📜 Level 1 Certificate</span>
-          <span style="font-size: 0.75rem; font-weight: normal;">Forest Floor Complete (10/10)</span>
-        </button>
-        <button class="btn-cert" id="cert-btn-2" disabled onclick="generateCertificate(2)">
-          <span>📜 Level 2 Certificate</span>
-          <span style="font-size: 0.75rem; font-weight: normal;">Understory Complete (10/10)</span>
-        </button>
-        <button class="btn-cert" id="cert-btn-3" disabled onclick="generateCertificate(3)">
-          <span>📜 Level 3 Certificate</span>
-          <span style="font-size: 0.75rem; font-weight: normal;">Emergent Canopy Complete (10/10)</span>
-        </button>
-        <button class="btn-cert master" id="cert-btn-master" disabled onclick="generateCertificate('MASTER')">
-          <span style="font-size: 1.1rem;">🌟 Master Canopy Explorer Award</span>
-          <span style="font-size: 0.8rem; font-weight: normal;">All 30 Jungle Challenges Completed</span>
-        </button>
-      </div>
+      <button class="btn-cert-master" id="cert-btn-master" disabled onclick="generateMasterCertificate()">
+        <span>🎓 Print Canopy Explorer Certificate</span>
+        <span style="font-size: 0.85rem; font-weight: normal;" id="cert-status-sub">0 / 10 Games Completed</span>
+      </button>
     </div>
 
+    <!-- Reset Progress -->
     <div class="reset-container">
       <button class="btn-reset" onclick="resetProgress()">🗑️ Reset Canopy Progress</button>
     </div>
@@ -757,11 +578,13 @@
   <!-- Print Modal -->
   <div id="print-modal">
     <div class="cert-frame">
-      <h2 id="cert-title">Certificate of Completion</h2>
+      <h2>Certificate of Completion</h2>
       <div class="sub">Jack's Jungle Educational Arcade</div>
       <p>This certifies that</p>
       <div class="kid-name" id="cert-kid-name">Student Name</div>
-      <p class="desc" id="cert-desc">Has successfully solved educational challenges.</p>
+      <p class="desc">
+        Has successfully conquered all 10 challenges in Jack's Jungle! Recognized as an official, certified Canopy Explorer in spelling, phonics, mathematics, patterns, and reading comprehension.
+      </p>
       <div class="date-line" id="cert-date">Date: 23 September 2026</div>
       <div class="modal-actions">
         <button class="modal-btn" style="background:#22c55e; color:#061a12;" onclick="window.print()">🖨️ Print Certificate</button>
@@ -771,25 +594,36 @@
   </div>
 
   <script>
-    // --- Tier 1 Random Launch ---
-    const TIER_ONE_GAMES = [
-      'games/vine-climber.html', 'games/phonics-swamp.html', 'games/syllable-chop.html',
-      'games/canopy-count.html', 'games/termite-trail.html', 'games/grammar-grove.html',
-      'games/angle-archer.html', 'games/canopy-crosswords.html', 'games/pattern-pioneer.html',
+    // --- 10 Core Games ---
+    const GAMES_LIST = [
+      'games/vine-climber.html',
+      'games/phonics-swamp.html',
+      'games/syllable-chop.html',
+      'games/canopy-count.html',
+      'games/termite-trail.html',
+      'games/grammar-grove.html',
+      'games/angle-archer.html',
+      'games/canopy-crosswords.html',
+      'games/pattern-pioneer.html',
       'games/context-clue-quest.html'
     ];
 
-    function startRandomTierOneGame() {
-      const target = TIER_ONE_GAMES[Math.floor(Math.random() * TIER_ONE_GAMES.length)];
+    const GAME_IDS = [
+      'vine_climber', 'phonics_swamp', 'syllable_chop', 'canopy_count',
+      'termite_trail', 'grammar_grove', 'angle_archer', 'canopy_crosswords',
+      'pattern_pioneer', 'context_clue_quest'
+    ];
+
+    function startRandomGame() {
+      const target = GAMES_LIST[Math.floor(Math.random() * GAMES_LIST.length)];
       window.location.href = target;
     }
 
-    // --- Ambient Canvas Particles ---
+    // --- Ambient Particle Engine ---
     const canvas = document.getElementById('ambient-canvas');
     const ctx = canvas.getContext('2d');
     let width, height;
     const particles = [];
-    let baseParticleCount = 30;
 
     function resizeCanvas() {
       width = canvas.width = window.innerWidth;
@@ -831,10 +665,10 @@
       }
     }
 
-    function initParticles(count) {
+    function initParticles() {
       resizeCanvas();
       particles.length = 0;
-      for (let i = 0; i < count; i++) particles.push(new LeafParticle());
+      for (let i = 0; i < 28; i++) particles.push(new LeafParticle());
     }
 
     function animate() {
@@ -844,7 +678,7 @@
     }
 
     window.addEventListener('resize', resizeCanvas);
-    initParticles(baseParticleCount);
+    initParticles();
     animate();
 
     // --- Audio Engine ---
@@ -929,7 +763,7 @@
       }
     }
 
-    // --- Progression Engine ---
+    // --- Progression & Completion Engine ---
     const rootSvgTemplate = `
       <svg class="root-overlay" viewBox="0 0 200 32" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M0 32 Q 35 15, 60 28 T 110 20 T 160 27 T 200 32" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" opacity="0.85" />
@@ -939,33 +773,20 @@
       </svg>
     `;
 
-    // 10-Game Balanced Layers
-    const LAYER_IDS = {
-      1: ['vine_climber', 'phonics_swamp', 'syllable_chop', 'canopy_count', 'termite_trail', 'grammar_grove', 'angle_archer', 'canopy_crosswords', 'pattern_pioneer', 'context_clue_quest'],
-      2: ['times_table_treetops', 'fraction_foliage', 'negative_nesting', 'number_line_leap', 'perimeter_patrol', 'homophone_haven', 'root_word_expedition', 'anagram_antics', 'river_crossing', 'canopy_circuit'],
-      3: ['jungle_budget', 'ratio_river', 'spelling_bee_swarm', 'food_web_weaver', 'deduction_trail', 'pathfinding_drone', 'resource_balancer', 'optical_canopy', 'sorting_matrix', 'the_false_log']
-    };
-
     function saveStudentName(name) {
       localStorage.setItem('jacksjungle_student_name', name.trim());
     }
 
     function updateProgress() {
       let completedCount = 0;
-      let layer1Done = 0, layer2Done = 0, layer3Done = 0;
 
-      const allNodes = document.querySelectorAll('.game-node[data-game-id]');
-      allNodes.forEach(node => {
-        const id = node.getAttribute('data-game-id');
+      GAME_IDS.forEach(id => {
         const isDone = localStorage.getItem(`jacksjungle_completed_${id}`) === 'true' ||
                        localStorage.getItem(`jacksjungle_completed_${id.replace(/_/g, '-')}`) === 'true';
 
-        if (isDone) {
+        const node = document.querySelector(`.game-node[data-game-id="${id}"]`);
+        if (isDone && node) {
           completedCount++;
-          if (LAYER_IDS[1].includes(id)) layer1Done++;
-          if (LAYER_IDS[2].includes(id)) layer2Done++;
-          if (LAYER_IDS[3].includes(id)) layer3Done++;
-
           if (!node.querySelector('.root-overlay')) {
             node.insertAdjacentHTML('beforeend', rootSvgTemplate);
             const foot = node.querySelector('.game-footer-row');
@@ -979,154 +800,84 @@
         }
       });
 
-      // Synchronize Leaves: 20 leaves per completed game
+      // Synchronize Leaves: 20 leaves per completed game (capped at 200)
       let calculatedLeaves = completedCount * 20;
       let storedLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10) || 0;
       let leaves = Math.max(storedLeaves, calculatedLeaves);
       localStorage.setItem('jacksjungle_leaves', leaves.toString());
 
-      // Update Header Leaf Total
+      // Update Header Leaf Total & Density
       const readout = document.getElementById('leaf-readout');
       if (readout) readout.textContent = `🍃 ${leaves} Leaves`;
 
-      // Update Progress Percent and Explorer Rank
-      const percent = Math.min(100, Math.round((completedCount / 30) * 100));
+      const percent = Math.min(100, Math.round((completedCount / 10) * 100));
       const progressBar = document.getElementById('leaf-progress-bar');
       if (progressBar) progressBar.style.width = `${percent}%`;
 
       const percentLabel = document.getElementById('progress-percent-label');
       if (percentLabel) percentLabel.textContent = `Jungle Explored: ${percent}%`;
 
+      const gameTracker = document.getElementById('game-tracker');
+      if (gameTracker) gameTracker.textContent = `${completedCount} / 10 Completed`;
+
+      // Update Explorer Ranks
       const rankLabel = document.getElementById('rank-label');
       if (rankLabel) {
-        if (completedCount >= 30) rankLabel.textContent = "Explorer Rank: Jungle Master! 👑";
-        else if (completedCount >= 20) rankLabel.textContent = "Explorer Rank: Canopy Glider 🦜";
-        else if (completedCount >= 10) rankLabel.textContent = "Explorer Rank: Tree Climber 🐒";
+        if (completedCount >= 10) rankLabel.textContent = "Explorer Rank: Jungle Master! 👑";
+        else if (completedCount >= 7) rankLabel.textContent = "Explorer Rank: Canopy Glider 🦜";
+        else if (completedCount >= 4) rankLabel.textContent = "Explorer Rank: Tree Climber 🐒";
         else if (completedCount >= 1) rankLabel.textContent = "Explorer Rank: Jungle Scout 🌿";
         else rankLabel.textContent = "Explorer Rank: Tiny Sprout 🌱";
       }
 
-      // Update Trackers in Section Headers
-      const l1Track = document.getElementById('l1-tracker');
-      if (l1Track) l1Track.textContent = `${layer1Done} / 10 to Unlock Level 2`;
-
-      const l2Track = document.getElementById('l2-tracker');
-      if (l2Track) l2Track.textContent = `${layer2Done} / 10 to Unlock Level 3`;
-
-      const l3Track = document.getElementById('l3-tracker');
-      if (l3Track) l3Track.textContent = `${layer3Done} / 10 Mastered`;
-
-      // Hide Hero CTA button once any game is completed
+      // Hide Hero CTA once a game has been finished
       const hero = document.getElementById('hero-cta');
       if (hero) {
         if (completedCount > 0) hero.classList.add('hidden');
         else hero.classList.remove('hidden');
       }
 
-      // Grow border vines
-      const vineGrowth = Math.min(1, completedCount / 10);
-      const leftVine = document.getElementById('left-vine');
-      const rightVine = document.getElementById('right-vine');
-      if (leftVine && rightVine) {
-        leftVine.style.opacity = vineGrowth;
-        leftVine.style.transform = `translateX(${-40 + (vineGrowth * 40)}px)`;
-        rightVine.style.opacity = vineGrowth;
-        rightVine.style.transform = `translateX(${40 - (vineGrowth * 40)}px) scaleX(-1)`;
-      }
-
-      // STRICT RULE: Level 2 unlocks ONLY when all 10 Level 1 games are completed
-      const isLevel2Unlocked = (layer1Done >= 10);
-      const l2LockLbl = document.getElementById('l2-lock-label');
-      const l2Pill = document.getElementById('l2-pill');
-
-      if (isLevel2Unlocked) {
-        if (l2LockLbl) l2LockLbl.textContent = "Level 2: Unlocked";
-        if (l2Pill) l2Pill.style.borderColor = "var(--accent)";
-        document.querySelectorAll('#understory-grid .game-node').forEach(node => {
-          node.classList.remove('locked');
-          const banner = node.querySelector('.lock-banner');
-          if (banner) { banner.textContent = "Understory • Unlocked"; banner.style.color = "var(--accent)"; }
-        });
-      } else {
-        if (l2LockLbl) l2LockLbl.textContent = `🔒 Need ${10 - layer1Done} more L1 Games`;
-        if (l2Pill) l2Pill.style.borderColor = "var(--border-card)";
-      }
-
-      // STRICT RULE: Level 3 unlocks ONLY when all 10 Level 2 games are completed
-      const isLevel3Unlocked = isLevel2Unlocked && (layer2Done >= 10);
-      const l3LockLbl = document.getElementById('l3-lock-label');
-      const l3Pill = document.getElementById('l3-pill');
-
-      if (isLevel3Unlocked) {
-        if (l3LockLbl) l3LockLbl.textContent = "Level 3: Unlocked";
-        if (l3Pill) l3Pill.style.borderColor = "var(--accent)";
-        document.querySelectorAll('#emergent-grid .game-node').forEach(node => {
-          node.classList.remove('locked');
-          const banner = node.querySelector('.lock-banner');
-          if (banner) { banner.textContent = "Canopy • Unlocked"; banner.style.color = "var(--accent)"; }
-        });
-      } else {
-        if (l3LockLbl) {
-          l3LockLbl.textContent = isLevel2Unlocked ? `🔒 Need ${10 - layer2Done} more L2 Games` : `🔒 Level 2 Locked`;
-        }
-        if (l3Pill) l3Pill.style.borderColor = "var(--border-card)";
-      }
-
-      // Restore Student Name & Update Certificates
+      // Restore Student Name & Update Master Certificate Button
       const savedName = localStorage.getItem('jacksjungle_student_name') || '';
       document.getElementById('student-name').value = savedName;
 
-      document.getElementById('cert-btn-1').disabled = (layer1Done < 10);
-      document.getElementById('cert-btn-2').disabled = (layer2Done < 10);
-      document.getElementById('cert-btn-3').disabled = (layer3Done < 10);
-      document.getElementById('cert-btn-master').disabled = (completedCount < 30);
+      const certBtn = document.getElementById('cert-btn-master');
+      const certSub = document.getElementById('cert-status-sub');
+      if (certBtn) {
+        certBtn.disabled = (completedCount < 10);
+        if (completedCount >= 10) {
+          certSub.textContent = "All 10 Games Solved! Click to Open Certificate";
+        } else {
+          certSub.textContent = `${completedCount} / 10 Games Completed`;
+        }
+      }
     }
 
-    // --- Certificates ---
-    function generateCertificate(tier) {
+    // --- Single Certificate Generator ---
+    function generateMasterCertificate() {
       const nameInput = document.getElementById('student-name');
       const kidName = nameInput.value.trim() || 'Trailblazing Explorer';
       const today = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
 
-      const modal = document.getElementById('print-modal');
-      const titleEl = document.getElementById('cert-title');
-      const nameEl = document.getElementById('cert-kid-name');
-      const descEl = document.getElementById('cert-desc');
-      const dateEl = document.getElementById('cert-date');
-
-      nameEl.textContent = kidName;
-      dateEl.textContent = `Awarded on: ${today}`;
-
-      if (tier === 1) {
-        titleEl.textContent = "Level 1: Forest Floor Certificate";
-        descEl.textContent = "For demonstrating spelling excellence, phonics mastery, and foundational math across all 10 Forest Floor modules.";
-      } else if (tier === 2) {
-        titleEl.textContent = "Level 2: Understory Explorer Award";
-        descEl.textContent = "For conquering multiplication recall, visual fractions, elevator elevation, and raft navigation throughout the Understory layer.";
-      } else if (tier === 3) {
-        titleEl.textContent = "Level 3: Emergent Canopy Honors";
-        descEl.textContent = "For outstanding deductive reasoning, systems optimization, raycast reflection, and critical thinking at the canopy apex.";
-      } else if (tier === 'MASTER') {
-        titleEl.textContent = "🌟 Master Canopy Explorer 🌟";
-        descEl.textContent = "Has completed all 30 challenges in Jack's Jungle! Recognized as an apex naturalist, mathematician, and critical thinker.";
-      }
-      modal.style.display = 'flex';
+      document.getElementById('cert-kid-name').textContent = kidName;
+      document.getElementById('cert-date').textContent = `Awarded on: ${today}`;
+      document.getElementById('print-modal').style.display = 'flex';
     }
 
     function closeModal() {
       document.getElementById('print-modal').style.display = 'none';
     }
 
+    // --- Double-Confirmation Reset Flow ---
     function resetProgress() {
       // Step 1: Initial Warning
       const firstConfirm = window.confirm("🌿 Jack's Jungle Reset:\n\nAre you sure you want to reset your canopy progress?");
       if (!firstConfirm) return;
 
       // Step 2: Final Warning (Safety Lock)
-      const secondConfirm = window.confirm("⚠️ FINAL WARNING:\n\nThis will permanently delete all your Leaves, Level Unlocks, and Printable Certificates!\n\nAre you 100% sure you want to start over?");
+      const secondConfirm = window.confirm("⚠️ FINAL WARNING:\n\nThis will permanently delete all your Leaves and your Printable Certificate!\n\nAre you 100% sure you want to start over?");
       if (!secondConfirm) return;
 
-      // Execute wipe if both confirmed
       const keysToRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
