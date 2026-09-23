@@ -171,13 +171,14 @@
       gap: 0.5rem;
       background: var(--accent);
       color: #061a12;
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       font-weight: 800;
       border: none;
-      padding: 1rem 2.75rem;
+      padding: 1rem 2.25rem;
       border-radius: 9999px;
       box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
       cursor: pointer;
+      white-space: nowrap;
       transition: transform 0.15s ease, background-color 0.2s ease;
     }
 
@@ -525,27 +526,28 @@
       <div><span class="badge">Rated: G &amp; PG-13</span></div>
     </header>
 
+    <!-- Quick Start Hero CTA -->
     <div class="cta-container" id="hero-cta">
       <button class="btn-get-started" onclick="startRandomTierOneGame()">
-        🌿 Get Started — Play Random Game
+        🎲 Play a Random Level 1 Game
       </button>
     </div>
 
     <!-- Biome Stage & Leaf Bank -->
     <div class="card">
       <h2>
-        <span>Biome Establishment Stage</span>
+        <span>Your Jungle Journey</span>
         <span id="leaf-readout" style="color: var(--leaf-green); font-size: 1.1rem;">🍃 0 Leaves</span>
       </h2>
-      <p style="font-size: 0.95rem; color: var(--text-muted);">
-        Master challenge tiers to gather leaves. Complete all 10 Level 1 games to unlock Level 2, and complete all 10 Level 2 games to reach Level 3!
+      <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5;">
+        Play games to collect shiny jungle leaves! Finish all 10 games on the Forest Floor to climb up into Level 2. Can you make it all the way to the top of the trees?
       </p>
       <div class="progress-track">
         <div class="progress-bar-fill" id="leaf-progress-bar" style="width: 0%;"></div>
       </div>
       <div class="stats-row">
-        <span>Current Phase: Sprout Initialization</span>
-        <span id="progress-percent-label">Canopy Density: 0%</span>
+        <span id="rank-label">Explorer Rank: Tiny Sprout 🌱</span>
+        <span id="progress-percent-label">Jungle Explored: 0%</span>
       </div>
     </div>
 
@@ -937,7 +939,7 @@
       </svg>
     `;
 
-    // Evenly distributed 10-game layers
+    // 10-Game Balanced Layers
     const LAYER_IDS = {
       1: ['vine_climber', 'phonics_swamp', 'syllable_chop', 'canopy_count', 'termite_trail', 'grammar_grove', 'angle_archer', 'canopy_crosswords', 'pattern_pioneer', 'context_clue_quest'],
       2: ['times_table_treetops', 'fraction_foliage', 'negative_nesting', 'number_line_leap', 'perimeter_patrol', 'homophone_haven', 'root_word_expedition', 'anagram_antics', 'river_crossing', 'canopy_circuit'],
@@ -977,22 +979,32 @@
         }
       });
 
-      // Synchronize Leaves: 20 leaves per unique completed game
+      // Synchronize Leaves: 20 leaves per completed game
       let calculatedLeaves = completedCount * 20;
       let storedLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10) || 0;
       let leaves = Math.max(storedLeaves, calculatedLeaves);
       localStorage.setItem('jacksjungle_leaves', leaves.toString());
 
-      // Update Header Leaf Total & Canopy Density
+      // Update Header Leaf Total
       const readout = document.getElementById('leaf-readout');
       if (readout) readout.textContent = `🍃 ${leaves} Leaves`;
 
+      // Update Progress Percent and Explorer Rank
       const percent = Math.min(100, Math.round((completedCount / 30) * 100));
       const progressBar = document.getElementById('leaf-progress-bar');
       if (progressBar) progressBar.style.width = `${percent}%`;
 
       const percentLabel = document.getElementById('progress-percent-label');
-      if (percentLabel) percentLabel.textContent = `Canopy Density: ${percent}%`;
+      if (percentLabel) percentLabel.textContent = `Jungle Explored: ${percent}%`;
+
+      const rankLabel = document.getElementById('rank-label');
+      if (rankLabel) {
+        if (completedCount >= 30) rankLabel.textContent = "Explorer Rank: Jungle Master! 👑";
+        else if (completedCount >= 20) rankLabel.textContent = "Explorer Rank: Canopy Glider 🦜";
+        else if (completedCount >= 10) rankLabel.textContent = "Explorer Rank: Tree Climber 🐒";
+        else if (completedCount >= 1) rankLabel.textContent = "Explorer Rank: Jungle Scout 🌿";
+        else rankLabel.textContent = "Explorer Rank: Tiny Sprout 🌱";
+      }
 
       // Update Trackers in Section Headers
       const l1Track = document.getElementById('l1-tracker');
@@ -1004,7 +1016,7 @@
       const l3Track = document.getElementById('l3-tracker');
       if (l3Track) l3Track.textContent = `${layer3Done} / 10 Mastered`;
 
-      // Hide Hero CTA once any game is completed
+      // Hide Hero CTA button once any game is completed
       const hero = document.getElementById('hero-cta');
       if (hero) {
         if (completedCount > 0) hero.classList.add('hidden');
