@@ -14,7 +14,7 @@
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Jack's Jungle - Online Educational Games</title>
+  <title>Jack's Jungle - Educational Arcade Evaluation</title>
   <style>
     :root {
       --bg-dark: #06150f;
@@ -140,37 +140,6 @@
       letter-spacing: 0.05rem;
     }
 
-    .cta-container {
-      text-align: center;
-      margin: 1.75rem 0 2.5rem;
-      transition: opacity 0.3s ease;
-    }
-
-    .cta-container.hidden { display: none; }
-
-    .btn-get-started {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      background: var(--accent);
-      color: #061a12;
-      font-size: 1.15rem;
-      font-weight: 800;
-      border: none;
-      padding: 1rem 2.25rem;
-      border-radius: 9999px;
-      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
-      cursor: pointer;
-      white-space: nowrap;
-      transition: transform 0.15s ease, background-color 0.2s ease;
-    }
-
-    .btn-get-started:hover {
-      background-color: var(--accent-hover);
-      transform: translateY(-2px);
-    }
-
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border-card);
@@ -178,7 +147,7 @@
       -webkit-backdrop-filter: blur(8px);
       border-radius: 1rem;
       padding: 1.5rem;
-      margin-bottom: 2rem;
+      margin: 1.5rem 0 2rem;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
 
@@ -215,7 +184,7 @@
       font-weight: 600;
     }
 
-    .arcade-section { margin-top: 2rem; }
+    .section-layer { margin-top: 2rem; }
 
     .section-header {
       display: flex;
@@ -312,69 +281,6 @@
       gap: 0.2rem;
     }
 
-    .achievement-card {
-      background: linear-gradient(135deg, rgba(13, 43, 31, 0.95), rgba(6, 26, 18, 0.95));
-      border: 2px solid var(--accent);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      margin-top: 2.5rem;
-    }
-
-    .name-input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin: 1rem 0 1.25rem;
-      max-width: 440px;
-    }
-
-    .name-input-group label { font-size: 0.9rem; font-weight: 700; color: var(--text-muted); }
-
-    .name-input {
-      background: #061a12;
-      border: 1px solid var(--border-card);
-      color: #fff;
-      padding: 0.75rem 1rem;
-      border-radius: 0.5rem;
-      font-size: 1.1rem;
-      font-weight: bold;
-      outline: none;
-      user-select: text;
-      -webkit-user-select: text;
-    }
-
-    .name-input:focus { border-color: var(--accent); }
-
-    .btn-cert-master {
-      width: 100%;
-      background: rgba(250, 204, 21, 0.15);
-      border: 2px solid var(--gold);
-      color: var(--gold);
-      padding: 1.1rem 1.5rem;
-      border-radius: 0.75rem;
-      font-weight: 900;
-      font-size: 1.15rem;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.35rem;
-      transition: all 0.2s ease;
-    }
-
-    .btn-cert-master:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      border-color: #334155;
-      background: #0f172a;
-      color: #94a3b8;
-    }
-
-    .btn-cert-master:not(:disabled):hover {
-      background: rgba(250, 204, 21, 0.25);
-      transform: translateY(-2px);
-    }
-
     .reset-container {
       text-align: center;
       margin-top: 3.5rem;
@@ -394,50 +300,6 @@
     }
 
     .btn-reset:hover { background: #dc2626; color: #fff; }
-
-    #print-modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-
-    .cert-frame {
-      background: #fff;
-      color: #061a12;
-      width: 100%;
-      max-width: 680px;
-      padding: 2.5rem;
-      border-radius: 12px;
-      border: 8px double #15803d;
-      text-align: center;
-      position: relative;
-    }
-
-    .cert-frame h2 { font-size: 2.2rem; color: #15803d; margin-bottom: 0.5rem; text-transform: uppercase; }
-    .cert-frame .sub { font-size: 1.1rem; color: #4b5563; margin-bottom: 1.5rem; }
-    .cert-frame .kid-name {
-      font-size: 2.5rem; font-weight: 900; color: #047857;
-      border-bottom: 2px solid #10b981;
-      display: inline-block; padding: 0 1.5rem 0.25rem; margin: 0.5rem 0 1.5rem;
-    }
-    .cert-frame .desc { font-size: 1.05rem; line-height: 1.6; color: #1f2937; margin-bottom: 1.5rem; }
-    .cert-frame .date-line { font-size: 0.95rem; font-weight: bold; color: #6b7280; }
-
-    .modal-actions { margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem; }
-    .modal-btn { padding: 0.6rem 1.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; }
-
-    @media print {
-      body * { visibility: hidden; }
-      #print-modal, #print-modal * { visibility: visible; }
-      #print-modal { position: absolute; left: 0; top: 0; background: none; display: block !important; padding: 0; }
-      .cert-frame { border: 6px double #15803d; box-shadow: none; max-width: 100%; width: 100%; margin: 0; padding: 2rem; }
-      .modal-actions { display: none !important; }
-    }
 
     footer {
       text-align: center;
@@ -462,50 +324,38 @@
       </div>
 
       <h1>Jack's Jungle</h1>
-      <div><span class="dev-banner">🚧 Currently in Active Development</span></div>
-      <p>Interactive web-based educational games designed for curious young minds.</p>
+      <div><span class="dev-banner">🧪 Evaluation Mode &mdash; All 30 Games Unlocked</span></div>
+      <p>Play through and test all 30 games across the arcade to select the best 10.</p>
       <div><span class="badge">Ages: 6–10 Years</span></div>
     </header>
 
-    <!-- Quick Start Hero CTA -->
-    <div class="cta-container" id="hero-cta">
-      <button class="btn-get-started" onclick="startRandomGame()">
-        🎲 Play a Random Game
-      </button>
-    </div>
-
-    <!-- Leaf Bank & Journey Status -->
+    <!-- Leaf Tracker & Biome Audit -->
     <div class="card">
       <h2>
-        <span>Your Jungle Journey</span>
+        <span>Curator Dashboard</span>
         <span id="leaf-readout" style="color: var(--leaf-green); font-size: 1.1rem;">🍃 0 Leaves</span>
       </h2>
       <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5;">
-        Play all 10 jungle games to collect shiny leaves! Complete every challenge to earn your official printable Canopy Explorer Certificate.
+        Every game is unlocked for review. Test each game directly to evaluate gameplay, age suitability, and polish.
       </p>
       <div class="progress-track">
         <div class="progress-bar-fill" id="leaf-progress-bar" style="width: 0%;"></div>
       </div>
       <div class="stats-row">
-        <span id="rank-label">Explorer Rank: Tiny Sprout 🌱</span>
-        <span id="progress-percent-label">Jungle Explored: 0%</span>
+        <span id="rank-label">Review Status: Testing Active 🔬</span>
+        <span id="progress-percent-label">Games Tested: 0 / 30</span>
       </div>
     </div>
 
-    <!-- The 10 Core Games (All Unlocked) -->
-    <div class="arcade-section">
+    <!-- Batch 1: Games 1 to 10 -->
+    <div class="section-layer">
       <div class="section-header">
-        <div class="section-title">🌿 Jungle Arcade Challenges</div>
-        <div class="status-pill">
-          <span>All Games Unlocked</span>
-          <span style="color:var(--text-muted);">&bull;</span>
-          <span id="game-tracker">0 / 10 Completed</span>
-        </div>
+        <div class="section-title">🌿 Group A: Foundational Games (1–10)</div>
+        <div class="status-pill"><span>Unlocked</span></div>
       </div>
-
       <div class="game-grid">
         <a href="games/vine-climber.html" class="game-node" data-game-id="vine_climber">
-          <div><h3>Vine Climber</h3><p>Grow jungle vines upward by picking missing letters.</p></div>
+          <div><h3>Vine Climber</h3><p>Pick missing letters to climb 6 vine milestones.</p></div>
           <div class="game-footer-row"><span class="game-tag">Spelling</span></div>
         </a>
         <a href="games/phonics-swamp.html" class="game-node" data-game-id="phonics_swamp">
@@ -513,56 +363,138 @@
           <div class="game-footer-row"><span class="game-tag">Phonics</span></div>
         </a>
         <a href="games/syllable-chop.html" class="game-node" data-game-id="syllable_chop">
-          <div><h3>Syllable Chop</h3><p>Count and slice syllables across multi-syllabic jungle fauna.</p></div>
+          <div><h3>Syllable Chop</h3><p>Count and slice syllables across multi-syllabic fauna.</p></div>
           <div class="game-footer-row"><span class="game-tag">Phonics</span></div>
         </a>
         <a href="games/canopy-count.html" class="game-node" data-game-id="canopy_count">
-          <div><h3>Canopy Count</h3><p>Fast-paced subitizing and mental arithmetic tracking tree frogs.</p></div>
+          <div><h3>Canopy Count</h3><p>Subitizing and mental arithmetic tracking tree frogs.</p></div>
           <div class="game-footer-row"><span class="game-tag">Math</span></div>
         </a>
         <a href="games/termite-trail.html" class="game-node" data-game-id="termite_trail">
-          <div><h3>Termite Trail</h3><p>Decide whether groups of marching termites get bigger or smaller.</p></div>
+          <div><h3>Termite Trail</h3><p>Decide whether marching groups get bigger (+) or smaller (-).</p></div>
           <div class="game-footer-row"><span class="game-tag">Math</span></div>
         </a>
         <a href="games/grammar-grove.html" class="game-node" data-game-id="grammar_grove">
-          <div><h3>Grammar Grove</h3><p>Sort falling leaves into nouns, verbs, adjectives, and adverbs.</p></div>
+          <div><h3>Grammar Grove</h3><p>Sort falling leaves into nouns, verbs, and adjectives.</p></div>
           <div class="game-footer-row"><span class="game-tag">Grammar</span></div>
         </a>
         <a href="games/angle-archer.html" class="game-node" data-game-id="angle_archer">
-          <div><h3>Shape Safari</h3><p>Identify rainforest shapes by counting their sides and corners.</p></div>
+          <div><h3>Shape Safari</h3><p>Count sides and corners to identify 2D shapes.</p></div>
           <div class="game-footer-row"><span class="game-tag">Geometry</span></div>
         </a>
         <a href="games/canopy-crosswords.html" class="game-node" data-game-id="canopy_crosswords">
-          <div><h3>Canopy Crosswords</h3><p>Solve friendly 4-word crossword grids with jungle creatures.</p></div>
+          <div><h3>Canopy Crosswords</h3><p>4-word interlocking puzzle (FROG, TREE, NEST, VINE).</p></div>
           <div class="game-footer-row"><span class="game-tag">Vocabulary</span></div>
         </a>
         <a href="games/pattern-pioneer.html" class="game-node" data-game-id="pattern_pioneer">
-          <div><h3>Pattern Pioneer</h3><p>Complete colorful repeating and growing jungle patterns.</p></div>
+          <div><h3>Pattern Pioneer</h3><p>Complete AB, AAB, ABC, and skip-counting patterns.</p></div>
           <div class="game-footer-row"><span class="game-tag">Patterns</span></div>
         </a>
         <a href="games/context-clue-quest.html" class="game-node" data-game-id="context_clue_quest">
-          <div><h3>Context Clue Quest</h3><p>Determine vocabulary meanings inside rainforest stories.</p></div>
+          <div><h3>Context Clue Quest</h3><p>Determine vocabulary meanings inside jungle passages.</p></div>
           <div class="game-footer-row"><span class="game-tag">Reading</span></div>
         </a>
       </div>
     </div>
 
-    <!-- Official Certificate Station -->
-    <div class="achievement-card">
-      <h2 style="margin-bottom: 0.5rem; color: #fff;">🏆 Canopy Explorer Achievement</h2>
-      <p style="font-size: 0.9rem; color: var(--text-muted);">
-        Complete all 10 games to unlock your official printable certificate!
-      </p>
-
-      <div class="name-input-group">
-        <label for="student-name">Enter Student Name:</label>
-        <input type="text" id="student-name" class="name-input" placeholder="e.g. Charlie" oninput="saveStudentName(this.value)" />
+    <!-- Batch 2: Games 11 to 20 -->
+    <div class="section-layer">
+      <div class="section-header">
+        <div class="section-title">🌴 Group B: Intermediate Challenges (11–20)</div>
+        <div class="status-pill"><span>Unlocked</span></div>
       </div>
+      <div class="game-grid">
+        <a href="games/times-table-treetops.html" class="game-node" data-game-id="times_table_treetops">
+          <div><h3>Times Table Treetops</h3><p>Climb branch bridges with 2s, 5s, and 10s recall.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Multiplication</span></div>
+        </a>
+        <a href="games/fraction-foliage.html" class="game-node" data-game-id="fraction_foliage">
+          <div><h3>Fraction Foliage</h3><p>Match shaded canopy leaf slices with halves and quarters.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Fractions</span></div>
+        </a>
+        <a href="games/negative-nesting.html" class="game-node" data-game-id="negative_nesting">
+          <div><h3>Negative Nesting</h3><p>Ride the tree elevator between canopy and root burrows.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Integers</span></div>
+        </a>
+        <a href="games/number-line-leap.html" class="game-node" data-game-id="number_line_leap">
+          <div><h3>Number Line Leap</h3><p>Jump accurately along suspended vine number lines.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Number Sense</span></div>
+        </a>
+        <a href="games/perimeter-patrol.html" class="game-node" data-game-id="perimeter_patrol">
+          <div><h3>Perimeter Patrol</h3><p>Calculate 2D enclosure boundaries and fence perimeters.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Geometry</span></div>
+        </a>
+        <a href="games/homophone-haven.html" class="game-node" data-game-id="homophone_haven">
+          <div><h3>Homophone Haven</h3><p>Differentiate between confusing homophones in nature text.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Grammar</span></div>
+        </a>
+        <a href="games/root-word-expedition.html" class="game-node" data-game-id="root_word_expedition">
+          <div><h3>Root Word Expedition</h3><p>Strip prefixes and suffixes to extract base root words.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Morphemes</span></div>
+        </a>
+        <a href="games/anagram-antics.html" class="game-node" data-game-id="anagram_antics">
+          <div><h3>Anagram Antics</h3><p>Unscramble scrambled jungle creature names.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Spelling</span></div>
+        </a>
+        <a href="games/river-crossing.html" class="game-node" data-game-id="river_crossing">
+          <div><h3>River Crossing</h3><p>Ferry the Koala and Crocodile safely across the river.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Logic</span></div>
+        </a>
+        <a href="games/canopy-circuit.html" class="game-node" data-game-id="canopy_circuit">
+          <div><h3>Canopy Circuit</h3><p>Rotate conduit tiles to complete solar energy paths.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Spatial</span></div>
+        </a>
+      </div>
+    </div>
 
-      <button class="btn-cert-master" id="cert-btn-master" disabled onclick="generateMasterCertificate()">
-        <span>🎓 Print Canopy Explorer Certificate</span>
-        <span style="font-size: 0.85rem; font-weight: normal;" id="cert-status-sub">0 / 10 Games Completed</span>
-      </button>
+    <!-- Batch 3: Games 21 to 30 -->
+    <div class="section-layer">
+      <div class="section-header">
+        <div class="section-title">🦅 Group C: Advanced &amp; Reasoning (21–30)</div>
+        <div class="status-pill"><span>Unlocked</span></div>
+      </div>
+      <div class="game-grid">
+        <a href="games/jungle-budget.html" class="game-node" data-game-id="jungle_budget">
+          <div><h3>Jungle Budget</h3><p>Audit and balance expedition gear purchases using AUD ($).</p></div>
+          <div class="game-footer-row"><span class="game-tag">Finance</span></div>
+        </a>
+        <a href="games/ratio-river.html" class="game-node" data-game-id="ratio_river">
+          <div><h3>Ratio River</h3><p>Mix nutrients, clean river water, and minerals in ratio.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Ratios</span></div>
+        </a>
+        <a href="games/spelling-bee-swarm.html" class="game-node" data-game-id="spelling_bee_swarm">
+          <div><h3>Spelling Bee Swarm</h3><p>Listen to audio prompts and type precise spellings.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Spelling</span></div>
+        </a>
+        <a href="games/food-web-weaver.html" class="game-node" data-game-id="food_web_weaver">
+          <div><h3>Food Web Weaver</h3><p>Connect plant eaters, meat eaters, and predators.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Ecology</span></div>
+        </a>
+        <a href="games/deduction-trail.html" class="game-node" data-game-id="deduction_trail">
+          <div><h3>Deduction Trail</h3><p>Follow elimination logic grids from field journal notes.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Logic</span></div>
+        </a>
+        <a href="games/pathfinding-drone.html" class="game-node" data-game-id="pathfinding_drone">
+          <div><h3>Pathfinding Drone</h3><p>Program directional algorithms to guide research drones.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Algorithms</span></div>
+        </a>
+        <a href="games/resource-balancer.html" class="game-node" data-game-id="resource_balancer">
+          <div><h3>Resource Balancer</h3><p>Optimize moisture, parasites, and soil nutrients.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Systems</span></div>
+        </a>
+        <a href="games/optical-canopy.html" class="game-node" data-game-id="optical_canopy">
+          <div><h3>Optical Canopy</h3><p>Redirect solar raycasts using 90° reflectors onto orchids.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Physics</span></div>
+        </a>
+        <a href="games/sorting-matrix.html" class="game-node" data-game-id="sorting_matrix">
+          <div><h3>Sorting Matrix</h3><p>Classify species across overlapping Venn diagram sets.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Sets</span></div>
+        </a>
+        <a href="games/the-false-log.html" class="game-node" data-game-id="the_false_log">
+          <div><h3>The False Log</h3><p>Audit ranger notes to spot real facts versus silly guesses.</p></div>
+          <div class="game-footer-row"><span class="game-tag">Critical Thinking</span></div>
+        </a>
+      </div>
     </div>
 
     <!-- Reset Progress -->
@@ -575,51 +507,17 @@
     </footer>
   </div>
 
-  <!-- Print Modal -->
-  <div id="print-modal">
-    <div class="cert-frame">
-      <h2>Certificate of Completion</h2>
-      <div class="sub">Jack's Jungle Educational Arcade</div>
-      <p>This certifies that</p>
-      <div class="kid-name" id="cert-kid-name">Student Name</div>
-      <p class="desc">
-        Has successfully conquered all 10 challenges in Jack's Jungle! Recognized as an official, certified Canopy Explorer in spelling, phonics, mathematics, patterns, and reading comprehension.
-      </p>
-      <div class="date-line" id="cert-date">Date: 23 September 2026</div>
-      <div class="modal-actions">
-        <button class="modal-btn" style="background:#22c55e; color:#061a12;" onclick="window.print()">🖨️ Print Certificate</button>
-        <button class="modal-btn" style="background:#e5e7eb; color:#1f2937;" onclick="closeModal()">Close</button>
-      </div>
-    </div>
-  </div>
-
   <script>
-    // --- 10 Core Games ---
-    const GAMES_LIST = [
-      'games/vine-climber.html',
-      'games/phonics-swamp.html',
-      'games/syllable-chop.html',
-      'games/canopy-count.html',
-      'games/termite-trail.html',
-      'games/grammar-grove.html',
-      'games/angle-archer.html',
-      'games/canopy-crosswords.html',
-      'games/pattern-pioneer.html',
-      'games/context-clue-quest.html'
+    const ALL_GAME_IDS = [
+      'vine_climber', 'phonics_swamp', 'syllable_chop', 'canopy_count', 'termite_trail',
+      'grammar_grove', 'angle_archer', 'canopy_crosswords', 'pattern_pioneer', 'context_clue_quest',
+      'times_table_treetops', 'fraction_foliage', 'negative_nesting', 'number_line_leap', 'perimeter_patrol',
+      'homophone_haven', 'root_word_expedition', 'anagram_antics', 'river_crossing', 'canopy_circuit',
+      'jungle_budget', 'ratio_river', 'spelling_bee_swarm', 'food_web_weaver', 'deduction_trail',
+      'pathfinding_drone', 'resource_balancer', 'optical_canopy', 'sorting_matrix', 'the_false_log'
     ];
 
-    const GAME_IDS = [
-      'vine_climber', 'phonics_swamp', 'syllable_chop', 'canopy_count',
-      'termite_trail', 'grammar_grove', 'angle_archer', 'canopy_crosswords',
-      'pattern_pioneer', 'context_clue_quest'
-    ];
-
-    function startRandomGame() {
-      const target = GAMES_LIST[Math.floor(Math.random() * GAMES_LIST.length)];
-      window.location.href = target;
-    }
-
-    // --- Ambient Particle Engine ---
+    // Ambient Canvas Particles
     const canvas = document.getElementById('ambient-canvas');
     const ctx = canvas.getContext('2d');
     let width, height;
@@ -668,7 +566,7 @@
     function initParticles() {
       resizeCanvas();
       particles.length = 0;
-      for (let i = 0; i < 28; i++) particles.push(new LeafParticle());
+      for (let i = 0; i < 26; i++) particles.push(new LeafParticle());
     }
 
     function animate() {
@@ -681,7 +579,7 @@
     initParticles();
     animate();
 
-    // --- Audio Engine ---
+    // Ambient Audio Engine
     let audioCtx = null, isSoundOn = false, ambientNoise = null, gainNode = null, chimeTimer = null;
 
     function initAmbientSoundEngine() {
@@ -763,7 +661,6 @@
       }
     }
 
-    // --- Progression & Completion Engine ---
     const rootSvgTemplate = `
       <svg class="root-overlay" viewBox="0 0 200 32" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M0 32 Q 35 15, 60 28 T 110 20 T 160 27 T 200 32" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" opacity="0.85" />
@@ -773,14 +670,10 @@
       </svg>
     `;
 
-    function saveStudentName(name) {
-      localStorage.setItem('jacksjungle_student_name', name.trim());
-    }
-
     function updateProgress() {
       let completedCount = 0;
 
-      GAME_IDS.forEach(id => {
+      ALL_GAME_IDS.forEach(id => {
         const isDone = localStorage.getItem(`jacksjungle_completed_${id}`) === 'true' ||
                        localStorage.getItem(`jacksjungle_completed_${id.replace(/_/g, '-')}`) === 'true';
 
@@ -800,82 +693,29 @@
         }
       });
 
-      // Synchronize Leaves: 20 leaves per completed game (capped at 200)
+      // Synchronize Leaves: 20 per unique game completed
       let calculatedLeaves = completedCount * 20;
       let storedLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10) || 0;
       let leaves = Math.max(storedLeaves, calculatedLeaves);
       localStorage.setItem('jacksjungle_leaves', leaves.toString());
 
-      // Update Header Leaf Total & Density
       const readout = document.getElementById('leaf-readout');
       if (readout) readout.textContent = `🍃 ${leaves} Leaves`;
 
-      const percent = Math.min(100, Math.round((completedCount / 10) * 100));
+      const percent = Math.min(100, Math.round((completedCount / 30) * 100));
       const progressBar = document.getElementById('leaf-progress-bar');
       if (progressBar) progressBar.style.width = `${percent}%`;
 
       const percentLabel = document.getElementById('progress-percent-label');
-      if (percentLabel) percentLabel.textContent = `Jungle Explored: ${percent}%`;
-
-      const gameTracker = document.getElementById('game-tracker');
-      if (gameTracker) gameTracker.textContent = `${completedCount} / 10 Completed`;
-
-      // Update Explorer Ranks
-      const rankLabel = document.getElementById('rank-label');
-      if (rankLabel) {
-        if (completedCount >= 10) rankLabel.textContent = "Explorer Rank: Jungle Master! 👑";
-        else if (completedCount >= 7) rankLabel.textContent = "Explorer Rank: Canopy Glider 🦜";
-        else if (completedCount >= 4) rankLabel.textContent = "Explorer Rank: Tree Climber 🐒";
-        else if (completedCount >= 1) rankLabel.textContent = "Explorer Rank: Jungle Scout 🌿";
-        else rankLabel.textContent = "Explorer Rank: Tiny Sprout 🌱";
-      }
-
-      // Hide Hero CTA once a game has been finished
-      const hero = document.getElementById('hero-cta');
-      if (hero) {
-        if (completedCount > 0) hero.classList.add('hidden');
-        else hero.classList.remove('hidden');
-      }
-
-      // Restore Student Name & Update Master Certificate Button
-      const savedName = localStorage.getItem('jacksjungle_student_name') || '';
-      document.getElementById('student-name').value = savedName;
-
-      const certBtn = document.getElementById('cert-btn-master');
-      const certSub = document.getElementById('cert-status-sub');
-      if (certBtn) {
-        certBtn.disabled = (completedCount < 10);
-        if (completedCount >= 10) {
-          certSub.textContent = "All 10 Games Solved! Click to Open Certificate";
-        } else {
-          certSub.textContent = `${completedCount} / 10 Games Completed`;
-        }
-      }
+      if (percentLabel) percentLabel.textContent = `Games Tested: ${completedCount} / 30`;
     }
 
-    // --- Single Certificate Generator ---
-    function generateMasterCertificate() {
-      const nameInput = document.getElementById('student-name');
-      const kidName = nameInput.value.trim() || 'Trailblazing Explorer';
-      const today = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
-
-      document.getElementById('cert-kid-name').textContent = kidName;
-      document.getElementById('cert-date').textContent = `Awarded on: ${today}`;
-      document.getElementById('print-modal').style.display = 'flex';
-    }
-
-    function closeModal() {
-      document.getElementById('print-modal').style.display = 'none';
-    }
-
-    // --- Double-Confirmation Reset Flow ---
+    // Two-Step Reset Confirmation
     function resetProgress() {
-      // Step 1: Initial Warning
-      const firstConfirm = window.confirm("🌿 Jack's Jungle Reset:\n\nAre you sure you want to reset your canopy progress?");
+      const firstConfirm = window.confirm("🌿 Jack's Jungle Reset:\n\nAre you sure you want to reset all test progress?");
       if (!firstConfirm) return;
 
-      // Step 2: Final Warning (Safety Lock)
-      const secondConfirm = window.confirm("⚠️ FINAL WARNING:\n\nThis will permanently delete all your Leaves and your Printable Certificate!\n\nAre you 100% sure you want to start over?");
+      const secondConfirm = window.confirm("⚠️ FINAL WARNING:\n\nThis will permanently clear all your leaf awards and completion checkmarks.\n\nContinue with reset?");
       if (!secondConfirm) return;
 
       const keysToRemove = [];
