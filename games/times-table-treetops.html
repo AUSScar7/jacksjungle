@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FPNZR7VVNC', {
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Times Table Treetops - Jack's Jungle</title>
   <style>
     :root {
       --bg: #091a10; --card: #122e1d; --accent: #22c55e; --accent-dim: #15803d;
-      --text: #f0fdf4; --muted: #86efac; --danger: #ef4444;
+      --text: #f0fdf4; --muted: #86efac; --danger: #ef4444; --success: #22c55e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -20,16 +31,23 @@
       width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--muted); }
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
-    .equation { font-size: 3rem; font-weight: 800; color: #fff; margin: 1.5rem 0; letter-spacing: 0.1rem; }
-    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; }
-    .ans-btn {
-      background: #17422b; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
-      font-size: 1.5rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer;
-      transition: background-color 0.15s ease, border-color 0.15s ease;
+    
+    .equation-card {
+      background: rgba(0, 0, 0, 0.35); border: 2px dashed var(--accent-dim); border-radius: 0.75rem;
+      width: 100%; padding: 1.25rem 1rem; margin: 0.75rem 0; text-align: center;
     }
-    .ans-btn:active { background: var(--accent-dim); }
+    .equation { font-size: 3rem; font-weight: 900; color: #fff; letter-spacing: 0.1rem; }
+    .skip-hint { font-size: 0.95rem; color: var(--muted); margin-top: 0.4rem; min-height: 1.3rem; }
+
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; margin-top: 0.5rem; }
+    .ans-btn {
+      background: #17422b; border: 2px solid var(--accent); color: #fff; padding: 1.15rem;
+      font-size: 1.6rem; font-weight: 900; border-radius: 0.75rem; cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .ans-btn:active { background: var(--accent-dim); transform: scale(0.97); }
     .ans-btn.wrong {
       background: #451a1a !important;
       border-color: var(--danger) !important;
@@ -41,7 +59,7 @@
       20%, 60% { transform: translateX(-6px); }
       40%, 80% { transform: translateX(6px); }
     }
-    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
+    .status-msg { height: 1.5rem; font-size: 0.92rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 0.75rem; }
   </style>
 </head>
 <body>
@@ -50,11 +68,17 @@
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
       <span id="climb-lbl">Branch: 1 / 5</span>
     </div>
-    <p style="color: var(--muted); font-size: 0.95rem;">Rapid Multiply to jump to the next branch:</p>
-    <div class="equation" id="eq-text">6 &times; 7</div>
+    <p style="color: var(--muted); font-size: 0.95rem; text-align: center;">Multiply or skip-count to climb higher!</p>
+    
+    <div class="equation-card">
+      <div class="equation" id="eq-text">2 &times; 5</div>
+      <div class="skip-hint" id="hint-text">Tip: Count by 5s two times!</div>
+    </div>
+
     <div class="grid" id="btn-grid"></div>
     <div class="status-msg" id="status-label"></div>
   </div>
+
   <script>
     let audioCtx = null;
     function playTone(freq, type, dur, isErr = false) {
@@ -71,62 +95,89 @@
     }
 
     function awardGameCompletion(gameId) {
-      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
-      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      const k1 = `jacksjungle_completed_${gameId}`;
+      const k2 = `jacksjungle_completed_${gameId.replace(/_/g, '-')}`;
+      
+      const alreadyFinished = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
+      
+      localStorage.setItem(k1, 'true');
+      localStorage.setItem(k2, 'true');
+
+      if (alreadyFinished) {
+        return false;
+      }
+
       let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
       if (isNaN(currentLeaves)) currentLeaves = 0;
+
       let updatedLeaves = currentLeaves + 20;
       localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
       localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+      return true;
     }
 
+    // Calibrated 2s, 5s, 10s, and gentle doubling for Ages 6-10
+    const PROBLEMS = [
+      { a: 2, b: 5, ans: 10, hint: "Count by 5s twice: 5, 10!", distractors: [7, 12, 15] },
+      { a: 3, b: 2, ans: 6, hint: "Double 3 (or 2 + 2 + 2)!", distractors: [5, 8, 9] },
+      { a: 4, b: 10, ans: 40, hint: "Count by 10s four times: 10, 20, 30, 40!", distractors: [14, 30, 50] },
+      { a: 5, b: 5, ans: 25, hint: "Skip count by 5s five times: 5, 10, 15, 20, 25!", distractors: [20, 30, 10] },
+      { a: 2, b: 8, ans: 16, hint: "Double 8 (8 + 8)!", distractors: [10, 14, 18] }
+    ];
     let branch = 0;
-    function nextBranch() {
+
+    function renderBranch() {
       const status = document.getElementById('status-label');
       status.textContent = "";
 
-      if (branch >= 5) {
-        document.getElementById('eq-text').textContent = "SUMMIT REACHED!";
+      if (branch >= PROBLEMS.length) {
+        document.getElementById('eq-text').textContent = "SUMMIT REACHED! 🌴";
+        document.getElementById('hint-text').textContent = "You climbed all the way to the top!";
         document.getElementById('btn-grid').innerHTML = "";
-        status.style.color = "var(--muted)";
-        status.textContent = "🍃 +20 Leaves Earned!";
-        awardGameCompletion('times_table_treetops');
+        
+        const isNew = awardGameCompletion('times_table_treetops');
+        status.style.color = "var(--success)";
+        if (isNew) {
+          status.textContent = "🍃 +20 Leaves Earned!";
+        } else {
+          status.textContent = "🌿 Summit Re-cleared! (Leaves already collected)";
+        }
+        
         playTone(520, 'sine', 0.2);
+        setTimeout(() => playTone(659, 'sine', 0.25), 150);
         return;
       }
-      document.getElementById('climb-lbl').textContent = `Branch: ${branch + 1} / 5`;
-      const num1 = Math.floor(Math.random() * 8) + 3;
-      const num2 = Math.floor(Math.random() * 8) + 3;
-      const product = num1 * num2;
-      document.getElementById('eq-text').innerHTML = `${num1} &times; ${num2}`;
 
-      let choices = [product];
-      while (choices.length < 4) {
-        let fake = (num1 + Math.floor(Math.random() * 3) - 1) * num2 + (Math.floor(Math.random() * 6) - 3);
-        if (fake > 0 && !choices.includes(fake)) choices.push(fake);
-      }
-      choices.sort(() => Math.random() - 0.5);
+      const p = PROBLEMS[branch];
+      document.getElementById('climb-lbl').textContent = `Branch: ${branch + 1} / ${PROBLEMS.length}`;
+      document.getElementById('eq-text').innerHTML = `${p.a} &times; ${p.b}`;
+      document.getElementById('hint-text').textContent = p.hint;
 
+      let choices = [p.ans, ...p.distractors].sort(() => Math.random() - 0.5);
       const grid = document.getElementById('btn-grid');
       grid.innerHTML = "";
+
       choices.forEach(val => {
         const b = document.createElement('button');
-        b.className = 'ans-btn'; b.textContent = val;
+        b.className = 'ans-btn';
+        b.textContent = val;
         b.onclick = () => {
-          if (val === product) {
+          if (val === p.ans) {
             playTone(480, 'triangle', 0.15);
-            branch++; nextBranch();
+            branch++;
+            renderBranch();
           } else {
             playTone(160, 'sawtooth', 0.25, true);
             b.classList.add('wrong');
-            status.textContent = `Branch slipped! Check ${num1} × ${num2}.`;
+            status.textContent = `Slip! Try skip-counting: ${p.hint}`;
             setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
         grid.appendChild(b);
       });
     }
-    nextBranch();
+
+    renderBranch();
   </script>
 </body>
 </html>
