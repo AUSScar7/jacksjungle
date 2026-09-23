@@ -18,7 +18,7 @@
   <style>
     :root {
       --bg: #091a18; --card: #132d29; --accent: #14b8a6; --accent-dim: #0f766e;
-      --text: #f0fdfa; --muted: #99f6e4; --danger: #ef4444;
+      --text: #f0fdfa; --muted: #99f6e4; --danger: #ef4444; --success: #22c55e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -31,31 +31,32 @@
       width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--muted); }
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
+    
     .river-scene {
-      width: 100%; background: #0c201d; border: 1px solid var(--accent-dim); border-radius: 0.5rem;
-      padding: 1rem; margin: 1rem 0; font-size: 0.95rem; line-height: 1.6;
-      transition: background-color 0.2s ease, border-color 0.2s ease;
+      width: 100%; background: #0c201d; border: 2px solid var(--accent-dim); border-radius: 0.75rem;
+      padding: 1rem; margin: 0.75rem 0; display: flex; flex-direction: column; gap: 0.6rem;
     }
-    .river-scene.wrong {
-      background: #3d1419 !important;
-      border-color: var(--danger) !important;
-      animation: shake 0.35s ease;
+    .bank {
+      background: rgba(0,0,0,0.3); border-radius: 6px; padding: 0.6rem 0.75rem; min-height: 48px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-6px); }
-      40%, 80% { transform: translateX(6px); }
+    .bank-name { font-weight: bold; font-size: 0.85rem; color: var(--muted); }
+    .animal-badges { display: flex; gap: 0.4rem; font-size: 1.6rem; }
+    .raft-channel {
+      background: rgba(20, 184, 166, 0.15); border: 1px dashed var(--accent); border-radius: 6px;
+      padding: 0.5rem; text-align: center; font-size: 0.9rem; font-weight: bold; color: #fff;
     }
-    .bank { min-height: 2.5rem; border-bottom: 1px dashed var(--accent-dim); padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
-    .btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; width: 100%; }
+
+    .btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; width: 100%; margin-top: 0.5rem; }
     .action-btn {
-      background: #19443e; border: 2px solid var(--accent-dim); color: #fff; padding: 0.85rem;
-      font-weight: bold; border-radius: 0.5rem; cursor: pointer; font-size: 0.95rem;
-      transition: background-color 0.15s ease, border-color 0.15s ease;
+      background: #19443e; border: 2px solid var(--accent); color: #fff; padding: 0.85rem 0.5rem;
+      font-weight: bold; border-radius: 0.5rem; cursor: pointer; font-size: 0.95rem; text-align: center;
+      transition: background-color 0.15s ease, transform 0.1s ease;
     }
-    .action-btn:active { background: var(--accent-dim); }
+    .action-btn:active { background: var(--accent-dim); transform: scale(0.97); }
+    .action-btn.danger { border-color: #ef4444; color: #fca5a5; }
     .status-lbl { height: 1.5rem; font-weight: 600; color: var(--danger); font-size: 0.9rem; text-align: center; margin-top: 0.75rem; }
   </style>
 </head>
@@ -63,21 +64,32 @@
   <div class="game-box">
     <div class="top-bar">
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
-      <span>Constraint Logic</span>
+      <span>Ranger Raft Patrol</span>
     </div>
-    <p style="color: var(--muted); font-size: 0.85rem; text-align: center;">Rule: The Dingo cannot be left alone with the Bush Turkey without the Ranger!</p>
+    <p style="color: var(--muted); font-size: 0.88rem; text-align: center;">Rule: Don't leave the 🐊 Crocodile alone with the 🐨 Koala!</p>
+
     <div class="river-scene" id="river-box">
-      <div class="bank" id="left-bank"><strong>Left Bank:</strong> Ranger, Dingo, Turkey</div>
-      <div class="bank" style="border-bottom:none;" id="right-bank"><strong>Right Bank:</strong> (Empty)</div>
+      <div class="bank" id="left-bank">
+        <span class="bank-name">🌿 Home Bank:</span>
+        <div class="animal-badges" id="left-badges">🐨 🐊</div>
+      </div>
+      <div class="raft-channel" id="raft-view">🛶 Ranger Raft: At Home Bank</div>
+      <div class="bank" id="right-bank">
+        <span class="bank-name">🌴 Across River:</span>
+        <div class="animal-badges" id="right-badges"></div>
+      </div>
     </div>
+
     <div class="btn-grid">
-      <button class="action-btn" onclick="takeItem('Dingo')">Take Dingo</button>
-      <button class="action-btn" onclick="takeItem('Turkey')">Take Turkey</button>
-      <button class="action-btn" onclick="takeItem('Alone')">Row Alone</button>
-      <button class="action-btn" style="border-color:#f87171; color:#f87171;" onclick="resetPuzzle()">Restart</button>
+      <button class="action-btn" onclick="takeAnimal('Croc')">🛶 Take Crocodile</button>
+      <button class="action-btn" onclick="takeAnimal('Koala')">🛶 Take Koala</button>
+      <button class="action-btn" onclick="rowAlone()">Row Raft Alone</button>
+      <button class="action-btn danger" onclick="resetRaft()">Restart Crossing</button>
     </div>
+
     <div class="status-lbl" id="error-msg"></div>
   </div>
+
   <script>
     let audioCtx = null;
     function playTone(freq, type, dur, isErr = false) {
@@ -94,76 +106,98 @@
     }
 
     function awardGameCompletion(gameId) {
-      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
-      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      const k1 = `jacksjungle_completed_${gameId}`;
+      const k2 = `jacksjungle_completed_${gameId.replace(/_/g, '-')}`;
+      const alreadyFinished = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
+      localStorage.setItem(k1, 'true');
+      localStorage.setItem(k2, 'true');
+
+      if (alreadyFinished) return false;
+
       let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
       if (isNaN(currentLeaves)) currentLeaves = 0;
+
       let updatedLeaves = currentLeaves + 20;
       localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
       localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+      return true;
     }
 
-    let left = ['Dingo', 'Turkey'], right = [], rangerPos = 'left';
-    let isFinished = false;
+    let left = ['Koala', 'Croc'];
+    let right = [];
+    let raftSide = 'left';
+    let isWon = false;
 
-    function updateView() {
-      document.getElementById('left-bank').innerHTML = `<strong>Left Bank:</strong> ${rangerPos === 'left' ? '🤠 Ranger, ' : ''}${left.join(', ') || '(Empty)'}`;
-      document.getElementById('right-bank').innerHTML = `<strong>Right Bank:</strong> ${rangerPos === 'right' ? '🤠 Ranger, ' : ''}${right.join(', ') || '(Empty)'}`;
+    function updateDisplay() {
+      const icons = { Koala: '🐨', Croc: '🐊' };
+      document.getElementById('left-badges').textContent = left.map(a => icons[a]).join(' ');
+      document.getElementById('right-badges').textContent = right.map(a => icons[a]).join(' ');
+      document.getElementById('raft-view').textContent = `🛶 Ranger Raft: At ${raftSide === 'left' ? 'Home Bank' : 'Across River'}`;
 
-      const dingoOnLeft = left.includes('Dingo') && left.includes('Turkey') && rangerPos === 'right';
-      const dingoOnRight = right.includes('Dingo') && right.includes('Turkey') && rangerPos === 'left';
+      // Check danger: Crocodile alone with Koala on either bank without the ranger
+      const leftDanger = (raftSide === 'right' && left.includes('Koala') && left.includes('Croc'));
+      const rightDanger = (raftSide === 'left' && right.includes('Koala') && right.includes('Croc'));
 
-      if (dingoOnLeft || dingoOnRight) {
-        playTone(160, 'sawtooth', 0.3, true);
-        const rBox = document.getElementById('river-box');
-        rBox.classList.add('wrong');
-        document.getElementById('error-msg').textContent = "The Dingo chased the Turkey away! Resetting crossing...";
-        setTimeout(() => {
-          rBox.classList.remove('wrong');
-          resetPuzzle();
-        }, 1200);
+      if (leftDanger || rightDanger) {
+        playTone(160, 'sawtooth', 0.25, true);
+        document.getElementById('error-msg').textContent = "Splash! The Crocodile scared the Koala into a tree! Try another passenger.";
+        setTimeout(resetRaft, 1000);
         return;
       }
 
-      if (right.length === 2 && right.includes('Dingo') && right.includes('Turkey') && rangerPos === 'right' && !isFinished) {
-        isFinished = true;
+      // Check win condition
+      if (right.includes('Koala') && right.includes('Croc') && !isWon) {
+        isWon = true;
         playTone(520, 'sine', 0.2);
-        document.getElementById('error-msg').style.color = 'var(--muted)';
-        document.getElementById('error-msg').textContent = "CROSSING COMPLETE! 🍃 +20 Leaves Earned.";
-        awardGameCompletion('river_crossing');
+        setTimeout(() => playTone(659, 'sine', 0.25), 150);
+
+        const isNew = awardGameCompletion('river_crossing');
+        const err = document.getElementById('error-msg');
+        err.style.color = "var(--success)";
+        if (isNew) {
+          err.textContent = "CROSSING COMPLETE! 🍃 +20 Leaves Earned.";
+        } else {
+          err.textContent = "🌿 Crossing Re-cleared! (Leaves already collected)";
+        }
       }
     }
 
-    function takeItem(item) {
-      if (isFinished) return;
+    function takeAnimal(animal) {
+      if (isWon) return;
       document.getElementById('error-msg').textContent = "";
-      if (rangerPos === 'left') {
-        if (item !== 'Alone') {
-          const idx = left.indexOf(item);
-          if (idx === -1) return;
-          left.splice(idx, 1);
-          right.push(item);
-        }
-        rangerPos = 'right';
+
+      if (raftSide === 'left') {
+        if (!left.includes(animal)) return;
+        left.splice(left.indexOf(animal), 1);
+        right.push(animal);
+        raftSide = 'right';
       } else {
-        if (item !== 'Alone') {
-          const idx = right.indexOf(item);
-          if (idx === -1) return;
-          right.splice(idx, 1);
-          left.push(item);
-        }
-        rangerPos = 'left';
+        if (!right.includes(animal)) return;
+        right.splice(right.indexOf(animal), 1);
+        left.push(animal);
+        raftSide = 'left';
       }
-      playTone(420, 'triangle', 0.1);
-      updateView();
+      playTone(440, 'triangle', 0.1);
+      updateDisplay();
     }
 
-    function resetPuzzle() {
-      left = ['Dingo', 'Turkey']; right = []; rangerPos = 'left';
+    function rowAlone() {
+      if (isWon) return;
       document.getElementById('error-msg').textContent = "";
-      updateView();
+      raftSide = (raftSide === 'left') ? 'right' : 'left';
+      playTone(380, 'triangle', 0.1);
+      updateDisplay();
     }
-    updateView();
+
+    function resetRaft() {
+      left = ['Koala', 'Croc'];
+      right = [];
+      raftSide = 'left';
+      isWon = false;
+      document.getElementById('error-msg').textContent = "";
+      updateDisplay();
+    }
+    updateDisplay();
   </script>
 </body>
 </html>
