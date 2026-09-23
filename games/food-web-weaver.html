@@ -18,7 +18,7 @@
   <style>
     :root {
       --bg: #0d1a10; --card: #182e1d; --accent: #22c55e; --accent-dim: #15803d;
-      --text: #f0fdf4; --muted: #86efac; --danger: #ef4444;
+      --text: #f0fdf4; --muted: #86efac; --danger: #ef4444; --success: #22c55e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -31,17 +31,28 @@
       width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--muted); }
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
-    .chain-diagram { font-size: 1.2rem; font-weight: bold; margin: 1.5rem 0; text-align: center; color: #fff; line-height: 1.6; }
-    .blank-slot { color: var(--accent); border-bottom: 3px dashed var(--accent); padding: 0 0.4rem; }
-    .grid { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; }
-    .opt-btn {
-      background: #204128; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
-      font-size: 1.05rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; text-align: left;
-      transition: background-color 0.15s ease, border-color 0.15s ease;
+    
+    .chain-card {
+      background: rgba(0,0,0,0.35); border: 2px dashed var(--accent-dim); border-radius: 0.75rem;
+      width: 100%; padding: 1.25rem 0.5rem; margin: 0.75rem 0; text-align: center;
     }
-    .opt-btn:active { background: var(--accent-dim); }
+    .chain-diagram { font-size: 1.35rem; font-weight: 800; color: #fff; line-height: 1.8; }
+    .blank-slot {
+      color: #facc15; background: rgba(250, 204, 21, 0.15); border: 2px solid #facc15;
+      padding: 0.2rem 0.6rem; border-radius: 6px; display: inline-block;
+    }
+
+    .grid { display: flex; flex-direction: column; gap: 0.65rem; width: 100%; margin-top: 0.5rem; }
+    .opt-btn {
+      background: #204128; border: 2px solid var(--accent); color: #fff; padding: 0.95rem 1rem;
+      font-size: 1.05rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer; text-align: left;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .opt-btn span.role { font-size: 0.8rem; color: var(--muted); font-weight: normal; }
+    .opt-btn:active { background: var(--accent-dim); transform: scale(0.98); }
     .opt-btn.wrong {
       background: #451a1a !important;
       border-color: var(--danger) !important;
@@ -53,20 +64,25 @@
       20%, 60% { transform: translateX(-6px); }
       40%, 80% { transform: translateX(6px); }
     }
-    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
+    .status-msg { height: 1.5rem; font-size: 0.92rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 0.75rem; }
   </style>
 </head>
 <body>
   <div class="game-box">
     <div class="top-bar">
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
-      <span id="tier-counter">Web: 1 / 3</span>
+      <span id="tier-counter">Chain: 1 / 3</span>
     </div>
-    <p style="color: var(--muted); font-size: 0.9rem;">Fill the missing biological trophic level:</p>
-    <div class="chain-diagram" id="chain-view"></div>
+    <p style="color: var(--muted); font-size: 0.92rem; text-align: center;">Who fits into this jungle food chain?</p>
+
+    <div class="chain-card">
+      <div class="chain-diagram" id="chain-view"></div>
+    </div>
+
     <div class="grid" id="choices-field"></div>
     <div class="status-msg" id="status-label"></div>
   </div>
+
   <script>
     let audioCtx = null;
     function playTone(freq, type, dur, isErr = false) {
@@ -83,20 +99,60 @@
     }
 
     function awardGameCompletion(gameId) {
-      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
-      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      const k1 = `jacksjungle_completed_${gameId}`;
+      const k2 = `jacksjungle_completed_${gameId.replace(/_/g, '-')}`;
+      const alreadyFinished = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
+      localStorage.setItem(k1, 'true');
+      localStorage.setItem(k2, 'true');
+
+      if (alreadyFinished) return false;
+
       let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
       if (isNaN(currentLeaves)) currentLeaves = 0;
+
       let updatedLeaves = currentLeaves + 20;
       localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
       localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+      return true;
     }
 
+    // Kid-friendly Rainforest food chains
     const WEBS = [
-      { chain: "Sunlight &rarr; Rainforest Fig (Producer) &rarr; <span class='blank-slot'>???</span> &rarr; Harpy Eagle (Apex)", correct: "Fruit Bat (Primary Consumer)", opts: ["Fruit Bat (Primary Consumer)", "Fungi (Decomposer)", "Jaguar (Apex)"] },
-      { chain: "Sunlight &rarr; Canopy Fern &rarr; Caterpillar &rarr; <span class='blank-slot'>???</span> &rarr; Python", correct: "Tree Frog (Secondary Consumer)", opts: ["Tree Frog (Secondary Consumer)", "Soil Bacteria", "Wild Boar"] },
-      { chain: "Dead Foliage &rarr; <span class='blank-slot'>???</span> &rarr; Soil Nutrients &rarr; Ancient Cedar", correct: "Termites (Decomposers)", opts: ["Termites (Decomposers)", "Ocelot (Predator)", "Macaw (Herbivore)"] }
+      {
+        diagram: "☀️ Sunlight &rarr; 🌿 Green Leaf &rarr; <span class='blank-slot'>???</span> &rarr; 🦉 Owl",
+        correct: "🐛 Caterpillar",
+        role: "Leaf Eater (Herbivore)",
+        hint: "Owls eat the bug that munches on the leaf!",
+        opts: [
+          { name: "🐛 Caterpillar", role: "Leaf Eater" },
+          { name: "🐯 Tiger", role: "Meat Eater" },
+          { name: "🪨 River Rock", role: "Not Alive" }
+        ]
+      },
+      {
+        diagram: "☀️ Sunlight &rarr; 🍌 Banana Tree &rarr; 🐒 Monkey &rarr; <span class='blank-slot'>???</span>",
+        correct: "🐆 Jaguar",
+        role: "Big Predator (Carnivore)",
+        hint: "Who hunts monkeys in the tall canopy?",
+        opts: [
+          { name: "🐆 Jaguar", role: "Big Predator" },
+          { name: "🌴 Palm Tree", role: "Plant" },
+          { name: "🦋 Butterfly", role: "Nectar Sipper" }
+        ]
+      },
+      {
+        diagram: "☀️ Sunlight &rarr; 🌾 Water Grass &rarr; 🐟 Little Fish &rarr; <span class='blank-slot'>???</span>",
+        correct: "🐊 Crocodile",
+        role: "Apex River Hunter",
+        hint: "Who snaps up little fish in the jungle river?",
+        opts: [
+          { name: "🐊 Crocodile", role: "River Hunter" },
+          { name: "🍄 Mushroom", role: "Decomposer" },
+          { name: "🍎 Wild Apple", role: "Fruit" }
+        ]
+      }
     ];
+
     let wIdx = 0;
 
     function renderWeb() {
@@ -104,32 +160,41 @@
       status.textContent = "";
 
       if (wIdx >= WEBS.length) {
-        document.getElementById('chain-view').innerHTML = "ECOSYSTEM BALANCED!";
+        document.getElementById('chain-view').innerHTML = "FOOD CHAINS CONNECTED! 🌿";
         document.getElementById('choices-field').innerHTML = "";
-        status.style.color = "var(--muted)";
-        status.textContent = "🍃 +20 Leaves Earned!";
-        awardGameCompletion('food_web_weaver');
+
+        const isNew = awardGameCompletion('food_web_weaver');
+        status.style.color = "var(--success)";
+        if (isNew) {
+          status.textContent = "🍃 +20 Leaves Earned!";
+        } else {
+          status.textContent = "🌿 Chains Re-cleared! (Leaves already collected)";
+        }
+
         playTone(520, 'sine', 0.2);
+        setTimeout(() => playTone(659, 'sine', 0.25), 150);
         return;
       }
+
       const item = WEBS[wIdx];
-      document.getElementById('tier-counter').textContent = `Web: ${wIdx + 1} / ${WEBS.length}`;
-      document.getElementById('chain-view').innerHTML = item.chain;
+      document.getElementById('tier-counter').textContent = `Chain: ${wIdx + 1} / ${WEBS.length}`;
+      document.getElementById('chain-view').innerHTML = item.diagram;
 
       const fld = document.getElementById('choices-field');
       fld.innerHTML = "";
       item.opts.forEach(opt => {
         const b = document.createElement('button');
         b.className = 'opt-btn';
-        b.textContent = opt;
+        b.innerHTML = `<span>${opt.name}</span><span class="role">${opt.role}</span>`;
         b.onclick = () => {
-          if (opt === item.correct) {
+          if (opt.name === item.correct) {
             playTone(480, 'triangle', 0.15);
-            wIdx++; renderWeb();
+            wIdx++;
+            renderWeb();
           } else {
             playTone(160, 'sawtooth', 0.25, true);
             b.classList.add('wrong');
-            status.textContent = "Check trophic transfer order: Producer -> Consumer -> Predator!";
+            status.textContent = item.hint;
             setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
