@@ -2,21 +2,23 @@
 <html lang="en">
 <head>
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-FPNZR7VVNC');
-</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FPNZR7VVNC', {
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Angle Archer - Jack's Jungle</title>
   <style>
     :root {
       --bg: #151a08; --card: #252e0e; --accent: #84cc16; --accent-dim: #65a30d;
-      --text: #f7fee7; --muted: #d9f99d; --danger: #ef4444;
+      --text: #f7fee7; --muted: #d9f99d; --danger: #ef4444; --success: #22c55e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -31,14 +33,26 @@
     }
     .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--muted); }
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
-    canvas { background: #131707; border: 1px solid var(--accent-dim); border-radius: 0.5rem; width: 240px; height: 160px; margin: 1rem 0; }
-    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; width: 100%; }
-    .angle-btn {
-      background: #354215; border: 2px solid var(--accent-dim); color: #fff; padding: 0.85rem 0;
-      font-size: 1.05rem; font-weight: bold; border-radius: 0.5rem; cursor: pointer;
-      transition: background-color 0.15s ease, border-color 0.15s ease;
+    
+    .canvas-container {
+      background: #111605; border: 2px solid var(--accent-dim); border-radius: 0.75rem;
+      padding: 0.5rem; margin: 0.75rem 0; display: flex; justify-content: center; width: 100%;
     }
-    .angle-btn:active { background: var(--accent-dim); }
+    canvas { width: 260px; height: 170px; }
+
+    .hint-bubble {
+      font-size: 0.9rem; color: var(--muted); min-height: 1.4rem; text-align: center; margin-bottom: 0.75rem;
+    }
+
+    .btn-col { display: flex; flex-direction: column; gap: 0.6rem; width: 100%; }
+    .angle-btn {
+      background: #354215; border: 2px solid var(--accent); color: #fff; padding: 0.95rem 1rem;
+      font-size: 1.1rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .angle-btn span.sub { font-size: 0.8rem; color: var(--muted); font-weight: normal; }
+    .angle-btn:active { background: var(--accent-dim); transform: scale(0.98); }
     .angle-btn.wrong {
       background: #451a1a !important;
       border-color: var(--danger) !important;
@@ -50,7 +64,7 @@
       20%, 60% { transform: translateX(-6px); }
       40%, 80% { transform: translateX(6px); }
     }
-    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
+    .status-msg { height: 1.5rem; font-size: 0.92rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 0.75rem; }
   </style>
 </head>
 <body>
@@ -59,11 +73,32 @@
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
       <span id="target-count">Target: 1 / 4</span>
     </div>
-    <p style="color: var(--muted); font-size: 0.9rem;">Estimate the angle between the vines:</p>
-    <canvas id="angle-canvas" width="240" height="160"></canvas>
-    <div class="grid" id="opts-container"></div>
+    <p style="color: var(--muted); font-size: 0.95rem; text-align: center;">How wide is this vine branch open?</p>
+    
+    <div class="canvas-container">
+      <canvas id="angle-canvas" width="260" height="170"></canvas>
+    </div>
+
+    <div class="hint-bubble" id="hint-text">Look at how the two branches meet at the center dot!</div>
+
+    <div class="btn-col" id="opts-container">
+      <button class="angle-btn" onclick="checkAngle('ACUTE', this)">
+        <span>Sharp & Narrow</span>
+        <span class="sub">Pinched closed (Acute)</span>
+      </button>
+      <button class="angle-btn" onclick="checkAngle('RIGHT', this)">
+        <span>Square Corner</span>
+        <span class="sub">Perfect "L" shape (Right)</span>
+      </button>
+      <button class="angle-btn" onclick="checkAngle('OBTUSE', this)">
+        <span>Wide Open</span>
+        <span class="sub">Stretched apart (Obtuse)</span>
+      </button>
+    </div>
+
     <div class="status-msg" id="status-label"></div>
   </div>
+
   <script>
     let audioCtx = null;
     function playTone(freq, type, dur, isErr = false) {
@@ -80,88 +115,127 @@
     }
 
     function awardGameCompletion(gameId) {
-      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
-      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      const k1 = `jacksjungle_completed_${gameId}`;
+      const k2 = `jacksjungle_completed_${gameId.replace(/_/g, '-')}`;
+      
+      const alreadyFinished = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
+      
+      localStorage.setItem(k1, 'true');
+      localStorage.setItem(k2, 'true');
+
+      if (alreadyFinished) {
+        return false;
+      }
+
       let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
       if (isNaN(currentLeaves)) currentLeaves = 0;
+
       let updatedLeaves = currentLeaves + 20;
       localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
       localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+      return true;
     }
 
-    const ANGLES = [
-      { deg: 45, type: "Acute (45°)", distractors: ["90°", "135°"] },
-      { deg: 90, type: "Right Angle (90°)", distractors: ["60°", "120°"] },
-      { deg: 120, type: "Obtuse (120°)", distractors: ["45°", "85°"] },
-      { deg: 30, type: "Acute (30°)", distractors: ["75°", "110°"] }
+    // 4 High-contrast angles kids can instantly distinguish
+    const ROUNDS = [
+      { deg: 90, type: "RIGHT", hint: "It forms a boxy square corner, like a book corner!" },
+      { deg: 35, type: "ACUTE", hint: "It's sharp and pinched close like an alligator beak!" },
+      { deg: 135, type: "OBTUSE", hint: "It's spread wide open like arms stretching out!" },
+      { deg: 90, type: "RIGHT", hint: "A clean square corner!" }
     ];
     let aIdx = 0;
     const canvas = document.getElementById('angle-canvas');
     const ctx = canvas.getContext('2d');
 
-    function drawAngle(deg) {
+    function drawBranch(deg, type) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const cx = 60, cy = 120, r = 70;
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = "#84cc16";
+      const cx = 80, cy = 125, len = 105;
+
+      // Base horizontal branch
+      ctx.lineWidth = 7;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#84cc16';
 
       ctx.beginPath();
       ctx.moveTo(cx, cy);
-      ctx.lineTo(cx + r, cy);
+      ctx.lineTo(cx + len, cy);
       ctx.stroke();
 
+      // Angled branch
       const rad = -(deg * Math.PI / 180);
       ctx.beginPath();
       ctx.moveTo(cx, cy);
-      ctx.lineTo(cx + r * Math.cos(rad), cy + r * Math.sin(rad));
+      ctx.lineTo(cx + len * Math.cos(rad), cy + len * Math.sin(rad));
       ctx.stroke();
 
+      // Visual indicator between branches
+      if (type === 'RIGHT') {
+        // Draw square corner box
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#facc15';
+        ctx.strokeRect(cx, cy - 24, 24, 24);
+      } else {
+        // Draw soft curve arc
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#facc15';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 32, 0, rad, true);
+        ctx.stroke();
+      }
+
+      // Center pivot leaf/knot
       ctx.beginPath();
-      ctx.arc(cx, cy, 25, 0, rad, true);
-      ctx.strokeStyle = "#a3e635";
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+      ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+      ctx.fillStyle = '#facc15';
+      ctx.fill();
     }
 
-    function renderQuestion() {
+    function renderRound() {
       const status = document.getElementById('status-label');
       status.textContent = "";
 
-      if (aIdx >= ANGLES.length) {
+      if (aIdx >= ROUNDS.length) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById('hint-text').textContent = "Target sighted! Seed slingshot loaded.";
         document.getElementById('opts-container').innerHTML = "";
-        status.style.color = "var(--muted)";
-        status.textContent = "🍃 +20 Leaves Earned!";
-        awardGameCompletion('angle_archer');
+        
+        const isNew = awardGameCompletion('angle_archer');
+        status.style.color = "var(--success)";
+        if (isNew) {
+          status.textContent = "🍃 +20 Leaves Earned!";
+        } else {
+          status.textContent = "🌿 Archer Re-cleared! (Leaves already collected)";
+        }
+        
         playTone(520, 'sine', 0.2);
+        setTimeout(() => playTone(659, 'sine', 0.25), 150);
         return;
       }
-      const item = ANGLES[aIdx];
-      document.getElementById('target-count').textContent = `Target: ${aIdx + 1} / ${ANGLES.length}`;
-      drawAngle(item.deg);
 
-      let choices = [item.type, ...item.distractors].sort(() => Math.random() - 0.5);
-      const container = document.getElementById('opts-container');
-      container.innerHTML = "";
-      choices.forEach(ch => {
-        const b = document.createElement('button');
-        b.className = 'angle-btn';
-        b.textContent = ch;
-        b.onclick = () => {
-          if (ch === item.type) {
-            playTone(480, 'triangle', 0.15);
-            aIdx++; renderQuestion();
-          } else {
-            playTone(160, 'sawtooth', 0.25, true);
-            b.classList.add('wrong');
-            status.textContent = "Remember: Acute (<90°), Right (90°), Obtuse (>90°)!";
-            setTimeout(() => b.classList.remove('wrong'), 700);
-          }
-        };
-        container.appendChild(b);
-      });
+      const r = ROUNDS[aIdx];
+      document.getElementById('target-count').textContent = `Target: ${aIdx + 1} / ${ROUNDS.length}`;
+      document.getElementById('hint-text').textContent = r.hint;
+      drawBranch(r.deg, r.type);
     }
-    renderQuestion();
+
+    function checkAngle(selectedType, btn) {
+      const current = ROUNDS[aIdx];
+      if (selectedType === current.type) {
+        playTone(480, 'triangle', 0.15);
+        aIdx++;
+        renderRound();
+      } else {
+        playTone(160, 'sawtooth', 0.25, true);
+        btn.classList.add('wrong');
+        const status = document.getElementById('status-label');
+        if (current.type === 'RIGHT') status.textContent = "Look for the square box corner!";
+        else if (current.type === 'ACUTE') status.textContent = "This one is sharp and pinched closed!";
+        else status.textContent = "This one is opened extra wide!";
+        setTimeout(() => btn.classList.remove('wrong'), 700);
+      }
+    }
+
+    renderRound();
   </script>
 </body>
 </html>
