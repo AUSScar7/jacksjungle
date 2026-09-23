@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FPNZR7VVNC', {
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Vine Climber - Jack's Jungle</title>
@@ -52,7 +63,7 @@
   <div class="game-box">
     <div class="top-bar">
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
-      <span id="score-readout">Height: 0m</span>
+      <span id="score-readout">Height: 0m (1 / 6)</span>
     </div>
     <div class="vine-meter-track"><div id="vine-fill" class="vine-meter-fill"></div></div>
     <div class="word-prompt" id="prompt-clue">Definition: A dense tropical forest</div>
@@ -90,15 +101,17 @@
       localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
     }
 
+    // 6 Core Jungle Vocabulary Words
     const WORDS = [
-      { clue: "Dense tropical wilderness", full: "JUNGLE", missing: 2 },
-      { clue: "High green tree leaves", full: "CANOPY", missing: 1 },
-      { clue: "Bright bird with large colorful bill", full: "TOUCAN", missing: 3 },
-      { clue: "Slow-moving tree mammal", full: "SLOTH", missing: 2 },
-      { clue: "Tropical tree-dwelling flower", full: "ORCHID", missing: 4 }
+      { clue: "Dense tropical wilderness", full: "JUNGLE", missing: 2 },        // N
+      { clue: "High green tree leaves", full: "CANOPY", missing: 1 },           // A
+      { clue: "Bright bird with large colorful bill", full: "TOUCAN", missing: 3 }, // C
+      { clue: "Slow-moving tree mammal", full: "SLOTH", missing: 2 },            // O
+      { clue: "Colorful blooming plant petal", full: "FLOWER", missing: 2 },     // O
+      { clue: "Fierce spotted apex predator", full: "JAGUAR", missing: 3 }       // U
     ];
 
-    let currentIdx = 0, score = 0;
+    let currentIdx = 0;
 
     function renderQuestion() {
       const status = document.getElementById('status-label');
@@ -106,6 +119,8 @@
       status.style.color = "var(--danger)";
 
       if (currentIdx >= WORDS.length) {
+        document.getElementById('score-readout').textContent = `Height: 60m (6 / 6)`;
+        document.getElementById('vine-fill').style.width = `100%`;
         document.getElementById('word-target').innerHTML = "CANOPY REACHED!";
         document.getElementById('prompt-clue').textContent = "Vine successfully anchored to the treetops.";
         document.getElementById('options-container').innerHTML = "";
@@ -120,6 +135,11 @@
       }
 
       const q = WORDS[currentIdx];
+      const heightMeters = currentIdx * 10;
+      const progressPercent = Math.round((currentIdx / WORDS.length) * 100);
+      
+      document.getElementById('score-readout').textContent = `Height: ${heightMeters}m (${currentIdx + 1} / ${WORDS.length})`;
+      document.getElementById('vine-fill').style.width = `${progressPercent}%`;
       document.getElementById('prompt-clue').textContent = "Clue: " + q.clue;
       const targetChar = q.full[q.missing];
       
@@ -146,9 +166,6 @@
         btn.onclick = () => {
           if (char === targetChar) {
             playBeep(440, 'triangle', 0.15);
-            score += 20;
-            document.getElementById('score-readout').textContent = `Height: ${score}m`;
-            document.getElementById('vine-fill').style.width = `${(score / 100) * 100}%`;
             currentIdx++;
             renderQuestion();
           } else {
