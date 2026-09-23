@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FPNZR7VVNC', {
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Fraction Foliage - Jack's Jungle</title>
   <style>
     :root {
       --bg: #061a12; --card: #0d2b1f; --accent: #10b981; --accent-dim: #047857;
-      --text: #ecfdf5; --muted: #a7f3d0; --danger: #ef4444;
+      --text: #ecfdf5; --muted: #a7f3d0; --danger: #ef4444; --success: #22c55e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -20,17 +31,26 @@
       width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--muted); }
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
-    .fraction-hero { font-size: 3rem; font-weight: 800; color: #fff; margin: 1.5rem 0; }
-    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; }
-    .leaf-btn {
-      background: #134e4a; border: 2px solid var(--accent-dim); color: #fff; padding: 1rem;
-      font-size: 1.25rem; font-weight: bold; border-radius: 0.6rem; cursor: pointer;
-      transition: background-color 0.15s ease, border-color 0.15s ease;
+    
+    .pie-container {
+      background: rgba(0,0,0,0.35); border: 2px dashed var(--accent-dim); border-radius: 0.75rem;
+      padding: 1rem; margin: 0.75rem 0; display: flex; flex-direction: column; align-items: center; width: 100%;
     }
-    .leaf-btn:active { background: var(--accent-dim); }
-    .leaf-btn.wrong {
+    svg.leaf-pie { width: 140px; height: 140px; }
+    .hint-text { font-size: 0.95rem; color: var(--muted); margin-top: 0.5rem; min-height: 1.3rem; text-align: center; }
+
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; margin-top: 0.5rem; }
+    .frac-btn {
+      background: #134e4a; border: 2px solid var(--accent); color: #fff; padding: 1rem;
+      font-size: 1.6rem; font-weight: 900; border-radius: 0.75rem; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .frac-btn span.label { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+    .frac-btn:active { background: var(--accent-dim); transform: scale(0.97); }
+    .frac-btn.wrong {
       background: #451a1a !important;
       border-color: var(--danger) !important;
       color: #fca5a5 !important;
@@ -41,7 +61,7 @@
       20%, 60% { transform: translateX(-6px); }
       40%, 80% { transform: translateX(6px); }
     }
-    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
+    .status-msg { height: 1.5rem; font-size: 0.92rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 0.75rem; }
   </style>
 </head>
 <body>
@@ -50,11 +70,17 @@
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
       <span id="tier-lbl">Foliage: 1 / 4</span>
     </div>
-    <p style="color: var(--muted); font-size: 0.9rem;">Match the fraction with its decimal equivalent:</p>
-    <div class="fraction-hero" id="fraction-text">1 / 2</div>
-    <div class="grid" id="decimal-options"></div>
+    <p style="color: var(--muted); font-size: 0.95rem; text-align: center;">What fraction of the leaf canopy is colored green?</p>
+    
+    <div class="pie-container">
+      <svg class="leaf-pie" id="pie-svg" viewBox="0 0 100 100"></svg>
+      <div class="hint-text" id="pie-hint">Count the green slices!</div>
+    </div>
+
+    <div class="grid" id="frac-options"></div>
     <div class="status-msg" id="status-label"></div>
   </div>
+
   <script>
     let audioCtx = null;
     function playTone(freq, type, dur, isErr = false) {
@@ -71,61 +97,123 @@
     }
 
     function awardGameCompletion(gameId) {
-      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
-      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      const k1 = `jacksjungle_completed_${gameId}`;
+      const k2 = `jacksjungle_completed_${gameId.replace(/_/g, '-')}`;
+      const alreadyFinished = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
+      localStorage.setItem(k1, 'true');
+      localStorage.setItem(k2, 'true');
+
+      if (alreadyFinished) return false;
+
       let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
       if (isNaN(currentLeaves)) currentLeaves = 0;
+
       let updatedLeaves = currentLeaves + 20;
       localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
       localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+      return true;
     }
 
-    const PAIRS = [
-      { frac: "1 / 2", dec: "0.5", distractors: ["0.2", "0.25", "0.05"] },
-      { frac: "3 / 4", dec: "0.75", distractors: ["0.34", "0.50", "0.80"] },
-      { frac: "1 / 4", dec: "0.25", distractors: ["0.40", "0.14", "0.04"] },
-      { frac: "1 / 5", dec: "0.20", distractors: ["0.15", "0.50", "0.02"] }
+    // High visual contrast fraction slices for primary kids
+    const PUZZLES = [
+      {
+        total: 2, green: 1, frac: "1/2", word: "One Half",
+        hint: "1 out of 2 equal parts is green!",
+        opts: ["1/2", "1/4", "3/4", "1/3"]
+      },
+      {
+        total: 4, green: 1, frac: "1/4", word: "One Quarter",
+        hint: "1 out of 4 equal parts is green!",
+        opts: ["1/4", "1/2", "2/4", "3/4"]
+      },
+      {
+        total: 4, green: 3, frac: "3/4", word: "Three Quarters",
+        hint: "3 out of 4 slices are green!",
+        opts: ["3/4", "1/4", "1/2", "2/3"]
+      },
+      {
+        total: 3, green: 1, frac: "1/3", word: "One Third",
+        hint: "1 out of 3 equal slices is green!",
+        opts: ["1/3", "1/2", "2/3", "1/4"]
+      }
     ];
-    let fIdx = 0;
 
-    function renderFraction() {
+    let pIdx = 0;
+
+    function drawPie(total, green) {
+      const svg = document.getElementById('pie-svg');
+      svg.innerHTML = '';
+      const r = 46, cx = 50, cy = 50;
+
+      for (let i = 0; i < total; i++) {
+        const startAngle = (i * 2 * Math.PI) / total - Math.PI / 2;
+        const endAngle = ((i + 1) * 2 * Math.PI) / total - Math.PI / 2;
+        const x1 = cx + r * Math.cos(startAngle);
+        const y1 = cy + r * Math.sin(startAngle);
+        const x2 = cx + r * Math.cos(endAngle);
+        const y2 = cy + r * Math.sin(endAngle);
+
+        const isGreen = i < green;
+        const pathData = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`;
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathData);
+        path.setAttribute("fill", isGreen ? "#10b981" : "#1f2937");
+        path.setAttribute("stroke", "#0d2b1f");
+        path.setAttribute("stroke-width", "2");
+        svg.appendChild(path);
+      }
+    }
+
+    function renderPuzzle() {
       const status = document.getElementById('status-label');
       status.textContent = "";
 
-      if (fIdx >= PAIRS.length) {
-        document.getElementById('fraction-text').textContent = "FOLIAGE MATCHED!";
-        document.getElementById('decimal-options').innerHTML = "";
-        status.style.color = "var(--muted)";
-        status.textContent = "🍃 +20 Leaves Earned!";
-        awardGameCompletion('fraction_foliage');
+      if (pIdx >= PUZZLES.length) {
+        document.getElementById('pie-svg').innerHTML = '';
+        document.getElementById('pie-hint').textContent = "Canopy leaf fractions mastered!";
+        document.getElementById('frac-options').innerHTML = '';
+
+        const isNew = awardGameCompletion('fraction_foliage');
+        status.style.color = "var(--success)";
+        if (isNew) {
+          status.textContent = "🍃 +20 Leaves Earned!";
+        } else {
+          status.textContent = "🌿 Foliage Re-cleared! (Leaves already collected)";
+        }
+
         playTone(520, 'sine', 0.2);
+        setTimeout(() => playTone(659, 'sine', 0.25), 150);
         return;
       }
-      const p = PAIRS[fIdx];
-      document.getElementById('tier-lbl').textContent = `Foliage: ${fIdx + 1} / ${PAIRS.length}`;
-      document.getElementById('fraction-text').textContent = p.frac;
-      let opts = [p.dec, ...p.distractors].sort(() => Math.random() - 0.5);
-      const grid = document.getElementById('decimal-options');
-      grid.innerHTML = "";
 
-      opts.forEach(o => {
+      const p = PUZZLES[pIdx];
+      document.getElementById('tier-lbl').textContent = `Foliage: ${pIdx + 1} / ${PUZZLES.length}`;
+      document.getElementById('pie-hint').textContent = p.hint;
+      drawPie(p.total, p.green);
+
+      const grid = document.getElementById('frac-options');
+      grid.innerHTML = '';
+      p.opts.forEach(val => {
         const b = document.createElement('button');
-        b.className = 'leaf-btn'; b.textContent = o;
+        b.className = 'frac-btn';
+        b.innerHTML = `${val} <span class="label">${val === p.frac ? p.word : 'Fraction'}</span>`;
         b.onclick = () => {
-          if (o === p.dec) {
+          if (val === p.frac) {
             playTone(480, 'triangle', 0.15);
-            fIdx++; renderFraction();
+            pIdx++;
+            renderPuzzle();
           } else {
             playTone(160, 'sawtooth', 0.25, true);
             b.classList.add('wrong');
-            status.textContent = `"${o}" is incorrect. Check your division & decimal points!`;
+            status.textContent = `Count the green parts over the total slices!`;
             setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
         grid.appendChild(b);
       });
     }
-    renderFraction();
+    renderPuzzle();
   </script>
 </body>
 </html>
