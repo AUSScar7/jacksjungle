@@ -56,7 +56,7 @@
       20%, 60% { transform: translateX(-6px); }
       40%, 80% { transform: translateX(6px); }
     }
-    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); }
+    .status-msg { height: 1.5rem; font-size: 0.92rem; font-weight: 600; text-align: center; color: var(--danger); }
   </style>
 </head>
 <body>
@@ -90,8 +90,18 @@
     }
 
     function awardGameCompletion(gameId) {
-      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
-      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      const k1 = `jacksjungle_completed_${gameId}`;
+      const k2 = `jacksjungle_completed_${gameId.replace(/_/g, '-')}`;
+      
+      const alreadyFinished = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
+      
+      localStorage.setItem(k1, 'true');
+      localStorage.setItem(k2, 'true');
+
+      // Stop! If already done once, do not add more leaves
+      if (alreadyFinished) {
+        return false;
+      }
 
       let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
       if (isNaN(currentLeaves)) currentLeaves = 0;
@@ -99,16 +109,16 @@
       let updatedLeaves = currentLeaves + 20;
       localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
       localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+      return true;
     }
 
-    // 6 Core Jungle Vocabulary Words
     const WORDS = [
-      { clue: "Dense tropical wilderness", full: "JUNGLE", missing: 2 },        // N
-      { clue: "High green tree leaves", full: "CANOPY", missing: 1 },           // A
-      { clue: "Bright bird with large colorful bill", full: "TOUCAN", missing: 3 }, // C
-      { clue: "Slow-moving tree mammal", full: "SLOTH", missing: 2 },            // O
-      { clue: "Colorful blooming plant petal", full: "FLOWER", missing: 2 },     // O
-      { clue: "Fierce spotted apex predator", full: "JAGUAR", missing: 3 }       // U
+      { clue: "Dense tropical wilderness", full: "JUNGLE", missing: 2 },
+      { clue: "High green tree leaves", full: "CANOPY", missing: 1 },
+      { clue: "Bright bird with large colorful bill", full: "TOUCAN", missing: 3 },
+      { clue: "Slow-moving tree mammal", full: "SLOTH", missing: 2 },
+      { clue: "Colorful blooming plant petal", full: "FLOWER", missing: 2 },
+      { clue: "Fierce spotted apex predator", full: "JAGUAR", missing: 3 }
     ];
 
     let currentIdx = 0;
@@ -124,10 +134,14 @@
         document.getElementById('word-target').innerHTML = "CANOPY REACHED!";
         document.getElementById('prompt-clue').textContent = "Vine successfully anchored to the treetops.";
         document.getElementById('options-container').innerHTML = "";
-        status.style.color = "var(--muted)";
-        status.textContent = "🍃 +20 Leaves Earned!";
         
-        awardGameCompletion('vine_climber');
+        const isNewCompletion = awardGameCompletion('vine_climber');
+        status.style.color = "var(--muted)";
+        if (isNewCompletion) {
+          status.textContent = "🍃 +20 Leaves Earned!";
+        } else {
+          status.textContent = "🌿 Challenge Re-cleared! (Leaves already collected)";
+        }
         
         playBeep(523.25, 'sine', 0.15);
         setTimeout(() => playBeep(659.25, 'sine', 0.25), 140);
