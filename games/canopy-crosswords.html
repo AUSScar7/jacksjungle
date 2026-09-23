@@ -29,39 +29,38 @@
     }
     .cw-box {
       background: var(--card); border: 2px solid var(--accent-dim); border-radius: 1rem;
-      width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
+      width: 100%; max-width: 480px; padding: 1.25rem; display: flex; flex-direction: column; align-items: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; }
     .nav-btn { background: transparent; border: 1px solid var(--accent); color: var(--text); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
-    
-    /* Clue Selection Cards */
-    .clues-container { width: 100%; display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1rem; }
-    .clue-card {
-      background: rgba(0, 0, 0, 0.35); border: 2px solid #312e81; border-radius: 0.6rem;
-      padding: 0.75rem 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-      transition: all 0.2s ease;
-    }
-    .clue-card.active { border-color: var(--accent); background: rgba(99, 102, 241, 0.2); transform: scale(1.01); }
-    .clue-card.completed { border-color: var(--success); opacity: 0.8; }
-    .clue-title { font-weight: bold; font-size: 0.95rem; color: #fff; }
-    .clue-sub { font-size: 0.8rem; color: var(--muted); }
-    .clue-status { font-size: 1.1rem; }
 
-    /* Visual Crossword Grid */
+    /* Clue Selection Cards */
+    .clues-container { width: 100%; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-bottom: 0.75rem; }
+    .clue-card {
+      background: rgba(0, 0, 0, 0.35); border: 2px solid #312e81; border-radius: 0.5rem;
+      padding: 0.5rem 0.65rem; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between;
+      min-height: 62px; transition: all 0.15s ease;
+    }
+    .clue-card.active { border-color: var(--accent); background: rgba(99, 102, 241, 0.25); }
+    .clue-card.completed { border-color: var(--success); opacity: 0.85; }
+    .clue-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.85rem; color: #fff; }
+    .clue-sub { font-size: 0.75rem; color: var(--muted); line-height: 1.25; margin-top: 2px; }
+
+    /* 5x5 Crossword Grid */
     .grid-container {
-      display: grid; grid-template-columns: repeat(4, 56px); grid-template-rows: repeat(4, 56px);
-      gap: 6px; margin: 1rem 0;
+      display: grid; grid-template-columns: repeat(5, 46px); grid-template-rows: repeat(5, 46px);
+      gap: 5px; margin: 0.5rem 0 0.75rem;
     }
     .cell {
-      background: #111425; border: 2px solid #2d3356; border-radius: 8px;
-      color: #fff; font-size: 1.6rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s ease; position: relative;
+      background: #111425; border: 2px solid #2d3356; border-radius: 6px;
+      color: #fff; font-size: 1.35rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s ease; position: relative; cursor: pointer;
     }
-    .cell.blocked { background: transparent; border-color: transparent; }
-    .cell.active-word { border-color: var(--accent); background: rgba(99, 102, 241, 0.15); }
+    .cell.blocked { background: transparent; border-color: transparent; cursor: default; }
+    .cell.active-word { border-color: var(--accent); background: rgba(99, 102, 241, 0.2); }
     .cell.shared-cell::after {
-      content: "⚡"; position: absolute; top: 2px; right: 2px; font-size: 0.6rem;
+      content: "•"; position: absolute; top: 2px; right: 4px; font-size: 0.8rem; color: var(--gold);
     }
     .cell.wrong {
       border-color: var(--danger) !important;
@@ -74,49 +73,51 @@
       40%, 80% { transform: translateX(6px); }
     }
 
-    /* Big Friendly Letter Bank */
-    .bank-label { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
-    .letter-bank { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; width: 100%; margin-bottom: 0.5rem; }
+    /* Friendly Letter Bank */
+    .bank-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.3rem; }
+    .letter-bank { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; width: 100%; margin-bottom: 0.5rem; }
     .key-btn {
-      background: #312e81; color: #fff; border: 2px solid var(--accent); border-radius: 8px;
-      width: 48px; height: 48px; font-size: 1.3rem; font-weight: bold; cursor: pointer;
+      background: #312e81; color: #fff; border: 2px solid var(--accent); border-radius: 6px;
+      width: 42px; height: 42px; font-size: 1.2rem; font-weight: bold; cursor: pointer;
       display: flex; align-items: center; justify-content: center; transition: transform 0.1s ease, background 0.15s ease;
     }
     .key-btn:active { transform: scale(0.95); background: var(--accent-dim); }
-    .key-btn.action-btn { width: auto; padding: 0 1rem; font-size: 0.9rem; border-color: #64748b; background: #1e293b; }
+    .action-btn { width: auto; padding: 0 0.85rem; font-size: 0.85rem; border-color: #64748b; background: #1e293b; height: 38px; }
 
-    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: bold; text-align: center; color: var(--danger); margin-top: 0.5rem; }
+    .status-msg { height: 1.4rem; font-size: 0.9rem; font-weight: bold; text-align: center; color: var(--danger); margin-top: 0.3rem; }
   </style>
 </head>
 <body>
   <div class="cw-box">
     <div class="top-bar">
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
-      <span style="font-weight: 700; color: var(--muted);">Forest Vocabulary</span>
+      <span style="font-weight: 700; color: var(--muted);">Forest Crosswords (4 Words)</span>
     </div>
 
-    <!-- Friendly Clue Selectors -->
+    <!-- 4 Easy Clues -->
     <div class="clues-container">
       <div class="clue-card active" id="clue-1" onclick="selectWord(1)">
-        <div>
-          <div class="clue-title">1. ACROSS: King of the Jungle (4)</div>
-          <div class="clue-sub">Fierce wild predator cat with a golden mane</div>
-        </div>
-        <div class="clue-status" id="status-1">✏️</div>
+        <div class="clue-header"><span>1. FROG (Across)</span><span id="chk-1">✏️</span></div>
+        <div class="clue-sub">Green jumper that ribbits!</div>
       </div>
       <div class="clue-card" id="clue-2" onclick="selectWord(2)">
-        <div>
-          <div class="clue-title">2. DOWN: Tree Nest Builder (4)</div>
-          <div class="clue-sub">Feathered creature that lays eggs in high branches</div>
-        </div>
-        <div class="clue-status" id="status-2">✏️</div>
+        <div class="clue-header"><span>2. TREE (Down)</span><span id="chk-2">✏️</span></div>
+        <div class="clue-sub">Tall plant with leafy branches.</div>
+      </div>
+      <div class="clue-card" id="clue-3" onclick="selectWord(3)">
+        <div class="clue-header"><span>3. NEST (Across)</span><span id="chk-3">✏️</span></div>
+        <div class="clue-sub">A cozy twig home for eggs.</div>
+      </div>
+      <div class="clue-card" id="clue-4" onclick="selectWord(4)">
+        <div class="clue-header"><span>4. VINE (Down)</span><span id="chk-4">✏️</span></div>
+        <div class="clue-sub">Long leafy rope you can swing on!</div>
       </div>
     </div>
 
-    <!-- Visual 4x4 Grid -->
+    <!-- 5x5 Crossword Grid -->
     <div class="grid-container" id="crossword-grid"></div>
 
-    <div class="bank-label">Tap a letter to fill the highlighted word:</div>
+    <div class="bank-label">Tap a letter to spell the highlighted word:</div>
     <div class="letter-bank" id="letter-tray"></div>
 
     <div style="display: flex; gap: 0.5rem; width: 100%; justify-content: center;">
@@ -143,33 +144,50 @@
     }
 
     function awardGameCompletion(gameId) {
-      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
-      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
+      const k1 = `jacksjungle_completed_${gameId}`;
+      const k2 = `jacksjungle_completed_${gameId.replace(/_/g, '-')}`;
+      
+      const alreadyFinished = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
+      
+      localStorage.setItem(k1, 'true');
+      localStorage.setItem(k2, 'true');
+
+      if (alreadyFinished) {
+        return false;
+      }
+
       let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
       if (isNaN(currentLeaves)) currentLeaves = 0;
+
       let updatedLeaves = currentLeaves + 20;
       localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
       localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+      return true;
     }
 
-    // Grid coordinates:
-    // Word 1 (ACROSS): [0,0]='L', [0,1]='I', [0,2]='O', [0,3]='N'
-    // Word 2 (DOWN):   [0,0]='L', [1,0]='A', [2,0]='R', [3,0]='K'  (Shared at [0,0])
-    // Or Classic BIRD: [0,1]='I' shared with BIRD down at [0,1] -> B=[0,0]
-    // Let's use clean intersection:
-    // Word 1 ACROSS (Row 0): L - I - O - N
-    // Word 2 DOWN (Col 0):   L - E - A - F  (Shared 'L' at [0,0] - perfectly thematic!)
+    // 4 Kid-Friendly Rainforest Words in a 5x5 Grid
+    // Word 1: FROG (Across, Row 1, Cols 0-3)
+    // Word 2: TREE (Down,   Rows 0-3, Col 1) -> Intersects at [1,1] ('R')
+    // Word 3: NEST (Across, Row 3, Cols 0-3) -> Intersects at [3,1] ('E')
+    // Word 4: VINE (Down,   Rows 1-4, Col 4) -> Standalone column
     const WORDS = {
-      1: { name: "ACROSS", answer: "LION", cells: [[0,0],[0,1],[0,2],[0,3]] },
-      2: { name: "DOWN", answer: "LEAF", cells: [[0,0],[1,0],[2,0],[3,0]] }
+      1: { name: "FROG", cells: [[1,0], [1,1], [1,2], [1,3]] },
+      2: { name: "TREE", cells: [[0,1], [1,1], [2,1], [3,1]] },
+      3: { name: "NEST", cells: [[3,0], [3,1], [3,2], [3,3]] },
+      4: { name: "VINE", cells: [[1,4], [2,4], [3,4], [4,4]] }
     };
 
-    let gridState = [
-      ['', '', '', ''],
-      ['', '#', '#', '#'],
-      ['', '#', '#', '#'],
-      ['', '#', '#', '#']
+    // Valid active cells (others are blocked '#')
+    const VALID_CELLS = [
+      [0,1],
+      [1,0], [1,1], [1,2], [1,3], [1,4],
+      [2,1], [2,4],
+      [3,0], [3,1], [3,2], [3,3], [3,4],
+      [4,4]
     ];
+
+    let gridState = Array(5).fill(null).map(() => Array(5).fill('#'));
+    VALID_CELLS.forEach(([r, c]) => { gridState[r][c] = ''; });
 
     let activeWordId = 1;
     let isCompleted = false;
@@ -177,8 +195,10 @@
     function selectWord(id) {
       if (isCompleted) return;
       activeWordId = id;
-      document.getElementById('clue-1').classList.toggle('active', id === 1);
-      document.getElementById('clue-2').classList.toggle('active', id === 2);
+      for (let i = 1; i <= 4; i++) {
+        const card = document.getElementById(`clue-${i}`);
+        if (card) card.classList.toggle('active', i === id);
+      }
       document.getElementById('status-label').textContent = '';
       playTone(400, 'triangle', 0.08);
       renderGrid();
@@ -189,8 +209,8 @@
       g.innerHTML = '';
       const activeCoords = WORDS[activeWordId].cells;
 
-      for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
           const d = document.createElement('div');
           d.className = 'cell';
           d.id = `cell-${r}-${c}`;
@@ -199,20 +219,23 @@
             d.classList.add('blocked');
           } else {
             d.textContent = gridState[r][c];
-            if (r === 0 && c === 0) d.classList.add('shared-cell');
+            
+            // Highlight shared intersections
+            if ((r === 1 && c === 1) || (r === 3 && c === 1)) {
+              d.classList.add('shared-cell');
+            }
 
             const isInActive = activeCoords.some(coord => coord[0] === r && coord[1] === c);
             if (isInActive && !isCompleted) d.classList.add('active-word');
 
             d.onclick = () => {
-              // Auto-toggle active word if tapping on shared intersection
-              if (r === 0 && c === 0) {
-                selectWord(activeWordId === 1 ? 2 : 1);
-              } else if (r === 0) {
-                selectWord(1);
-              } else if (c === 0) {
-                selectWord(2);
-              }
+              // Contextual word switching on tap
+              if (r === 1 && c === 1) selectWord(activeWordId === 1 ? 2 : 1);
+              else if (r === 3 && c === 1) selectWord(activeWordId === 2 ? 3 : 2);
+              else if (r === 1 && c <= 3) selectWord(1);
+              else if (c === 1) selectWord(2);
+              else if (r === 3 && c <= 3) selectWord(3);
+              else if (c === 4) selectWord(4);
             };
           }
           g.appendChild(d);
@@ -224,8 +247,8 @@
     function buildLetterTray() {
       const tray = document.getElementById('letter-tray');
       tray.innerHTML = '';
-      // Curated letter tray with target letters and light distractors
-      const letters = ['L', 'I', 'O', 'N', 'E', 'A', 'F', 'T', 'S'];
+      // All necessary letters + 3 light distractors
+      const letters = ['F', 'R', 'O', 'G', 'T', 'E', 'N', 'S', 'V', 'I', 'A', 'M', 'L'];
       letters.forEach(ch => {
         const b = document.createElement('button');
         b.className = 'key-btn';
@@ -239,7 +262,7 @@
       if (isCompleted) return;
       const targetCells = WORDS[activeWordId].cells;
       
-      // Find the first empty cell in the active word
+      // Auto-advance: fill first open cell in the active word
       for (const [r, c] of targetCells) {
         if (gridState[r][c] === '') {
           gridState[r][c] = ch;
@@ -249,7 +272,7 @@
         }
       }
 
-      // If already full, overwrite the last cell
+      // Overwrite last cell if full
       const last = targetCells[targetCells.length - 1];
       gridState[last[0]][last[1]] = ch;
       playTone(460, 'triangle', 0.1);
@@ -274,12 +297,9 @@
       if (isCompleted) return;
       const targetCells = WORDS[activeWordId].cells;
       targetCells.forEach(([r, c]) => {
-        // Protect shared letter if other word has it right
-        if (r === 0 && c === 0) {
-          const otherWordId = activeWordId === 1 ? 2 : 1;
-          const otherWord = WORDS[otherWordId].cells.map(([ro, co]) => gridState[ro][co]).join('');
-          if (otherWord.startsWith('L')) return;
-        }
+        // Protect shared letter if other word has it correct
+        if (r === 1 && c === 1 && WORDS[2].cells.map(([ro, co]) => gridState[ro][co]).join('')[1] === 'R') return;
+        if (r === 3 && c === 1 && WORDS[2].cells.map(([ro, co]) => gridState[ro][co]).join('')[3] === 'E') return;
         gridState[r][c] = '';
       });
       playTone(300, 'sawtooth', 0.1);
@@ -287,23 +307,27 @@
     }
 
     function checkCompletion() {
-      const word1 = WORDS[1].cells.map(([r, c]) => gridState[r][c]).join('');
-      const word2 = WORDS[2].cells.map(([r, c]) => gridState[r][c]).join('');
+      let wordsDone = 0;
+      let allFilled = true;
 
-      const w1Correct = (word1 === WORDS[1].answer);
-      const w2Correct = (word2 === WORDS[2].answer);
+      for (let i = 1; i <= 4; i++) {
+        const userWord = WORDS[i].cells.map(([r, c]) => gridState[r][c]).join('');
+        const isRight = (userWord === WORDS[i].name);
+        
+        if (userWord.length < 4) allFilled = false;
+        if (isRight) wordsDone++;
 
-      document.getElementById('status-1').textContent = w1Correct ? '✅' : '✏️';
-      document.getElementById('clue-1').classList.toggle('completed', w1Correct);
+        const chk = document.getElementById(`chk-${i}`);
+        if (chk) chk.textContent = isRight ? '✅' : '✏️';
+        const card = document.getElementById(`clue-${i}`);
+        if (card) card.classList.toggle('completed', isRight);
+      }
 
-      document.getElementById('status-2').textContent = w2Correct ? '✅' : '✏️';
-      document.getElementById('clue-2').classList.toggle('completed', w2Correct);
-
-      // Check if both words are filled but wrong
-      if (word1.length === 4 && word2.length === 4 && (!w1Correct || !w2Correct)) {
+      // All filled but errors present
+      if (allFilled && wordsDone < 4) {
         playTone(160, 'sawtooth', 0.25, true);
         const status = document.getElementById('status-label');
-        status.textContent = 'Some letters are out of place. Check spelling clues!';
+        status.textContent = 'Some letters are mixed up. Re-check your spelling!';
         document.querySelectorAll('.cell:not(.blocked)').forEach(c => c.classList.add('wrong'));
         setTimeout(() => {
           document.querySelectorAll('.cell').forEach(c => c.classList.remove('wrong'));
@@ -311,14 +335,20 @@
         return;
       }
 
-      if (w1Correct && w2Correct && !isCompleted) {
+      // 4 / 4 Complete!
+      if (wordsDone === 4 && !isCompleted) {
         isCompleted = true;
         playTone(520, 'sine', 0.2);
         setTimeout(() => playTone(659, 'sine', 0.25), 150);
+        
+        const isNew = awardGameCompletion('canopy_crosswords');
         const status = document.getElementById('status-label');
         status.style.color = 'var(--success)';
-        status.textContent = 'CROSSWORD SOLVED! 🍃 +20 Leaves Earned.';
-        awardGameCompletion('canopy_crosswords');
+        if (isNew) {
+          status.textContent = 'CROSSWORD SOLVED! 🍃 +20 Leaves Earned.';
+        } else {
+          status.textContent = '🌿 Crossword Solved! (Leaves already collected)';
+        }
       }
     }
 
