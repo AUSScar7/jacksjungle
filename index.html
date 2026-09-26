@@ -432,29 +432,29 @@
 
       <h1>Jack's Jungle</h1>
       <div><span class="dev-banner">🚧 Currently in Active Development</span></div>
-      <p>Interactive web-based educational games designed for curious young minds.</p>
+      <p>Interactive educational adventures where your learning helps the rainforest grow.</p>
       <div><span class="badge">Ages: 6–10 Years</span></div>
     </header>
 
-    <!-- Leaf Bank & Journey Status -->
+    <!-- Jungle Growth Dashboard -->
     <div class="card">
       <h2>
-        <span>Your Jungle Journey</span>
-        <span id="leaf-readout" style="color: var(--leaf-green); font-size: 1.1rem;">🍃 0 Leaves</span>
+        <span>Rainforest Ecosystem</span>
+        <span id="growth-readout" style="color: var(--leaf-green); font-size: 1.1rem;">🌱 Seedling Stage</span>
       </h2>
       <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5;">
-        Play all 13 jungle games to collect shiny leaves! Complete every challenge to earn your official printable Canopy Explorer Certificate.
+        Every challenge you solve breathes life into the jungle canopy! Complete all 13 adventures to grow a thriving, ancient rainforest and unlock your Canopy Explorer Certificate.
       </p>
       <div class="progress-track">
-        <div class="progress-bar-fill" id="leaf-progress-bar" style="width: 0%;"></div>
+        <div class="progress-bar-fill" id="growth-progress-bar" style="width: 0%;"></div>
       </div>
       <div class="stats-row">
-        <span id="rank-label">Explorer Rank: Tiny Sprout 🌱</span>
-        <span id="progress-percent-label">Jungle Explored: 0%</span>
+        <span id="rank-label">Ecosystem Rank: Sprouting Soil 🌱</span>
+        <span id="progress-percent-label">Jungle Growth: 0%</span>
       </div>
     </div>
 
-    <!-- The 13 Selected Games (All Unlocked) -->
+    <!-- The 13 Chosen Core Games (All Unlocked) -->
     <div class="arcade-section">
       <div class="section-header">
         <div class="section-title">🌿 Jungle Arcade Challenges</div>
@@ -466,79 +466,66 @@
       </div>
 
       <div class="game-grid">
-        <!-- 1. Vine Climber -->
         <a href="games/vine-climber.html" class="game-node" data-game-id="vine_climber">
-          <div><h3>Vine Climber</h3><p>Grow vines upward by picking missing letters to spell words.</p></div>
+          <div><h3>Vine Climber</h3><p>Grow tall vines upward by picking missing letters to spell words.</p></div>
           <div class="game-footer-row"><span class="game-tag">Spelling</span></div>
         </a>
 
-        <!-- 2. Syllable Chop -->
         <a href="games/syllable-chop.html" class="game-node" data-game-id="syllable_chop">
           <div><h3>Syllable Chop</h3><p>Count and slice syllables across multi-syllabic jungle animals.</p></div>
           <div class="game-footer-row"><span class="game-tag">Phonics</span></div>
         </a>
 
-        <!-- 3. Termite Trail -->
         <a href="games/termite-trail.html" class="game-node" data-game-id="termite_trail">
           <div><h3>Termite Trail</h3><p>Decide whether marching groups get bigger (+) or smaller (-).</p></div>
           <div class="game-footer-row"><span class="game-tag">Math</span></div>
         </a>
 
-        <!-- 4. Grammar Grove -->
         <a href="games/grammar-grove.html" class="game-node" data-game-id="grammar_grove">
           <div><h3>Grammar Grove</h3><p>Sort falling leaves into nouns, verbs, and adjectives.</p></div>
           <div class="game-footer-row"><span class="game-tag">Grammar</span></div>
         </a>
 
-        <!-- 5. Pattern Pioneer -->
         <a href="games/pattern-pioneer.html" class="game-node" data-game-id="pattern_pioneer">
           <div><h3>Pattern Pioneer</h3><p>Complete colorful repeating and growing jungle patterns.</p></div>
           <div class="game-footer-row"><span class="game-tag">Patterns</span></div>
         </a>
 
-        <!-- 6. Context Clue Quest -->
         <a href="games/context-clue-quest.html" class="game-node" data-game-id="context_clue_quest">
           <div><h3>Context Clue Quest</h3><p>Determine vocabulary meanings inside rainforest stories.</p></div>
           <div class="game-footer-row"><span class="game-tag">Reading</span></div>
         </a>
 
-        <!-- 7. Times Table Treetops -->
         <a href="games/times-table-treetops.html" class="game-node" data-game-id="times_table_treetops">
           <div><h3>Times Table Treetops</h3><p>Climb branch bridges with 2s, 5s, and 10s skip-counting recall.</p></div>
           <div class="game-footer-row"><span class="game-tag">Math</span></div>
         </a>
 
-        <!-- 8. Homophone Haven -->
         <a href="games/homophone-haven.html" class="game-node" data-game-id="homophone_haven">
           <div><h3>Homophone Haven</h3><p>Differentiate between confusing words that sound the same.</p></div>
           <div class="game-footer-row"><span class="game-tag">Grammar</span></div>
         </a>
 
-        <!-- 9. Spelling Bee Swarm -->
         <a href="games/spelling-bee-swarm.html" class="game-node" data-game-id="spelling_bee_swarm">
           <div><h3>Spelling Bee Swarm</h3><p>Listen to audio prompts and type friendly 3-letter words.</p></div>
           <div class="game-footer-row"><span class="game-tag">Spelling</span></div>
         </a>
 
-        <!-- 10. Deduction Trail -->
         <a href="games/deduction-trail.html" class="game-node" data-game-id="deduction_trail">
           <div><h3>Deduction Trail</h3><p>Follow elimination clues to match jungle animals to their homes.</p></div>
           <div class="game-footer-row"><span class="game-tag">Logic</span></div>
         </a>
 
-        <!-- 11. Sorting Matrix -->
         <a href="games/sorting-matrix.html" class="game-node" data-game-id="sorting_matrix">
           <div><h3>Sorting Matrix</h3><p>Sort jungle creatures into friendly Venn diagram groups.</p></div>
           <div class="game-footer-row"><span class="game-tag">Logic</span></div>
         </a>
 
-        <!-- 12. Anagram Antics -->
         <a href="games/anagram-antics.html" class="game-node" data-game-id="anagram_antics">
           <div><h3>Anagram Antics</h3><p>Unscramble 3-letter animal words by tapping the letters.</p></div>
           <div class="game-footer-row"><span class="game-tag">Spelling</span></div>
         </a>
 
-        <!-- 13. Number Line Leap -->
         <a href="games/number-line-leap.html" class="game-node" data-game-id="number_line_leap">
           <div><h3>Number Line Leap</h3><p>Jump accurately along suspended vine number lines.</p></div>
           <div class="game-footer-row"><span class="game-tag">Math</span></div>
@@ -550,7 +537,7 @@
     <div class="achievement-card">
       <h2 style="margin-bottom: 0.5rem; color: #fff;">🏆 Canopy Explorer Achievement</h2>
       <p style="font-size: 0.9rem; color: var(--text-muted);">
-        Complete all 13 games to unlock your official printable certificate!
+        Help the whole jungle grow by finishing all 13 games to unlock your official printable certificate!
       </p>
 
       <div class="name-input-group">
@@ -566,7 +553,7 @@
 
     <!-- Reset Progress -->
     <div class="reset-container">
-      <button class="btn-reset" onclick="resetProgress()">🗑️ Reset Canopy Progress</button>
+      <button class="btn-reset" onclick="resetProgress()">🗑️ Reset Jungle Progress</button>
     </div>
 
     <footer>
@@ -582,9 +569,9 @@
       <p>This certifies that</p>
       <div class="kid-name" id="cert-kid-name">Student Name</div>
       <p class="desc">
-        Has successfully conquered all 13 core challenges in Jack's Jungle! Recognized as an official, certified Canopy Explorer in spelling, phonics, mathematics, patterns, and reading comprehension.
+        Has successfully grown the entire rainforest by conquering all 13 challenges in Jack's Jungle! Recognized as an official, certified Canopy Explorer in spelling, phonics, mathematics, patterns, and reading comprehension.
       </p>
-      <div class="date-line" id="cert-date">Date: 23 September 2026</div>
+      <div class="date-line" id="cert-date">Date: 27 September 2026</div>
       <div class="modal-actions">
         <button class="modal-btn" style="background:#22c55e; color:#061a12;" onclick="window.print()">🖨️ Print Certificate</button>
         <button class="modal-btn" style="background:#e5e7eb; color:#1f2937;" onclick="closeModal()">Close</button>
@@ -600,7 +587,7 @@
       'sorting_matrix', 'anagram_antics', 'number_line_leap'
     ];
 
-    // Ambient Particle Engine
+    // Dynamic Ambient Foliage Engine (Density scales with game completions)
     const canvas = document.getElementById('ambient-canvas');
     const ctx = canvas.getContext('2d');
     let width, height;
@@ -616,7 +603,7 @@
       reset() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
-        this.size = Math.random() * 3 + 2;
+        this.size = Math.random() * 3.5 + 2;
         this.speedX = (Math.random() - 0.5) * 0.6;
         this.speedY = Math.random() * 0.45 + 0.25;
         this.alpha = Math.random() * 0.4 + 0.25;
@@ -646,10 +633,16 @@
       }
     }
 
-    function initParticles() {
+    function syncFoliageDensity(completedCount) {
       resizeCanvas();
-      particles.length = 0;
-      for (let i = 0; i < 26; i++) particles.push(new LeafParticle());
+      // Scales ambient canopy leaves: 15 base + ~4.6 leaves per completed game (up to 75 particles)
+      const targetCount = Math.min(75, 15 + Math.round(completedCount * 4.6));
+      while (particles.length < targetCount) {
+        particles.push(new LeafParticle());
+      }
+      while (particles.length > targetCount) {
+        particles.pop();
+      }
     }
 
     function animate() {
@@ -659,7 +652,6 @@
     }
 
     window.addEventListener('resize', resizeCanvas);
-    initParticles();
     animate();
 
     // Audio Engine
@@ -773,41 +765,50 @@
             if (foot && !foot.querySelector('.completed-badge')) {
               const b = document.createElement('span');
               b.className = 'completed-badge';
-              b.innerHTML = '🌿 Completed';
+              b.innerHTML = '🌿 Restored';
               foot.appendChild(b);
             }
           }
         }
       });
 
-      // Synchronize Leaves: 20 per unique game (13 games * 20 = 260 Leaves)
-      let calculatedLeaves = completedCount * 20;
-      let storedLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10) || 0;
-      let leaves = Math.max(storedLeaves, calculatedLeaves);
-      localStorage.setItem('jacksjungle_leaves', leaves.toString());
+      // Synchronize dynamic background canopy growth
+      syncFoliageDensity(completedCount);
 
-      const readout = document.getElementById('leaf-readout');
-      if (readout) readout.textContent = `🍃 ${leaves} Leaves`;
-
+      // Growth Calculations
       const percent = Math.min(100, Math.round((completedCount / 13) * 100));
-      const progressBar = document.getElementById('leaf-progress-bar');
+      const progressBar = document.getElementById('growth-progress-bar');
       if (progressBar) progressBar.style.width = `${percent}%`;
 
       const percentLabel = document.getElementById('progress-percent-label');
-      if (percentLabel) percentLabel.textContent = `Jungle Explored: ${percent}%`;
+      if (percentLabel) percentLabel.textContent = `Jungle Growth: ${percent}%`;
 
       const gameTracker = document.getElementById('game-tracker');
-      if (gameTracker) gameTracker.textContent = `${completedCount} / 13 Completed`;
+      if (gameTracker) gameTracker.textContent = `${completedCount} / 13 Restored`;
 
+      // Ecosystem Readout & Ranks
+      const growthReadout = document.getElementById('growth-readout');
       const rankLabel = document.getElementById('rank-label');
-      if (rankLabel) {
-        if (completedCount >= 13) rankLabel.textContent = "Explorer Rank: Jungle Master! 👑";
-        else if (completedCount >= 9) rankLabel.textContent = "Explorer Rank: Canopy Glider 🦜";
-        else if (completedCount >= 5) rankLabel.textContent = "Explorer Rank: Tree Climber 🐒";
-        else if (completedCount >= 1) rankLabel.textContent = "Explorer Rank: Jungle Scout 🌿";
-        else rankLabel.textContent = "Explorer Rank: Tiny Sprout 🌱";
+      if (growthReadout && rankLabel) {
+        if (completedCount >= 13) {
+          growthReadout.textContent = "🌳 Ancient Rainforest (100%)";
+          rankLabel.textContent = "Ecosystem Rank: Jungle Guardian! 👑";
+        } else if (completedCount >= 9) {
+          growthReadout.textContent = "🌴 Canopy Shaded (High Growth)";
+          rankLabel.textContent = "Ecosystem Rank: Canopy Weaver 🦜";
+        } else if (completedCount >= 5) {
+          growthReadout.textContent = "🌿 Flourishing Understory";
+          rankLabel.textContent = "Ecosystem Rank: Vine Tender 🐒";
+        } else if (completedCount >= 1) {
+          growthReadout.textContent = "🌱 Fresh Saplings Growing";
+          rankLabel.textContent = "Ecosystem Rank: Forest Scout 🌿";
+        } else {
+          growthReadout.textContent = "🌱 Seedling Stage";
+          rankLabel.textContent = "Ecosystem Rank: Sprouting Soil 🌱";
+        }
       }
 
+      // Certificate State
       const savedName = localStorage.getItem('jacksjungle_student_name') || '';
       document.getElementById('student-name').value = savedName;
 
@@ -816,9 +817,9 @@
       if (certBtn) {
         certBtn.disabled = (completedCount < 13);
         if (completedCount >= 13) {
-          certSub.textContent = "All 13 Games Solved! Click to Open Certificate";
+          certSub.textContent = "All 13 Habitats Grown! Click to Print Award";
         } else {
-          certSub.textContent = `${completedCount} / 13 Games Completed`;
+          certSub.textContent = `${completedCount} / 13 Challenges Completed`;
         }
       }
     }
@@ -837,11 +838,12 @@
       document.getElementById('print-modal').style.display = 'none';
     }
 
+    // Two-Step Reset Confirmation
     function resetProgress() {
-      const firstConfirm = window.confirm("🌿 Jack's Jungle Reset:\n\nAre you sure you want to reset your canopy progress?");
+      const firstConfirm = window.confirm("🌿 Jack's Jungle Reset:\n\nAre you sure you want to reset your rainforest growth?");
       if (!firstConfirm) return;
 
-      const secondConfirm = window.confirm("⚠️ FINAL WARNING:\n\nThis will permanently delete all your Leaves and your Printable Certificate!\n\nAre you 100% sure you want to start over?");
+      const secondConfirm = window.confirm("⚠️ FINAL WARNING:\n\nThis will permanently reset your jungle growth and your printable certificate!\n\nAre you sure you want to start over?");
       if (!secondConfirm) return;
 
       const keysToRemove = [];
