@@ -38,17 +38,21 @@
       background: rgba(0, 0, 0, 0.35); border: 2px dashed var(--accent-dim); border-radius: 0.75rem;
       width: 100%; padding: 1.5rem 1rem; margin: 1rem 0; text-align: center;
     }
-    .eq-row { font-size: 2.6rem; font-weight: 900; color: #fff; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .eq-row { font-size: 2.3rem; font-weight: 900; color: #fff; display: flex; align-items: center; justify-content: center; gap: 0.3rem; }
+    
+    /* Resized and generously padded slot */
     .op-slot {
       color: var(--accent); background: rgba(245, 158, 11, 0.15); border: 2px solid var(--accent);
-      border-radius: 8px; min-width: 48px; height: 56px; display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 6px; width: 40px; height: 42px; font-size: 1.5rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      margin: 0 14px;
     }
-    .termite-helper { font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem; min-height: 1.2rem; }
+    .termite-helper { font-size: 0.9rem; color: var(--muted); margin-top: 0.75rem; min-height: 1.2rem; }
 
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; width: 100%; margin-top: 0.5rem; }
     .op-btn {
-      background: #3d2913; border: 2px solid var(--accent); color: #fff; padding: 1.25rem 1rem;
-      font-size: 2rem; font-weight: 900; border-radius: 0.75rem; cursor: pointer;
+      background: #3d2913; border: 2px solid var(--accent); color: #fff; padding: 1.15rem 1rem;
+      font-size: 1.8rem; font-weight: 900; border-radius: 0.75rem; cursor: pointer;
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.2rem;
       transition: background-color 0.15s ease, transform 0.1s ease;
     }
@@ -81,10 +85,10 @@
         <span id="num-a">5</span>
         <span class="op-slot" id="slot-box">?</span>
         <span id="num-b">3</span>
-        <span>=</span>
+        <span style="margin: 0 8px;">=</span>
         <span id="num-res">8</span>
       </div>
-      <div class="termite-helper" id="helper-text">Tip: 5 became 8, so we added more termites!</div>
+      <div class="termite-helper" id="helper-text">Tip: 5 became 8, so more termites joined!</div>
     </div>
 
     <div class="grid" id="op-grid">
@@ -116,35 +120,21 @@
       osc.start(); osc.stop(audioCtx.currentTime + dur);
     }
 
-    function awardGameCompletion(gameId) {
+    function recordCompletion(gameId) {
       const k1 = `jacksjungle_completed_${gameId}`;
       const k2 = `jacksjungle_completed_${gameId.replace(/_/g, '-')}`;
-      
-      const alreadyFinished = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
-      
+      const alreadyDone = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
       localStorage.setItem(k1, 'true');
       localStorage.setItem(k2, 'true');
-
-      if (alreadyFinished) {
-        return false;
-      }
-
-      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
-      if (isNaN(currentLeaves)) currentLeaves = 0;
-
-      let updatedLeaves = currentLeaves + 20;
-      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
-      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
-      return true;
+      return !alreadyDone;
     }
 
-    // Friendly 5-bridge progression for Ages 6-10
     const PUZZLES = [
-      { a: 5, b: 3, res: 8, op: '+', hint: "5 became 8 (it got bigger!)" },
-      { a: 9, b: 4, res: 5, op: '-', hint: "9 became 5 (some marched away!)" },
-      { a: 6, b: 6, res: 12, op: '+', hint: "Two groups of 6 joined together!" },
-      { a: 10, b: 3, res: 7, op: '-', hint: "10 dropped down to 7!" },
-      { a: 8, b: 7, res: 15, op: '+', hint: "8 climbed up to 15!" }
+      { a: 5, b: 3, res: 8, op: '+', hint: "5 grew up to 8 (it got bigger!)" },
+      { a: 9, b: 4, res: 5, op: '-', hint: "9 dropped down to 5 (some marched away!)" },
+      { a: 6, b: 2, res: 8, op: '+', hint: "6 grew up to 8!" },
+      { a: 10, b: 3, res: 7, op: '-', hint: "10 decreased down to 7!" },
+      { a: 7, b: 4, res: 11, op: '+', hint: "7 climbed up to 11!" }
     ];
     let idx = 0;
 
@@ -157,13 +147,9 @@
         document.getElementById('helper-text').textContent = "All termites safely crossed the canyon.";
         document.getElementById('op-grid').innerHTML = "";
         
-        const isNew = awardGameCompletion('termite_trail');
+        recordCompletion('termite_trail');
         status.style.color = "var(--success)";
-        if (isNew) {
-          status.textContent = "🍃 +20 Leaves Earned!";
-        } else {
-          status.textContent = "🌿 Bridge Re-crossed! (Leaves already collected)";
-        }
+        status.textContent = "🌿 Canyon Restored! Habitat Grown.";
         
         playTone(520, 'sine', 0.2);
         setTimeout(() => playTone(659, 'sine', 0.25), 150);
@@ -190,7 +176,7 @@
         playTone(160, 'sawtooth', 0.25, true);
         btn.classList.add('wrong');
         const status = document.getElementById('status-label');
-        status.textContent = chosenOp === '+' ? "Oops! Adding would make the number bigger." : "Oops! Minus would make the number smaller.";
+        status.textContent = chosenOp === '+' ? "Oops! Adding makes the number bigger." : "Oops! Minus makes the number smaller.";
         setTimeout(() => btn.classList.remove('wrong'), 700);
       }
     }
