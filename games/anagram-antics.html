@@ -90,30 +90,21 @@
       osc.start(); osc.stop(audioCtx.currentTime + dur);
     }
 
-    function awardGameCompletion(gameId) {
+    function recordCompletion(gameId) {
       const k1 = `jacksjungle_completed_${gameId}`;
       const k2 = `jacksjungle_completed_${gameId.replace(/_/g, '-')}`;
-      const alreadyFinished = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
+      const alreadyDone = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
       localStorage.setItem(k1, 'true');
       localStorage.setItem(k2, 'true');
-
-      if (alreadyFinished) return false;
-
-      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
-      if (isNaN(currentLeaves)) currentLeaves = 0;
-
-      let updatedLeaves = currentLeaves + 20;
-      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
-      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
-      return true;
+      return !alreadyDone;
     }
 
-    // Strictly 3-letter animal words
+    // Fully scrambled letters: 0 characters match their solution index
     const PUZZLES = [
-      { word: "CAT", scramble: ["T", "A", "C"], clue: "Small furry pet that purrs and meows 🐱" },
-      { word: "BAT", scramble: ["T", "B", "A"], clue: "Night creature with wings that sleeps upside-down 🦇" },
-      { word: "FOX", scramble: ["X", "O", "F"], clue: "Clever wild animal with an orange bushy tail 🦊" },
-      { word: "OWL", scramble: ["L", "W", "O"], clue: "Wise night bird that turns its head and says 'Hoo!' 🦉" }
+      { word: "CAT", scramble: ["A", "T", "C"], clue: "Small furry pet that purrs and meows 🐱" },
+      { word: "BAT", scramble: ["T", "A", "B"], clue: "Winged night flyer that sleeps upside-down 🦇" },
+      { word: "FOX", scramble: ["X", "F", "O"], clue: "Clever wild animal with a bushy orange tail 🦊" },
+      { word: "OWL", scramble: ["W", "L", "O"], clue: "Wise night bird that turns its head and says 'Hoo!' 🦉" }
     ];
 
     let pIdx = 0;
@@ -126,15 +117,11 @@
       if (pIdx >= PUZZLES.length) {
         document.getElementById('prompt-clue').textContent = "ALL ANAGRAMS UNSCRAMBLED! 🌟";
         document.getElementById('scramble-rack').innerHTML = "";
-        document.getElementById('typed-word').textContent = "DONE!";
+        document.getElementById('typed-word').textContent = "SOLVED!";
         
-        const isNew = awardGameCompletion('anagram_antics');
+        recordCompletion('anagram_antics');
         status.style.color = "var(--success)";
-        if (isNew) {
-          status.textContent = "🍃 +20 Leaves Earned!";
-        } else {
-          status.textContent = "🌿 Anagrams Re-cleared! (Leaves already collected)";
-        }
+        status.textContent = "🌿 Forest Floor Restored! Habitat Grown.";
         playTone(520, 'sine', 0.2);
         return;
       }
@@ -176,7 +163,7 @@
           playTone(160, 'sawtooth', 0.25, true);
           const area = document.getElementById('typed-word');
           area.classList.add('wrong');
-          document.getElementById('status-label').textContent = "Not quite! Tap 'Reset Letters' to try again.";
+          document.getElementById('status-label').textContent = "Not quite! Tap 'Reset Letters' to retry.";
           setTimeout(() => area.classList.remove('wrong'), 700);
         }
       }
