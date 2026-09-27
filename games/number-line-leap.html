@@ -2,21 +2,23 @@
 <html lang="en">
 <head>
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-FPNZR7VVNC');
-</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPNZR7VVNC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FPNZR7VVNC', {
+      'allow_google_signals': false,
+      'allow_ad_personalization_signals': false
+    });
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Number Line Leap - Jack's Jungle</title>
   <style>
     :root {
-      --bg: #141b17; --card: #202d26; --accent: #34d399; --accent-dim: #059669;
-      --text: #ecfdf5; --muted: #a7f3d0; --danger: #ef4444;
+      --bg: #09171e; --card: #122834; --accent: #06b6d4; --accent-dim: #0891b2;
+      --text: #ecfeff; --muted: #a5f3fc; --danger: #ef4444; --success: #22c55e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
     body {
@@ -29,20 +31,42 @@
       width: 100%; max-width: 480px; padding: 1.5rem; display: flex; flex-direction: column; align-items: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--muted); }
+    .top-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--muted); }
     .nav-btn { background: transparent; border: 1px solid var(--accent-dim); color: var(--muted); padding: 0.35rem 0.75rem; border-radius: 0.4rem; cursor: pointer; text-decoration: none; font-size: 0.85rem; }
-    .target-val { font-size: 2.8rem; font-weight: 800; color: #fff; margin: 1.5rem 0; }
-    .line-container { width: 100%; position: relative; margin: 1.5rem 0; padding: 0 10px; }
-    .vine-bar { width: 100%; height: 8px; background: var(--accent-dim); border-radius: 4px; position: relative; }
-    .labels-row { display: flex; justify-content: space-between; margin-top: 8px; font-weight: bold; color: var(--muted); }
-    .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; width: 100%; margin-top: 1rem; }
-    .slot-btn {
-      background: #134e3b; border: 2px solid var(--accent-dim); color: #fff; padding: 0.85rem;
-      border-radius: 0.5rem; font-weight: bold; cursor: pointer; font-size: 1.1rem;
-      transition: background-color 0.15s ease, border-color 0.15s ease;
+    
+    .story-card {
+      background: rgba(0, 0, 0, 0.35); border: 2px dashed var(--accent-dim); border-radius: 0.75rem;
+      width: 100%; padding: 1.25rem 1rem; margin: 0.75rem 0; text-align: center;
     }
-    .slot-btn:active { background: var(--accent-dim); }
-    .slot-btn.wrong {
+    .story-clue { font-size: 1.15rem; font-weight: 700; color: #fff; line-height: 1.4; }
+    .story-sub { font-size: 0.9rem; color: var(--muted); margin-top: 0.35rem; }
+
+    /* Visual Number Line */
+    .line-track {
+      width: 100%; background: #081b24; border: 2px solid var(--accent-dim); border-radius: 8px;
+      padding: 1rem 0.5rem 0.5rem; margin: 0.75rem 0; position: relative;
+    }
+    .ticks { display: flex; justify-content: space-between; position: relative; border-bottom: 3px solid var(--accent); padding-bottom: 6px; }
+    .tick {
+      font-size: 0.85rem; font-weight: 800; color: var(--muted); position: relative; text-align: center; width: 20px;
+    }
+    .tick::after {
+      content: ""; position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%);
+      width: 2px; height: 8px; background: var(--accent);
+    }
+    .frog-marker {
+      font-size: 1.6rem; position: absolute; top: -14px; transition: left 0.3s ease;
+      transform: translateX(-50%);
+    }
+
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.65rem; width: 100%; margin-top: 0.75rem; }
+    .ans-btn {
+      background: #154559; border: 2px solid var(--accent); color: #fff; padding: 1rem 0.5rem;
+      font-size: 1.5rem; font-weight: 900; border-radius: 0.6rem; cursor: pointer; text-align: center;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .ans-btn:active { background: var(--accent-dim); transform: scale(0.97); }
+    .ans-btn.wrong {
       background: #451a1a !important;
       border-color: var(--danger) !important;
       color: #fca5a5 !important;
@@ -53,29 +77,31 @@
       20%, 60% { transform: translateX(-6px); }
       40%, 80% { transform: translateX(6px); }
     }
-    .status-msg { height: 1.5rem; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 1rem; }
+    .status-msg { height: 1.5rem; font-size: 0.92rem; font-weight: 600; text-align: center; color: var(--danger); margin-top: 0.75rem; }
   </style>
 </head>
 <body>
   <div class="game-box">
     <div class="top-bar">
       <a class="nav-btn" href="../index.html">&larr; Canopy Hub</a>
-      <span id="leap-count">Leap: 1 / 4</span>
+      <span id="round-lbl">Leap: 1 / 4</span>
     </div>
-    <p style="color: var(--muted); font-size: 0.95rem;">Which vine segment contains this value?</p>
-    <div class="target-val" id="target-number">1.75</div>
-    <div class="line-container">
-      <div class="vine-bar"></div>
-      <div class="labels-row">
-        <span>0</span>
-        <span>1</span>
-        <span>2</span>
-        <span>3</span>
-      </div>
+    <p style="color: var(--muted); font-size: 0.92rem; text-align: center;">Help the tree frog leap along the vine!</p>
+
+    <div class="line-track">
+      <span class="frog-marker" id="frog-pos" style="left: 0%;">🐸</span>
+      <div class="ticks" id="tick-bar"></div>
     </div>
-    <div class="btn-grid" id="zones-box"></div>
+
+    <div class="story-card">
+      <div class="story-clue" id="prompt-math">Start at 2. Leap forward 3 pads.</div>
+      <div class="story-sub" id="prompt-hint">2 + 3 = ?</div>
+    </div>
+
+    <div class="grid" id="choices-field"></div>
     <div class="status-msg" id="status-label"></div>
   </div>
+
   <script>
     let audioCtx = null;
     function playTone(freq, type, dur, isErr = false) {
@@ -91,61 +117,88 @@
       osc.start(); osc.stop(audioCtx.currentTime + dur);
     }
 
-    function awardGameCompletion(gameId) {
-      localStorage.setItem(`jacksjungle_completed_${gameId}`, 'true');
-      localStorage.setItem(`jacksjungle_completed_${gameId.replace(/_/g, '-')}`, 'true');
-      let currentLeaves = parseInt(localStorage.getItem('jacksjungle_leaves'), 10);
-      if (isNaN(currentLeaves)) currentLeaves = 0;
-      let updatedLeaves = currentLeaves + 20;
-      localStorage.setItem('jacksjungle_leaves', updatedLeaves.toString());
-      localStorage.setItem('jacksjungle_sunlight', updatedLeaves.toString());
+    function recordCompletion(gameId) {
+      const k1 = `jacksjungle_completed_${gameId}`;
+      const k2 = `jacksjungle_completed_${gameId.replace(/_/g, '-')}`;
+      const alreadyDone = (localStorage.getItem(k1) === 'true' || localStorage.getItem(k2) === 'true');
+      localStorage.setItem(k1, 'true');
+      localStorage.setItem(k2, 'true');
+      return !alreadyDone;
     }
 
+    // Number line 0 to 10
     const LEAPS = [
-      { val: "1.75", range: "Between 1 and 2", opts: ["Between 0 and 1", "Between 1 and 2", "Between 2 and 3"] },
-      { val: "2 ½", range: "Between 2 and 3", opts: ["Between 0 and 1", "Between 1 and 2", "Between 2 and 3"] },
-      { val: "0.4", range: "Between 0 and 1", opts: ["Between 0 and 1", "Between 1 and 2", "Between 2 and 3"] },
-      { val: "2.85", range: "Between 2 and 3", opts: ["Between 0 and 1", "Between 1 and 2", "Between 2 and 3"] }
+      { start: 2, leap: 3, ans: 5, clue: "Start at 2. Leap forward 3 pads:", hint: "2 + 3 = ?", opts: [4, 5, 6] },
+      { start: 4, leap: 4, ans: 8, clue: "Start at 4. Leap forward 4 pads:", hint: "4 + 4 = ?", opts: [7, 8, 9] },
+      { start: 7, leap: -3, ans: 4, clue: "Start at 7. Hop backward 3 pads:", hint: "7 - 3 = ?", opts: [3, 4, 5] },
+      { start: 3, leap: 6, ans: 9, clue: "Start at 3. Big leap forward 6 pads:", hint: "3 + 6 = ?", opts: [8, 9, 10] }
     ];
     let lIdx = 0;
+
+    function buildTicks() {
+      const bar = document.getElementById('tick-bar');
+      bar.innerHTML = '';
+      for (let i = 0; i <= 10; i++) {
+        const d = document.createElement('div');
+        d.className = 'tick';
+        d.textContent = i;
+        bar.appendChild(d);
+      }
+    }
 
     function renderLeap() {
       const status = document.getElementById('status-label');
       status.textContent = "";
 
       if (lIdx >= LEAPS.length) {
-        document.getElementById('target-number').textContent = "VINE CROSSED!";
-        document.getElementById('zones-box').innerHTML = "";
-        status.style.color = "var(--muted)";
-        status.textContent = "🍃 +20 Leaves Earned!";
-        awardGameCompletion('number_line_leap');
+        document.getElementById('prompt-math').textContent = "POND REACHED! 🐸";
+        document.getElementById('prompt-hint').textContent = "All number line leaps completed.";
+        document.getElementById('choices-field').innerHTML = "";
+        document.getElementById('frog-pos').style.left = "100%";
+        
+        recordCompletion('number_line_leap');
+        status.style.color = "var(--success)";
+        status.textContent = "🌿 Wetland Restored! Habitat Grown.";
+        
         playTone(520, 'sine', 0.2);
+        setTimeout(() => playTone(659, 'sine', 0.25), 150);
         return;
       }
-      const item = LEAPS[lIdx];
-      document.getElementById('leap-count').textContent = `Leap: ${lIdx + 1} / ${LEAPS.length}`;
-      document.getElementById('target-number').textContent = item.val;
 
-      const zBox = document.getElementById('zones-box');
-      zBox.innerHTML = "";
-      item.opts.forEach(opt => {
+      const q = LEAPS[lIdx];
+      document.getElementById('round-lbl').textContent = `Leap: ${lIdx + 1} / ${LEAPS.length}`;
+      document.getElementById('prompt-math').textContent = q.clue;
+      document.getElementById('prompt-hint').textContent = q.hint;
+      
+      // Position frog at starting tick (percentage of 0-10)
+      const pct = (q.start / 10) * 100;
+      document.getElementById('frog-pos').style.left = `${pct}%`;
+
+      const fld = document.getElementById('choices-field');
+      fld.innerHTML = '';
+      q.opts.forEach(val => {
         const b = document.createElement('button');
-        b.className = 'slot-btn';
-        b.textContent = opt.replace("Between ", "");
+        b.className = 'ans-btn';
+        b.textContent = val;
         b.onclick = () => {
-          if (opt === item.range) {
+          if (val === q.ans) {
             playTone(480, 'triangle', 0.15);
-            lIdx++; renderLeap();
+            // Hop to answer
+            document.getElementById('frog-pos').style.left = `${(q.ans / 10) * 100}%`;
+            lIdx++;
+            setTimeout(renderLeap, 450);
           } else {
             playTone(160, 'sawtooth', 0.25, true);
             b.classList.add('wrong');
-            status.textContent = `Compare whole number boundaries for ${item.val}!`;
+            status.textContent = "Count each pad one by one along the line!";
             setTimeout(() => b.classList.remove('wrong'), 700);
           }
         };
-        zBox.appendChild(b);
+        fld.appendChild(b);
       });
     }
+
+    buildTicks();
     renderLeap();
   </script>
 </body>
